@@ -1,6 +1,6 @@
 name: 기능 요청
 description: 새로운 기능이나 개선 아이디어가 있다면 누구나 작성해주세요!
-title: "[Feat] "
+title: "[Feat] 제목"
 labels: ["enhancement"]
 body:
   - type: input
