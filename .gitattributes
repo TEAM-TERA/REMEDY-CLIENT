@@ -1,0 +1,5 @@
+android/** linguist-vendored
+ios/** linguist-vendored
+Gemfile linguist-vendored
+Gemfile.lock linguist-vendored
+.bundle/** linguist-vendored
