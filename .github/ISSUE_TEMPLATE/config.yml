@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+
+pull_request_templates:
+  - name: 버그 제보
+    path: ISSUE_TEMPLETE/bug_report.yml
+
+  - name: 기능 요청
+    path: ISSUE_TEMPLETE/feature_request.yml
