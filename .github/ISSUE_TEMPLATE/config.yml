@@ -4,9 +4,9 @@ issue_templates:
   - name: 버그 제보
     description: 버그를 신고할 때 사용해주세요!
     labels: ["bug"]
-    path: bug_report.yml
+    path: ISSUE_TEMPLATE/bug_report.yml
 
   - name: 기능 요청
     description: 새로운 기능을 제안할 때 사용해주세요!
     labels: ["enhancement"]
-    path: feature_request.yml
+    path: ISSUE_TEMPLATE/feature_request.yml
