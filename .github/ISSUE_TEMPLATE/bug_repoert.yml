@@ -1,0 +1,24 @@
+name: 버그 리포트
+description: 버그가 발생하면 바로 알려주세요!
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: input
+    id: os
+    attributes:
+      label: 실행 환경
+      description: 버그가 발생한 환경에 대해 작성해 주세요!
+      placeholder: "예: ios 18.4"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 방법
+      description: 어떻게 이 버그를 재현할 수 있었나요?
+      placeholder: |
+        1. 어떤 페이지에서
+        2. 어떤 행동을 했을 때
+        3. 어떤 문제가 발생했는지
+    validations:
+      required: true
