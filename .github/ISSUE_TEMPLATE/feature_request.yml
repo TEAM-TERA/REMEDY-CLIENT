@@ -1,6 +1,6 @@
 name: 기능 요청
 description: 새로운 기능이나 개선 아이디어가 있다면 누구나 작성해주세요!
-title: "[Feat]"
+title: "[Feat] "
 labels: ["enhancement"]
 body:
   - type: input
@@ -8,7 +8,7 @@ body:
     attributes:
       label: 기능 요약
       description: 제안하는 기능을 요약해주세요!
-      placeholder: 예: 플레이어에 반복 재생 버튼 추가
+      placeholder: "에 : 플레이어에 반복 재생 버튼 추가"
     validations:
       required: true
 
@@ -28,6 +28,6 @@ body:
     attributes:
       label: 참고 자료
       description: 참고한 서비스, 링크가 있다면 작성해주세요!
-      placeholder: 예: 공식 문서 링크 등
+      placeholder: "예: 공식 문서 링크 등"
     validations:
       required: false
