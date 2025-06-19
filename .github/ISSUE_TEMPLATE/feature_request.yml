@@ -1,5 +1,5 @@
-name: ✨ 기능 요청
-description: 새로운 기능이나 개선 아이디어가 있다면 작성해주세요.
+name: 기능 요청
+description: 새로운 기능이나 개선 아이디어가 있다면 누구나 작성해주세요!
 title: "[Feat] "
 labels: ["enhancement"]
 body:
@@ -7,7 +7,7 @@ body:
     id: feature-title
     attributes:
       label: 기능 요약
-      description: 제안하는 기능을 한 문장으로 요약해주세요.
+      description: 제안하는 기능을 요약해주세요!
       placeholder: 예: 플레이어에 반복 재생 버튼 추가
     validations:
       required: true
@@ -16,7 +16,7 @@ body:
     id: feature-detail
     attributes:
       label: 기능 설명
-      description: 어떤 기능이 왜 필요한지 상세히 작성해주세요.
+      description: 어떤 기능이 왜 필요한지 상세히 작성해주세요!
       placeholder: |
         반복 재생 기능이 없어 같은 곡을 계속 들으려면 수동 조작이 필요합니다.
         버튼을 통해 반복 재생을 제어할 수 있으면 좋겠습니다.
