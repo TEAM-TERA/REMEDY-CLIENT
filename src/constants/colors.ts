@@ -34,3 +34,11 @@ export const UI_COLORS = {
     BACKGROUND_RED : "#1E161A",
     BACKGROUND_BLUE : "#14131E",
 }
+
+export const TEXT_COLORS = {
+    DEFAULT : "#FFFFFF",
+    CAPTION : "#434356",
+    CAPTION_LIGHTER : "#656581",
+    CAPTION_RED : "#75575F",
+    CAPTION_BLUE : "#575C75",
+}
