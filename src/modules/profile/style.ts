@@ -15,7 +15,7 @@ const commonStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  subTitle: {
+  title: {
     fontSize: 18,
     color: '#FFFFFF',
     fontWeight: 'bold',

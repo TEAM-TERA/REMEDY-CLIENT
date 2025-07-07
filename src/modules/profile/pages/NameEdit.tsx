@@ -7,8 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
 } from 'react-native';
-import BackButton from '../components/BackButton';
 import commonStyles from '../style';
+import Header from '../components/Header';
 
 function NameEdit() {
   const [userName, setUserName] = useState('User_1');
@@ -18,14 +18,10 @@ function NameEdit() {
       <StatusBar translucent={false} />
 
       <View style={commonStyles.container}>
-        <View style={commonStyles.headerContainer}>
-          <BackButton textStyle={commonStyles.backButton} />
-          <Text style={commonStyles.subTitle}>이름 수정</Text>
-          <View />
-        </View>
+        <Header title="이름 수정" />
 
         <View style={commonStyles.nameEditContainer}>
-          <Text style={commonStyles.subTitle}>이름</Text>
+          <Text style={commonStyles.title}>이름</Text>
           <TextInput
             style={commonStyles.nameEditInput}
             value={userName}
