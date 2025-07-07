@@ -21,3 +21,16 @@ export const TERTIARY_COLORS = {
     PLUS_TEN : "#8586F0",
     PLUS_TWENTY : "#B2B3F5",
 }
+
+export const BACKGROUND_COLORS = {
+    BACKGROUND : "#111118",
+    BACKGROUND_RED : "#130309",
+    BACKGROUND_BLUE : "#070313",
+}
+
+export const UI_COLORS = {
+    BACKGROUND : "#1D1D26",
+    BACKGROUND_DARKER : "#181820",
+    BACKGROUND_RED : "#1E161A",
+    BACKGROUND_BLUE : "#14131E",
+}
