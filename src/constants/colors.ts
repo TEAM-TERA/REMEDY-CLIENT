@@ -1,0 +1,23 @@
+export const PRIMARY_COLORS = {
+    DEFAULT : "#F23F6F",
+    MINUS_TEN : "#EF104C",
+    MINUS_TWENTY : "#BF0D3D",
+    PLUS_TEN : "#F57093",
+    PLUS_TWENTY : "#F8A0B7",
+}
+
+export const SECONDARY_COLORS = {
+    DEFAULT : "#FF9429",
+    MINUS_TEN : "#F57A00",
+    MINUS_TWENTY : "#C26100",
+    PLUS_TEN : "#FFAD5C",
+    PLUS_TWENTY : "#FFC78F",
+}
+
+export const TERTIARY_COLORS = {
+    DEFAULT : "#595BEA",
+    MINUS_TEN : "#2A2DE4",
+    MINUS_TWENTY : "#181BC3",
+    PLUS_TEN : "#8586F0",
+    PLUS_TWENTY : "#B2B3F5",
+}
