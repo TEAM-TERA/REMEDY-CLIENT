@@ -1,0 +1,44 @@
+export const PRIMARY_COLORS = {
+    DEFAULT : "#F23F6F",
+    MINUS_TEN : "#EF104C",
+    MINUS_TWENTY : "#BF0D3D",
+    PLUS_TEN : "#F57093",
+    PLUS_TWENTY : "#F8A0B7",
+}
+
+export const SECONDARY_COLORS = {
+    DEFAULT : "#FF9429",
+    MINUS_TEN : "#F57A00",
+    MINUS_TWENTY : "#C26100",
+    PLUS_TEN : "#FFAD5C",
+    PLUS_TWENTY : "#FFC78F",
+}
+
+export const TERTIARY_COLORS = {
+    DEFAULT : "#595BEA",
+    MINUS_TEN : "#2A2DE4",
+    MINUS_TWENTY : "#181BC3",
+    PLUS_TEN : "#8586F0",
+    PLUS_TWENTY : "#B2B3F5",
+}
+
+export const BACKGROUND_COLORS = {
+    BACKGROUND : "#111118",
+    BACKGROUND_RED : "#130309",
+    BACKGROUND_BLUE : "#070313",
+}
+
+export const UI_COLORS = {
+    BACKGROUND : "#1D1D26",
+    BACKGROUND_DARKER : "#181820",
+    BACKGROUND_RED : "#1E161A",
+    BACKGROUND_BLUE : "#14131E",
+}
+
+export const TEXT_COLORS = {
+    DEFAULT : "#FFFFFF",
+    CAPTION : "#434356",
+    CAPTION_LIGHTER : "#656581",
+    CAPTION_RED : "#75575F",
+    CAPTION_BLUE : "#575C75",
+}
