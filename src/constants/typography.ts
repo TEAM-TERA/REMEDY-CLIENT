@@ -14,17 +14,17 @@ export const TYPOGRAPHY = {
     HEADLINE_3: {
         fontSize: 20,
         lineHeight: 26,
-        fontFamily: FONTS.SEMIBOLD,
+        fontFamily: FONTS.BOLD,
     },
     SUBTITLE: {
         fontSize: 18,
         lineHeight: 24,
-        fontFamily: FONTS.MEDIUM,
+        fontFamily: FONTS.BOLD,
     },
     BODY_1: {
         fontSize: 16,
         lineHeight: 22,
-        fontFamily: FONTS.REGULAR,
+        fontFamily: FONTS.BOLD,
     },
     BODY_2: {
         fontSize: 16,
@@ -34,26 +34,26 @@ export const TYPOGRAPHY = {
     CAPTION_1: {
         fontSize: 14,
         lineHeight: 20,
-        fontFamily: FONTS.REGULAR,
+        fontFamily: FONTS.MEDIUM,
     },
     CAPTION_2: {
         fontSize: 14,
         lineHeight: 16,
-        fontFamily: FONTS.LIGHT,
+        fontFamily: FONTS.MEDIUM,
     },
     CAPTION_3: {
         fontSize: 12,
         lineHeight: 16,
-        fontFamily: FONTS.LIGHT,
+        fontFamily: FONTS.MEDIUM,
     },
     BUTTON_TEXT: {
         fontSize: 16,
         lineHeight: 22,
-        fontFamily: FONTS.SEMIBOLD,
+        fontFamily: FONTS.BOLD,
     },
     INPUT_TEXT: {
         fontSize: 16,
         lineHeight: 22,
-        fontFamily: FONTS.REGULAR,
+        fontFamily: FONTS.MEDIUM,
     },
 }
