@@ -1,12 +1,12 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import BackButton from './BackButton';
-import nameEditScreen from '../styles/NameEditScreen';
+import nameEditScreen from '../styles/nameEditScreen';
 
 type HeaderProps = {
     title: string;
     onBackPress?: () => void;
-    rightComponent?: React.ReactNode; // 오른쪽에 버튼 등 추가 가능
+    rightComponent?: React.ReactNode;
     headerStyle?: object;
     titleStyle?: object;
     backButtonStyle?: object;
@@ -27,7 +27,7 @@ function Header({
                 onPress={onBackPress}
             />
             <Text style={[nameEditScreen.title, titleStyle]}>{title}</Text>
-            {rightComponent || <View />}
+            {rightComponent || <View style={nameEditScreen.rightComponent} />}
         </View>
     );
 }
