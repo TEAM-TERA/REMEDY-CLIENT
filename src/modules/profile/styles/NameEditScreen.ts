@@ -22,6 +22,9 @@ const nameEditScreen = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
+    rightComponent: {
+        width: 24,
+    },
     title: {
         color: TEXT_COLORS.DEFAULT,
         ...TYPOGRAPHY.SUBTITLE,
