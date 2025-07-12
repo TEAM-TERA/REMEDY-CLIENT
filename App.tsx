@@ -1,12 +1,14 @@
 import { NewAppScreen } from '@react-native/new-app-screen';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import GoogleMapView from './src/components/map/GoogleMapView';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
 
   return (
-    <GoogleMapView></GoogleMapView>
+    <View style={styles.container}>
+      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      <NewAppScreen templateFileName="App.tsx" />
+    </View>
   );
 }
 
