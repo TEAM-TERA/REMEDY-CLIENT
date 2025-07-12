@@ -1,5 +1,6 @@
 import { TouchableOpacity, Text, GestureResponderEvent } from 'react-native';
 import Icon from 'react-native-vector-icons/Entypo';
+import { TEXT_COLORS } from '../../../constants/colors';
 
 type BackButtonProps = {
     label?: string;
@@ -14,7 +15,7 @@ function BackButton({ label = '', onPress, textStyle = {} }: BackButtonProps) {
 
     return (
         <TouchableOpacity onPress={onPress || handlePress}>
-            <Icon name="chevron-small-left" size={20} color="#fff" />
+            <Icon name="chevron-left" size={24} color={TEXT_COLORS.DEFAULT} />
             {label ? <Text style={textStyle}>{label}</Text> : null}
         </TouchableOpacity>
     );
