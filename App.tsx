@@ -1,14 +1,22 @@
 import { NewAppScreen } from '@react-native/new-app-screen';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+import MusicWheel from './src/modules/home/components/MainFunction/MusicWheel';
 
-  return (
-    <View style={styles.container}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <NewAppScreen templateFileName="App.tsx" />
-    </View>
+// function App() {
+//   const isDarkMode = useColorScheme() === 'dark';
+
+//   return (
+//     <View style={styles.container}>
+//       <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+//       <NewAppScreen templateFileName="App.tsx" />
+//     </View>
+//   );
+// }
+
+function App() {
+  return(
+    <MusicWheel></MusicWheel>
   );
 }
 
