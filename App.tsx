@@ -1,7 +1,5 @@
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-
-import MusicWheel from './src/modules/home/components/MainFunction/MusicWheel';
+// import { NewAppScreen } from '@react-native/new-app-screen';
+// import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 
 // function App() {
 //   const isDarkMode = useColorScheme() === 'dark';
@@ -14,16 +12,30 @@ import MusicWheel from './src/modules/home/components/MainFunction/MusicWheel';
 //   );
 // }
 
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//   },
+// });
+
+// export default App;
+
+import { NewAppScreen } from '@react-native/new-app-screen';
+import { StatusBar, StyleSheet, Text, useColorScheme, View } from 'react-native';
+import GoogleMapView from './src/components/map/GoogleMapView';
+
+import MainFunction from './src/modules/home/components/MainFunction';
+import HeaderBar from './src/modules/home/components/HeaderBar';
+
+
 function App() {
-  return(
-    <MusicWheel></MusicWheel>
+  return (
+    <View style={{ flex: 1 }}>
+      <HeaderBar></HeaderBar>
+      <GoogleMapView></GoogleMapView>
+      <MainFunction></MainFunction>
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
 
 export default App;
