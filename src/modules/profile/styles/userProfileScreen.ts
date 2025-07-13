@@ -29,10 +29,10 @@ const userProfileScreen = StyleSheet.create({
         gap: 12,
     },
     aliasContainer: {
+        flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        alignSelf: 'flex-start',
-        margin: 'auto',
+        alignSelf: 'center',
         paddingHorizontal: 8,
         paddingVertical: 4,
         borderRadius: 16,
