@@ -19,6 +19,8 @@ export const styles = StyleSheet.create({
         padding : scale(0),
         alignItems : "center",
         gap : scale(12),
+        marginLeft : "auto",
+        marginRight : "auto",
         alignSelf : "stretch"
     },
     recommendMusicContainer : {
@@ -27,6 +29,8 @@ export const styles = StyleSheet.create({
         alignItems : "flex-start",
         flexDirection : "column",
         gap : scale(12),
+        marginLeft : "auto",
+        marginRight : "auto",
         alignSelf : "stretch"
     },
     recommendText : {
@@ -39,6 +43,7 @@ export const styles = StyleSheet.create({
         alignItems : "flex-start",
         gap : scale(8),
         alignSelf : "stretch"
+        
     },
 })
 
@@ -49,10 +54,13 @@ export const historyStyles = StyleSheet.create({
     },
     logContainer : {
         display : "flex",
+        width : scale(345),
         padding : scale(12),
         alignItems : "flex-start",
         flexDirection : "column",
         gap : scale(12),
+        marginLeft : "auto",
+        marginRight : "auto",
         alignSelf : "stretch"
     },
     historyContainer : {
