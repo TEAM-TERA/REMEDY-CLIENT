@@ -22,7 +22,12 @@ function DropItem({
                     />
                     {hasHeart && (
                         <View style={userProfileScreen.heartOverlay}>
-                            <Entypo name="heart" size={45} color="rgba(255, 71, 87, 0.8)" />
+                            <Entypo
+                                name="heart"
+                                size={45}
+                                color="rgba(255, 71, 87, 0.8)"
+                            />{' '}
+                            {/* 투명도 위해 상수 사용 안함 */}
                         </View>
                     )}
                     <View style={userProfileScreen.albumDisk}>
@@ -31,7 +36,7 @@ function DropItem({
                 </View>
 
                 <View style={userProfileScreen.memoContainer}>
-                    <Text 
+                    <Text
                         style={userProfileScreen.memoText}
                         numberOfLines={1}
                         ellipsizeMode="tail"
