@@ -21,3 +21,5 @@ function LoginScreen(){
         </View>
     )
 }
+
+export default LoginScreen;

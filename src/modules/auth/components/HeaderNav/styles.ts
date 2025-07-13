@@ -1,12 +1,12 @@
 import { StyleSheet } from "react-native";
-import { rem } from "../../../../utils/scalerRem";
+import { scale } from "../../../../utils/scalers";
 import { TEXT_COLORS } from "../../../../constants/colors";
 
 export const styles = StyleSheet.create({
     container : {
         display : "flex",
-        width : rem(21.4375),
-        padding : rem(0),
+        width : scale(343),
+        padding : scale(0),
         justifyContent : "space-between",
         alignItems : "center"
     },

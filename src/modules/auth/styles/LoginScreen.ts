@@ -1,23 +1,23 @@
 import { StyleSheet } from "react-native";
-import { rem } from "../../../utils/scalerRem";
+import { scale } from "../../../utils/scalers";
 import { TEXT_COLORS, UI_COLORS } from "../../../constants/colors";
 
 export const styles = StyleSheet.create({
   container : {
     display : "flex",
     flex : 1,
-    padding : rem(1),
+    padding : scale(16),
     flexDirection : "column",
     alignItems : "flex-start",
-    gap : rem(1.5),
+    gap : scale(24),
     backgroundColor : UI_COLORS.BACKGROUND
   },
   textContainer : {
     display : "flex",
-    padding : rem(0),
+    padding : scale(0),
     justifyContent : "center",
     alignItems : "center",
-    gap : rem(1.5),
+    gap : scale(24),
     alignSelf : "stretch"
   },
   text : {
@@ -25,20 +25,20 @@ export const styles = StyleSheet.create({
   },
   inputContainer : {
     display : "flex",
-    width : rem(21.4375),
-    padding : rem(0.75),
+    width : scale(343),
+    padding : scale(12),
     flexDirection : "column",
     justifyContent : "center",
     alignItems : "center",
-    gap : rem(1.5)
+    gap : scale(24)
   },
   buttonContainer : {
     display : "flex",
-    width : rem(21.4375),
-    padding : rem(0.75),
+    width : scale(343),
+    padding : scale(12),
     flexDirection : "column",
     justifyContent : "center",
     alignItems : "center",
-    gap : rem(1)
+    gap : scale(16)
   }
 });
