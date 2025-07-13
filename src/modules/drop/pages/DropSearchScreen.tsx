@@ -5,13 +5,14 @@ import BackSvg from "../../auth/components/BackSvg/BackSvg";
 import Input from "../../../components/input/Input";
 import History from "../components/History/History";
 import Music from "../components/Music/Music";
+import { scale } from "../../../utils/scalers";
 
 function DropSearchScreen(){
     return(
         <SafeAreaView style = {styles.container}>
             <View style = {styles.inputContainer}>
                 <BackSvg></BackSvg>
-                <Input placeholder="드랍할 음악 검색"></Input>
+                <Input placeholder="드랍할 음악 검색" width={scale(287)}></Input>
             </View>
             <View style = {historyStyles.logContainer}>
                 <View style = {styles.textContainer}>
@@ -27,7 +28,6 @@ function DropSearchScreen(){
                     <Music musicTitle="LILAC" singer="아이유"></Music>
                     <Music musicTitle="LILAC" singer="아이유"></Music>
                     <Music musicTitle="LILAC" singer="아이유"></Music>
-                    
                 </View>
             </View>
         </SafeAreaView>
