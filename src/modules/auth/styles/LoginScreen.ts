@@ -37,7 +37,6 @@ export const styles = StyleSheet.create({
     justifyContent : "center",
     alignItems : "center",
     gap : scale(24),
-    textAlign : "left"
   },
   buttonContainer : {
     marginLeft : "auto",
