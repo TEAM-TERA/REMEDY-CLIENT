@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { scale } from "../../utils/scalers";
-import { TEXT_COLORS } from "../../constants/colors";
+import { TEXT_COLORS, UI_COLORS } from "../../constants/colors";
 
 export const styles = StyleSheet.create({
     container : {
@@ -10,7 +10,8 @@ export const styles = StyleSheet.create({
         justifyContent : "center",
         alignItems : "center",
         gap : scale(8),
-        alignSelf : "stretch"
+        alignSelf : "stretch",
+        backgroundColor : UI_COLORS.BACKGROUND
     },
     text : {
         color : TEXT_COLORS.CAPTION

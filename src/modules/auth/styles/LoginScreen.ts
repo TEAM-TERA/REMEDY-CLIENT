@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { scale } from "../../../utils/scalers";
-import { TEXT_COLORS, UI_COLORS } from "../../../constants/colors";
+import { TEXT_COLORS, BACKGROUND_COLORS } from "../../../constants/colors";
 
 export const styles = StyleSheet.create({
   container : {
@@ -10,7 +10,7 @@ export const styles = StyleSheet.create({
     flexDirection : "column",
     alignItems : "flex-start",
     gap : scale(24),
-    backgroundColor : UI_COLORS.BACKGROUND
+    backgroundColor : BACKGROUND_COLORS.BACKGROUND
   },
   textContainer : {
     display : "flex",

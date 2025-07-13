@@ -3,13 +3,15 @@ import { styles } from "../styles/LoginScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import Input from "../../../components/input/Input";
 import Button from "../../../components/button/Button";
+import HeaderNav from "../components/HeaderNav/HeaderNav";
 
 function LoginScreen(){
     return(
         <View style = { styles.container }>
+            <HeaderNav></HeaderNav>
             <View style = {styles.inputContainer}>
-                <Input></Input>
-                <Input></Input>
+                <Input placeholder="이메일을 입력해주세요"></Input>
+                <Input placeholder="비밀번호를 입력해주세요"></Input>
             </View>
             <View style = {styles.buttonContainer}>
                 <Button title = {"로그인"}/>
