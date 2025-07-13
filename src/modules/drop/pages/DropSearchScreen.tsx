@@ -4,6 +4,7 @@ import { TYPOGRAPHY } from "../../../constants/typography";
 import BackSvg from "../../auth/components/BackSvg/BackSvg";
 import Input from "../../../components/input/Input";
 import History from "../components/History/History";
+import Music from "../components/Music/Music";
 
 function DropSearchScreen(){
     return(
@@ -23,6 +24,10 @@ function DropSearchScreen(){
             <View style = {styles.recommendMusicContainer}>
                 <View style = {styles.textContainer}>
                     <Text style = {[TYPOGRAPHY.HEADLINE_2, styles.recommendText]}>추천 음악</Text>
+                    <Music musicTitle="LILAC" singer="아이유"></Music>
+                    <Music musicTitle="LILAC" singer="아이유"></Music>
+                    <Music musicTitle="LILAC" singer="아이유"></Music>
+                    
                 </View>
             </View>
         </SafeAreaView>
