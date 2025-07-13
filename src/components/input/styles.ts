@@ -1,18 +1,18 @@
 import { StyleSheet } from "react-native";
-import { rem } from "../../utils/scalerRem";
-import { TEXT_COLORS } from "../../constants/colors";
+import { scale } from "../../utils/scalers";
+import { TEXT_COLORS, UI_COLORS } from "../../constants/colors";
 
 export const styles = StyleSheet.create({
     container : {
         display : "flex",
-        height : rem(2.875),
-        padding : rem(0.75),
-        justifyContent : "center",
-        alignItems : "center",
-        gap : rem(0.5),
-        alignSelf : "stretch"
+        height : scale(46),
+        padding : scale(12),
+        gap : scale(8),
+        alignSelf : "stretch",
+        backgroundColor : UI_COLORS.BACKGROUND
     },
     text : {
-        color : TEXT_COLORS.CAPTION
+        color : TEXT_COLORS.CAPTION,
+        textAlign : "left"
     }
 })
