@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { rem } from "../../utils/scalerRem";
-import { TEXT_COLORS } from "../../constants/colors";
+import { TEXT_COLORS, PRIMARY_COLORS } from "../../constants/colors";
 
 export const styles = StyleSheet.create({
     container : {
@@ -10,7 +10,8 @@ export const styles = StyleSheet.create({
         justifyContent : "center",
         alignItems : "center",
         gap : rem(0.5),
-        alignSelf : "stretch"
+        alignSelf : "stretch",
+        backgroundColor : PRIMARY_COLORS.DEFAULT
     },
     text : {
         color : TEXT_COLORS.DEFAULT
