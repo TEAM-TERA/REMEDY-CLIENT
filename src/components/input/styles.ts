@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
         backgroundColor : UI_COLORS.BACKGROUND
     },
     text : {
-        color : TEXT_COLORS.CAPTION,
+        color : TEXT_COLORS.DEFAULT,
         textAlign : "left"
     }
 })
