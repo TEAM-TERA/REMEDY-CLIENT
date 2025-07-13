@@ -21,14 +21,6 @@ export const styles = StyleSheet.create({
         gap : scale(12),
         alignSelf : "stretch"
     },
-    searchLogContainer : {
-        display : "flex",
-        padding : scale(12),
-        alignItems : "flex-start",
-        flexDirection : "column",
-        gap : scale(12),
-        alignSelf : "stretch"
-    },
     recommendMusicContainer : {
         display : "flex",
         padding : scale(12),
@@ -36,10 +28,6 @@ export const styles = StyleSheet.create({
         flexDirection : "column",
         gap : scale(12),
         alignSelf : "stretch"
-    },
-    logText : {
-        color : TEXT_COLORS.CAPTION,
-        textAlign : "center"
     },
     recommendText : {
         color : PRIMARY_COLORS.DEFAULT,
@@ -49,6 +37,27 @@ export const styles = StyleSheet.create({
         display : "flex",
         padding : scale(0),
         alignItems : "flex-start",
+        gap : scale(8),
+        alignSelf : "stretch"
+    },
+})
+
+export const historyStyles = StyleSheet.create({
+    logText : {
+        color : TEXT_COLORS.CAPTION,
+        textAlign : "center"
+    },
+    logContainer : {
+        display : "flex",
+        padding : scale(12),
+        alignItems : "flex-start",
+        flexDirection : "column",
+        gap : scale(12),
+        alignSelf : "stretch"
+    },
+    historyContainer : {
+        display : "flex",
+        alignItems: "flex-start",
         gap : scale(8),
         alignSelf : "stretch"
     }

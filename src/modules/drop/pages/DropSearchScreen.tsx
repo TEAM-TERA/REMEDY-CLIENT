@@ -1,8 +1,9 @@
 import { View, SafeAreaView, Text } from "react-native";
-import { styles } from "../styles/DropSearchScreen";
+import { styles, historyStyles } from "../styles/DropSearchScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import BackSvg from "../../auth/components/BackSvg/BackSvg";
 import Input from "../../../components/input/Input";
+import History from "../components/History/History";
 
 function DropSearchScreen(){
     return(
@@ -11,9 +12,12 @@ function DropSearchScreen(){
                 <BackSvg></BackSvg>
                 <Input placeholder="드랍할 음악 검색"></Input>
             </View>
-            <View style = {styles.searchLogContainer}>
+            <View style = {historyStyles.logContainer}>
                 <View style = {styles.textContainer}>
-                    <Text style = {[TYPOGRAPHY.BODY_1, styles.logText]}>검색 기록</Text>
+                    <Text style = {[TYPOGRAPHY.BODY_1, historyStyles.logText]}>검색 기록</Text>
+                    <View style = {historyStyles.historyContainer}>
+                        <History musicTitle="Lilac"></History>
+                    </View>
                 </View>
             </View>
             <View style = {styles.recommendMusicContainer}>
