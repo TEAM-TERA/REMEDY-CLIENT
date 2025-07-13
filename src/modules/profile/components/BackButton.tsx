@@ -1,21 +1,20 @@
-import { TouchableOpacity, Text, GestureResponderEvent } from 'react-native';
-import Icon from 'react-native-vector-icons/Entypo';
+import { TouchableOpacity, Text } from 'react-native';
+import Entypo from 'react-native-vector-icons/Entypo';
 import { TEXT_COLORS } from '../../../constants/colors';
-
-type BackButtonProps = {
-    label?: string;
-    onPress?: (event: GestureResponderEvent) => void;
-    textStyle?: object;
-};
+import { BackButtonProps } from '../types/BackButton';
 
 function BackButton({ label = '', onPress, textStyle = {} }: BackButtonProps) {
     const handlePress = () => {
-        console.log('Back button pressed');
+        // 뒤로가기 네비게이션 구현
     };
 
     return (
         <TouchableOpacity onPress={onPress || handlePress}>
-            <Icon name="chevron-left" size={24} color={TEXT_COLORS.DEFAULT} />
+            <Entypo
+                name="chevron-small-left"
+                size={24}
+                color={TEXT_COLORS.DEFAULT}
+            />
             {label ? <Text style={textStyle}>{label}</Text> : null}
         </TouchableOpacity>
     );
