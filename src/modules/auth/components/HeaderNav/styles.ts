@@ -5,6 +5,9 @@ import { TEXT_COLORS } from "../../../../constants/colors";
 export const styles = StyleSheet.create({
     container : {
         display : "flex",
+        flexDirection : "row",
+        marginLeft : "auto",
+        marginRight : "auto",
         width : scale(343),
         padding : scale(0),
         justifyContent : "space-between",

@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Text, View, SafeAreaView } from "react-native";
 import { styles } from "../styles/LoginScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import Input from "../../../components/input/Input";
@@ -7,7 +7,7 @@ import HeaderNav from "../components/HeaderNav/HeaderNav";
 
 function LoginScreen(){
     return(
-        <View style = { styles.container }>
+        <SafeAreaView style = { styles.container }>
             <HeaderNav></HeaderNav>
             <View style = {styles.inputContainer}>
                 <Input placeholder="이메일을 입력해주세요"></Input>
@@ -20,7 +20,7 @@ function LoginScreen(){
                     <Text style = {[styles.text, TYPOGRAPHY.CAPTION_1]}>회원가입</Text>
                 </View>
             </View>
-        </View>
+        </SafeAreaView>
     )
 }
 

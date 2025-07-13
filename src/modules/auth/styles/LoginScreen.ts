@@ -5,6 +5,7 @@ import { TEXT_COLORS, BACKGROUND_COLORS } from "../../../constants/colors";
 export const styles = StyleSheet.create({
   container : {
     display : "flex",
+    width : "100%",
     flex : 1,
     padding : scale(16),
     flexDirection : "column",
@@ -13,26 +14,34 @@ export const styles = StyleSheet.create({
     backgroundColor : BACKGROUND_COLORS.BACKGROUND
   },
   textContainer : {
+    marginLeft : "auto",
+    marginRight : "auto",
     display : "flex",
     padding : scale(0),
     justifyContent : "center",
     alignItems : "center",
     gap : scale(24),
-    alignSelf : "stretch"
+    alignSelf : "stretch",
+    flexDirection : "row"
   },
   text : {
     color : TEXT_COLORS.DEFAULT
   },
   inputContainer : {
+    marginLeft : "auto",
+    marginRight : "auto",
     display : "flex",
     width : scale(343),
     padding : scale(12),
     flexDirection : "column",
     justifyContent : "center",
     alignItems : "center",
-    gap : scale(24)
+    gap : scale(24),
+    textAlign : "left"
   },
   buttonContainer : {
+    marginLeft : "auto",
+    marginRight : "auto",
     display : "flex",
     width : scale(343),
     padding : scale(12),

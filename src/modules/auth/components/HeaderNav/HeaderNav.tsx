@@ -7,7 +7,8 @@ function HeaderNav(){
     return(
         <View style = {styles.container}>
             <BackSvg></BackSvg>
-            <Text style = {[TYPOGRAPHY.SUBTITLE, styles.text]}></Text>
+            <Text style = {[TYPOGRAPHY.SUBTITLE, styles.text]}>로그인</Text>
+            <BackSvg></BackSvg>
         </View>
     )
 }
