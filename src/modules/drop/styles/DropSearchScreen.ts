@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { scale } from "../../../utils/scalers";
-import { BACKGROUND_COLORS } from "../../../constants/colors";
+import { BACKGROUND_COLORS, PRIMARY_COLORS, TEXT_COLORS } from "../../../constants/colors";
 
 export const styles = StyleSheet.create({
     container : {
@@ -15,6 +15,7 @@ export const styles = StyleSheet.create({
     },
     inputContainer : {
         display : "flex",
+        flexDirection : "row",
         padding : scale(0),
         alignItems : "center",
         gap : scale(12),
@@ -34,6 +35,21 @@ export const styles = StyleSheet.create({
         alignItems : "flex-start",
         flexDirection : "column",
         gap : scale(12),
+        alignSelf : "stretch"
+    },
+    logText : {
+        color : TEXT_COLORS.CAPTION,
+        textAlign : "center"
+    },
+    recommendText : {
+        color : PRIMARY_COLORS.DEFAULT,
+        textAlign : "center"
+    },
+    textContainer : {
+        display : "flex",
+        padding : scale(0),
+        alignItems : "flex-start",
+        gap : scale(8),
         alignSelf : "stretch"
     }
 })

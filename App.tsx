@@ -7,8 +7,8 @@
 
 import React from 'react';
 import RootNavigation from './src/navigation';
-import LoginScreen from './src/modules/auth/pages/LoginScreen';
+import DropSearchScreen from './src/modules/drop/pages/DropSearchScreen';
 
 export default function App() {
-  return <LoginScreen></LoginScreen>;
+  return <DropSearchScreen></DropSearchScreen>;
 }
