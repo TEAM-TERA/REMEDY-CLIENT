@@ -14,6 +14,10 @@ function UserProfileScreen() {
 
     const currentData = activeTab === 'drop' ? dropMockData : likeMockData;
 
+    const handleEditPress = () => {
+        // TODO: NameEditScreen으로 네비게이션
+    };
+
     return (
         <SafeAreaView style={userProfileScreen.safeAreaView}>
             <View style={userProfileScreen.container}>
@@ -24,13 +28,13 @@ function UserProfileScreen() {
                             <SimpleLineIcons
                                 name="settings"
                                 size={20}
-                                color="#fff"
+                                color={TEXT_COLORS.DEFAULT}
                             />
                         </TouchableOpacity>
                     }
                 />
                 <View style={userProfileScreen.profileContainer}>
-                    <Image 
+                    <Image
                         source={require('../../../assets/images/profileImage.png')}
                         style={userProfileScreen.profileImage}
                     />
@@ -41,11 +45,13 @@ function UserProfileScreen() {
                         <Text style={userProfileScreen.userNameText}>
                             User_1
                         </Text>
-                        <Feather
-                            name="edit"
-                            size={20}
-                            color={TEXT_COLORS.CAPTION}
-                        />
+                        <TouchableOpacity onPress={handleEditPress}>
+                            <Feather
+                                name="edit"
+                                size={20}
+                                color={TEXT_COLORS.CAPTION}
+                            />
+                        </TouchableOpacity>
                     </View>
                 </View>
 
@@ -83,7 +89,7 @@ function UserProfileScreen() {
 
                     {currentData.map((item, index) => (
                         <DropItem
-                            key={index}
+                            key={`${item.memo}-${item.location}-${index}`}
                             memo={item.memo}
                             location={item.location}
                             imageSource={item.imageSource}
