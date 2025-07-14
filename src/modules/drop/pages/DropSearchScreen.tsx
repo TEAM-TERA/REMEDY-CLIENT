@@ -7,6 +7,7 @@ import Input from "../../../components/input/Input";
 import History from "../components/History/History";
 import Music from "../components/Music/Music";
 import { scale } from "../../../utils/scalers";
+import findMusic from "../utils/findMusic";
 
 function DropSearchScreen(){
     const [searchingText,setSearchingText] = useState("");
@@ -45,7 +46,15 @@ function DropSearchScreen(){
             )
             : 
             <View style = {styles.searchMusicContainer}>
-                <Music musicTitle="LILAC" singer="아이유"></Music>
+                {
+                findMusic(searchingText).map((item,idx) => (
+                    <Music 
+                    musicTitle = {item.musicTitle}
+                    singer = {item.singer}
+                    ></Music>
+                ))
+                }
+                
             </View>
             }
         </SafeAreaView>
