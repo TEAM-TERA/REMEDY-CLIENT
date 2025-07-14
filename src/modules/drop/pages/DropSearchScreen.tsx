@@ -1,4 +1,4 @@
-import { View, SafeAreaView, Text } from "react-native";
+import { View, SafeAreaView, Text, ScrollView } from "react-native";
 import { styles, historyStyles } from "../styles/DropSearchScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import { useState } from "react";
@@ -55,7 +55,10 @@ function DropSearchScreen(){
                 </>
             )
             : 
-            <View style = {styles.searchMusicContainer}>
+            <ScrollView
+                style={styles.searchMusicContainer}
+                contentContainerStyle={styles.searchMusicContent}
+            >
                 {
                 findMusic(searchingText).map((item, idx) => (
                     <Music
@@ -64,9 +67,9 @@ function DropSearchScreen(){
                         singer={item.singer}
                     />
                 ))
-                }
+                } 
                 
-            </View>
+            </ScrollView>
             }
         </SafeAreaView>
     )

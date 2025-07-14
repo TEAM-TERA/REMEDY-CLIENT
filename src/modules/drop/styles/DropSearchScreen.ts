@@ -46,13 +46,14 @@ export const styles = StyleSheet.create({
         
     },
     searchMusicContainer : {
-        display : "flex",
-        padding : scale(12),
-        flexDirection : "column",
+        padding: scale(12),
+        flex: 1,
+        alignSelf: "stretch"
+    },
+    searchMusicContent: {
+        flexDirection: "column",
         alignItems: "flex-start",
-        gap : scale(0),
-        flex : 1,
-        alignSelf : "stretch"
+        gap: scale(0)
     }
 })
 
