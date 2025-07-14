@@ -45,6 +45,15 @@ export const styles = StyleSheet.create({
         alignSelf : "stretch"
         
     },
+    searchMusicContainer : {
+        display : "flex",
+        padding : scale(12),
+        flexDirection : "column",
+        alignItems: "flex-start",
+        gap : scale(0),
+        flex : 1,
+        alignSelf : "stretch"
+    }
 })
 
 export const historyStyles = StyleSheet.create({
