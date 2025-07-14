@@ -17,7 +17,7 @@ function Music({ musicTitle, singer, onPress }: MusicProps) {
         <Text style={[TYPOGRAPHY.SUBTITLE, styles.musicTitleText]}>{musicTitle}</Text>
         <Text style={[TYPOGRAPHY.CAPTION_1, styles.singerText]}>{singer}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
