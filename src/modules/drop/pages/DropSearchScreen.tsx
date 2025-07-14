@@ -11,6 +11,13 @@ import findMusic from "../utils/findMusic";
 
 function DropSearchScreen(){
     const [searchingText,setSearchingText] = useState("");
+    const [searchHistory, setSearchHistory] = useState<string[]>([]);
+
+    const onSearch = () => {
+        if (searchingText && !searchHistory.includes(searchingText)) {
+          setSearchHistory([searchingText, ...searchHistory].slice(0, 5));
+        }
+    };
 
     return(
         <SafeAreaView style = {styles.container}>
@@ -21,6 +28,7 @@ function DropSearchScreen(){
                 width={scale(287)}
                 value = {searchingText}
                 onChangeText = {setSearchingText}
+                onSubmitEditing = {onSearch}
                 ></Input>
             </View>
             {searchingText === "" ? 
@@ -30,7 +38,9 @@ function DropSearchScreen(){
                     <View style = {styles.textContainer}>
                         <Text style = {[TYPOGRAPHY.BODY_1, historyStyles.logText]}>검색 기록</Text>
                         <View style = {historyStyles.historyContainer}>
-                            <History musicTitle="Lilac"></History>
+                        {searchHistory.map((item, idx) => (
+                            <History key={item + idx} musicTitle={item} />
+                        ))}
                         </View>
                     </View>
                 </View>
@@ -47,11 +57,12 @@ function DropSearchScreen(){
             : 
             <View style = {styles.searchMusicContainer}>
                 {
-                findMusic(searchingText).map((item,idx) => (
-                    <Music 
-                    musicTitle = {item.musicTitle}
-                    singer = {item.singer}
-                    ></Music>
+                findMusic(searchingText).map((item, idx) => (
+                    <Music
+                        key={item.musicTitle + item.singer + idx}
+                        musicTitle={item.musicTitle}
+                        singer={item.singer}
+                    />
                 ))
                 }
                 
