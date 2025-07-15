@@ -1,15 +1,15 @@
 import { Image, View } from "react-native";
 import { styles } from "./styles";
 import CircleSvg from "../CircleSvg/CircleSvg";
+import CircleBlurSvg from "../CircleSvg/CircleBlurSvg";
+import DiscSvg from "./DiscSvg";
 
 function CdPlayer(){
     return(
         <View style = {styles.container}>
-            <Image
-            source={{ uri : ""}}
-            style = {styles.imgContainer}></Image>
+            <DiscSvg></DiscSvg>
             <CircleSvg></CircleSvg>
-            <View style = {styles.smallShape}></View>
+            <CircleBlurSvg></CircleBlurSvg>
         </View>
     )
 }
