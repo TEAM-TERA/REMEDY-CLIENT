@@ -23,7 +23,7 @@ export const styles = StyleSheet.create({
     textContainer : {
         display : "flex",
         padding : scale(0),
-        alignItems : "center",
+        alignItems : "flex-start",
         gap : scale(0),
         alignSelf: "stretch"
     },

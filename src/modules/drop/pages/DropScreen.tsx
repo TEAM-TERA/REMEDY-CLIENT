@@ -14,7 +14,7 @@ function DropScreen({musicTitle, singer} : DropScreenProps){
             <View style = {styles.playerContainer}>
                 <View style = {styles.textContainer}>
                     <Text style = {[TYPOGRAPHY.HEADLINE_1, styles.titleText]}>{musicTitle}</Text>
-                    <Text style = {[TYPOGRAPHY.HEADLINE_1, styles.singerText]}>{singer}</Text>
+                    <Text style = {[TYPOGRAPHY.SUBTITLE, styles.singerText]}>{singer}</Text>
                 </View>
                 <PlayBar currentTime={currentTime} musicTime={188}
                 onSeek={(position : number)=>{
