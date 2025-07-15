@@ -1,5 +1,5 @@
 export type PlayBarProps = {
     currentTime : number;
     musicTime : number;
-    onSeek? : ()=>void;
+    onSeek? : (position : number)=>void;
 };
