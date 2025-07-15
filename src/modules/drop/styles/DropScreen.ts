@@ -70,5 +70,8 @@ export const styles = StyleSheet.create({
         justifyContent : "center",
         alignItems : "center",
         gap : scale(4)
+    },
+    locationText : {
+        color : PRIMARY_COLORS.PLUS_TWENTY
     }
 });

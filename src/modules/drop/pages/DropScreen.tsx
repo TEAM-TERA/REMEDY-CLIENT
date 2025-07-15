@@ -39,7 +39,8 @@ function DropScreen({musicTitle, singer} : DropScreenProps){
                 <View style = {styles.remainTextContainer}>
                     <Text style = {[TYPOGRAPHY.SUBTITLE, styles.remainText]}>위치 선택</Text>
                     <View style = {styles.locationContainer}>
-
+                        <LocationMarkerSvg></LocationMarkerSvg>
+                        <Text style = {[TYPOGRAPHY.CAPTION_1, styles.locationText]}>부산광역시 강서구 가락대로 1393</Text>
                     </View>
                 </View>
             </View>
