@@ -10,7 +10,7 @@ import LocationMarkerSvg from "../components/LocationMarker/LocationMarkerSvg";
 import GoogleMapView from "../../../components/map/GoogleMapView";
 
 
-function DropScreen({musicTitle, singer, location} : DropScreenProps){
+function DropScreen({musicTitle, singer, musicTime, location} : DropScreenProps){
 
     const [currentTime, setCurrentTime] = useState(0);
 
@@ -25,7 +25,7 @@ function DropScreen({musicTitle, singer, location} : DropScreenProps){
                     <Text style = {[TYPOGRAPHY.HEADLINE_1, styles.titleText]}>{musicTitle}</Text>
                     <Text style = {[TYPOGRAPHY.SUBTITLE, styles.singerText]}>{singer}</Text>
                 </View>
-                <PlayBar currentTime={currentTime} musicTime={188}
+                <PlayBar currentTime={currentTime} musicTime={musicTime}
                 onSeek={(position : number)=>{
                     setCurrentTime(position);
                 }}></PlayBar>

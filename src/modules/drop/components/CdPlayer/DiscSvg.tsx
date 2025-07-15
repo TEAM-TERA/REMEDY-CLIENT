@@ -1,4 +1,3 @@
-// src/components/map/BlurredDisc.tsx
 import React, { useEffect, useRef, useState } from "react";
 import Svg, { Defs, Filter, FeFlood, FeColorMatrix, FeMorphology, FeOffset, FeGaussianBlur, FeComposite, FeBlend, G, Circle, ClipPath, Image as SvgImage } from "react-native-svg";
 
