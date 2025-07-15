@@ -9,5 +9,6 @@ export const styles = StyleSheet.create({
         alignItems : "flex-start",
         gap : scale(12),
         alignSelf : "stretch"
-    }
+    },
+    
 })
