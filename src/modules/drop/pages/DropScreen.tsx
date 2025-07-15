@@ -6,6 +6,7 @@ import { DropScreenProps } from "../types/DropScreen";
 import PlayBar from "../../../components/playBar/PlayBar";
 import CdPlayer from "../components/CdPlayer/CdPlayer";
 import { TEXT_COLORS } from "../../../constants/colors";
+import LocationMarkerSvg from "../components/LocationMarker/LocationMarkerSvg";
 
 function DropScreen({musicTitle, singer} : DropScreenProps){
 
@@ -33,8 +34,14 @@ function DropScreen({musicTitle, singer} : DropScreenProps){
                     multiline={true}
                     placeholderTextColor={TEXT_COLORS.CAPTION_RED}></TextInput>
                 </View>
+            </View>
+            <View style = {styles.informationContainer}>
+                <View style = {styles.remainTextContainer}>
+                    <Text style = {[TYPOGRAPHY.SUBTITLE, styles.remainText]}>위치 선택</Text>
+                    <View style = {styles.locationContainer}>
 
-                
+                    </View>
+                </View>
             </View>
         </SafeAreaView>
     )

@@ -63,5 +63,12 @@ export const styles = StyleSheet.create({
         alignSelf : "stretch",
         borderRadius : scale(12),
         backgroundColor : UI_COLORS.BACKGROUND_RED
+    },
+    locationContainer : {
+        display : "flex",
+        padding : scale(0),
+        justifyContent : "center",
+        alignItems : "center",
+        gap : scale(4)
     }
 });
