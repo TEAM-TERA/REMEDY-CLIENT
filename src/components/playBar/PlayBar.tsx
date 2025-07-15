@@ -22,7 +22,7 @@ function PlayBar({currentTime, musicTime, onSeek} : PlayBarProps){
             thumbTintColor = {TEXT_COLORS.DEFAULT}
             onValueChange = {onSeek}
             ></Slider>
-            <Text style = {[TYPOGRAPHY.CAPTION_3, styles.timeText]}>{musicTime}</Text>
+            <Text style = {[TYPOGRAPHY.CAPTION_3, styles.timeText]}>{formatTime(musicTime)}</Text>
         </View>
     )
 }
