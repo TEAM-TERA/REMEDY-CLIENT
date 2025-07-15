@@ -8,9 +8,11 @@ export const styles = StyleSheet.create({
         width : scale(375),
         padding : scale(16),
         flexDirection : "column",
-        alignItems: "center",
         gap : scale(24),
         backgroundColor : BACKGROUND_COLORS.BACKGROUND_RED
+    },
+    contentContainer: {
+        alignItems: "center"
     },
     playerContainer : {
         display : "flex",
@@ -66,6 +68,7 @@ export const styles = StyleSheet.create({
     },
     locationContainer : {
         display : "flex",
+        flexDirection : "row",
         padding : scale(0),
         justifyContent : "center",
         alignItems : "center",

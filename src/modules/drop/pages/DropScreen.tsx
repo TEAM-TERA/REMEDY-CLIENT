@@ -1,19 +1,24 @@
-import { View, SafeAreaView, Text, TextInput } from "react-native";
+import { View, SafeAreaView, Text, TextInput, ScrollView } from "react-native";
 import { useState } from "react";
 import { styles } from "../styles/DropScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
+import { TEXT_COLORS } from "../../../constants/colors";
 import { DropScreenProps } from "../types/DropScreen";
 import PlayBar from "../../../components/playBar/PlayBar";
 import CdPlayer from "../components/CdPlayer/CdPlayer";
-import { TEXT_COLORS } from "../../../constants/colors";
 import LocationMarkerSvg from "../components/LocationMarker/LocationMarkerSvg";
+import GoogleMapView from "../../../components/map/GoogleMapView";
+
 
 function DropScreen({musicTitle, singer} : DropScreenProps){
 
     const [currentTime, setCurrentTime] = useState(0);
 
     return(
-        <SafeAreaView style = {styles.container}>
+        <ScrollView
+            style={styles.container}
+            contentContainerStyle={styles.contentContainer}
+        >
             <CdPlayer></CdPlayer>
             <View style = {styles.playerContainer}>
                 <View style = {styles.textContainer}>
@@ -42,9 +47,10 @@ function DropScreen({musicTitle, singer} : DropScreenProps){
                         <LocationMarkerSvg></LocationMarkerSvg>
                         <Text style = {[TYPOGRAPHY.CAPTION_1, styles.locationText]}>부산광역시 강서구 가락대로 1393</Text>
                     </View>
+                    <GoogleMapView></GoogleMapView>
                 </View>
             </View>
-        </SafeAreaView>
+        </ScrollView>
     )
 }
 
