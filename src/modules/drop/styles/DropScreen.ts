@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { PRIMARY_COLORS } from "../../../constants/colors";
+import { PRIMARY_COLORS, BACKGROUND_COLORS } from "../../../constants/colors";
 import { scale } from "../../../utils/scalers";
 
 export const styles = StyleSheet.create({
@@ -9,7 +9,8 @@ export const styles = StyleSheet.create({
         padding : scale(16),
         flexDirection : "column",
         alignItems: "center",
-        gap : scale(24)
+        gap : scale(24),
+        backgroundColor : BACKGROUND_COLORS.BACKGROUND_RED
     },
     playerContainer : {
         display : "flex",
