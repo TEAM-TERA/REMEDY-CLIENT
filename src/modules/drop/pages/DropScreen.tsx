@@ -29,6 +29,8 @@ function DropScreen({musicTitle, singer} : DropScreenProps){
                     <Text style = {[TYPOGRAPHY.SUBTITLE, styles.remainText]}>남길 한마디</Text>
                     <TextInput style = {styles.remainInput}
                     placeholder="음악과 남길 한마디를 적어주세요"
+                    textAlignVertical="top"
+                    multiline={true}
                     placeholderTextColor={TEXT_COLORS.CAPTION_RED}></TextInput>
                 </View>
 
