@@ -6,7 +6,7 @@ export const styles = StyleSheet.create({
     container : {
         display : "flex",
         padding : scale(12),
-        flexDirection : "column",
+        flexDirection : "row",
         alignItems : "flex-start",
         gap : scale(12),
         alignSelf : "stretch"
