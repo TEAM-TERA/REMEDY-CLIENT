@@ -10,7 +10,7 @@ import LocationMarkerSvg from "../components/LocationMarker/LocationMarkerSvg";
 import GoogleMapView from "../../../components/map/GoogleMapView";
 
 
-function DropScreen({musicTitle, singer} : DropScreenProps){
+function DropScreen({musicTitle, singer, location} : DropScreenProps){
 
     const [currentTime, setCurrentTime] = useState(0);
 
@@ -45,7 +45,7 @@ function DropScreen({musicTitle, singer} : DropScreenProps){
                     <Text style = {[TYPOGRAPHY.SUBTITLE, styles.remainText]}>위치 선택</Text>
                     <View style = {styles.locationContainer}>
                         <LocationMarkerSvg></LocationMarkerSvg>
-                        <Text style = {[TYPOGRAPHY.CAPTION_1, styles.locationText]}>부산광역시 강서구 가락대로 1393</Text>
+                        <Text style = {[TYPOGRAPHY.CAPTION_1, styles.locationText]}>{location}</Text>
                     </View>
                     <GoogleMapView></GoogleMapView>
                 </View>
