@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import userProfileScreen from '../styles/userProfileScreen';
-import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import Entypo from 'react-native-vector-icons/Entypo';
+import SimpleLineIcons from '@react-native-vector-icons/simple-line-icons';
+import Entypo from '@react-native-vector-icons/entypo';
 import { PRIMARY_COLORS } from '../../../constants/colors';
 import { DropItemProps } from '../types/DropItem';
 

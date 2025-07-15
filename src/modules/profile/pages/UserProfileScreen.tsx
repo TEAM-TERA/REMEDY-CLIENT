@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import Feather from 'react-native-vector-icons/Feather';
+import SimpleLineIcons from '@react-native-vector-icons/simple-line-icons';
+import Feather from '@react-native-vector-icons/feather';
 import { TEXT_COLORS } from '../../../constants/colors';
 import userProfileScreen from '../styles/userProfileScreen';
 import Header from '../components/Header';

@@ -1,5 +1,5 @@
 import { TouchableOpacity, Text } from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo';
+import Entypo from '@react-native-vector-icons/entypo';
 import { TEXT_COLORS } from '../../../constants/colors';
 import { BackButtonProps } from '../types/BackButton';
 
