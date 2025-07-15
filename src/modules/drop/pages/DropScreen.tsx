@@ -4,6 +4,7 @@ import { styles } from "../styles/DropScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import { DropScreenProps } from "../types/DropScreen";
 import PlayBar from "../../../components/playBar/PlayBar";
+import CdPlayer from "../components/CdPlayer/CdPlayer";
 
 function DropScreen({musicTitle, singer} : DropScreenProps){
 
@@ -11,6 +12,7 @@ function DropScreen({musicTitle, singer} : DropScreenProps){
 
     return(
         <SafeAreaView style = {styles.container}>
+            <CdPlayer></CdPlayer>
             <View style = {styles.playerContainer}>
                 <View style = {styles.textContainer}>
                     <Text style = {[TYPOGRAPHY.HEADLINE_1, styles.titleText]}>{musicTitle}</Text>
