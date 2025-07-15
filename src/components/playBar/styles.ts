@@ -13,6 +13,10 @@ export const styles = StyleSheet.create({
     },
     timeText : {
         color : TEXT_COLORS.DEFAULT
+    },
+    sliderContainer : {
+        height : scale(10),
+        flex: 1
     }
 
 })
