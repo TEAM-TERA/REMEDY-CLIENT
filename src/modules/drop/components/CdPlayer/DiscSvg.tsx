@@ -1,8 +1,28 @@
 // src/components/map/BlurredDisc.tsx
-import React from "react";
-import Svg, { Defs, Filter, FeFlood, FeColorMatrix, FeMorphology, FeOffset, FeGaussianBlur, FeComposite, FeBlend, G, Circle, ClipPath, Image } from "react-native-svg";
+import React, { useEffect, useRef, useState } from "react";
+import Svg, { Defs, Filter, FeFlood, FeColorMatrix, FeMorphology, FeOffset, FeGaussianBlur, FeComposite, FeBlend, G, Circle, ClipPath, Image as SvgImage } from "react-native-svg";
 
 function DiscSvg({ imageUrl }: { imageUrl?: string }) {
+  const [tilt, setTilt] = useState(0);
+  const reqRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    let last = Date.now();
+
+    const animate = () => {
+      const now = Date.now();
+      const delta = now - last;
+      last = now;
+      setTilt(prev => prev + delta * 0.001); // 1초에 약 60도 (속도 조절)
+      reqRef.current = requestAnimationFrame(animate);
+    };
+
+    reqRef.current = requestAnimationFrame(animate);
+    return () => {
+      if (reqRef.current) cancelAnimationFrame(reqRef.current);
+    };
+  }, []);
+
   return (
     <Svg width={407} height={231} viewBox="0 0 407 231" fill="none">
       <Defs>
@@ -18,23 +38,24 @@ function DiscSvg({ imageUrl }: { imageUrl?: string }) {
           <FeBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
         </Filter>
         <ClipPath id="cd_clip">
-          <Circle cx="204" cy="210" r="198" />
+          <Circle cx={204} cy={210} r={198} />
         </ClipPath>
       </Defs>
       <G filter="url(#filter0_d)">
         {imageUrl && (
-          <Image
-            x={6} 
+          <SvgImage
+            x={6}
             y={12}
             width={396}
             height={396}
             href={{ uri: imageUrl }}
             clipPath="url(#cd_clip)"
             preserveAspectRatio="xMidYMid slice"
+            transform={`rotate(${tilt}, 204, 210)`}
           />
         )}
-        <Circle cx="204" cy="210" r="60" fill="#130309" fillOpacity={0.5} />
-        <Circle cx="204" cy="210" r="40" fill="#130309" />
+        <Circle cx={204} cy={210} r={60} fill="#130309" fillOpacity={0.5} />
+        <Circle cx={204} cy={210} r={40} fill="#130309" />
       </G>
     </Svg>
   );
