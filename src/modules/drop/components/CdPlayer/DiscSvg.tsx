@@ -13,7 +13,7 @@ function DiscSvg({ imageUrl }: { imageUrl?: string }) {
       const now = Date.now();
       const delta = now - last;
       last = now;
-      setTilt(prev => prev + delta * 0.001); // 1초에 약 60도 (속도 조절)
+      setTilt(prev => prev + delta * 0.001);
       reqRef.current = requestAnimationFrame(animate);
     };
 

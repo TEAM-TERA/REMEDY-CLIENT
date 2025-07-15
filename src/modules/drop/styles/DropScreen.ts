@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { PRIMARY_COLORS, BACKGROUND_COLORS } from "../../../constants/colors";
+import { PRIMARY_COLORS, BACKGROUND_COLORS, TEXT_COLORS, UI_COLORS } from "../../../constants/colors";
 import { scale } from "../../../utils/scalers";
 
 export const styles = StyleSheet.create({
@@ -42,5 +42,26 @@ export const styles = StyleSheet.create({
     singerText : {
         color : PRIMARY_COLORS.PLUS_TWENTY,
         textAlign : "center"
+    },
+    remainTextContainer : {
+        display : "flex",
+        padding : scale(0),
+        alignItems : "flex-start",
+        gap : scale(8),
+        alignSelf : "stretch"
+    },
+    remainText : {
+        color : TEXT_COLORS.DEFAULT,
+        textAlign : "center"
+    },
+    remainInput : {
+        display : "flex",
+        height : scale(128),
+        padding : scale(12),
+        justifyContent : "space-between",
+        alignItems : "flex-start",
+        alignSelf : "stretch",
+        borderRadius : scale(12),
+        backgroundColor : UI_COLORS.BACKGROUND_RED
     }
 });
