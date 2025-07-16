@@ -75,7 +75,7 @@ function DropSearchScreen(){
                             navigation.navigate("DropDetail", {
                                 musicTitle: item.musicTitle,
                                 singer: item.singer,
-                                musicTime: 0,
+                                musicTime: 120,
                                 location: "부산광역시 해운대구", 
                             })
                         }
