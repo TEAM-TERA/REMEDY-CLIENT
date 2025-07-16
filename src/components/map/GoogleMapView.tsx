@@ -39,8 +39,8 @@ export default function GoogleMapView() {
   }, []);
 
   const { data: droppings, isLoading: isDroppingLoading } = useDroppings(
-    location?.longitude,
-    location?.latitude
+    location ? location.longitude : 0,
+    location ? location.latitude : 0
   );
 
   const html = location ? `
