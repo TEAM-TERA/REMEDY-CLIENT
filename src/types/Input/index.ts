@@ -4,4 +4,5 @@ export type InputProps = {
     onChangeText? : (text : string) => void;
     width? : number | `${number}%`;
     onSubmitEditing? : ()=>void;
+    secureTextEntry?: boolean;
 };
