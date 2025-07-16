@@ -1,10 +1,9 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import userProfileScreen from '../styles/userProfileScreen';
-import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import Entypo from 'react-native-vector-icons/Entypo';
 import { PRIMARY_COLORS } from '../../../constants/colors';
 import { DropItemProps } from '../types/DropItem';
+import Icon from '../../../components/icon/Icon';
 
 function DropItem({
     memo,
@@ -22,9 +21,10 @@ function DropItem({
                     />
                     {hasHeart && (
                         <View style={userProfileScreen.heartOverlay}>
-                            <Entypo
+                            <Icon
                                 name="heart"
-                                size={45}
+                                width={24}
+                                height={24}
                                 color="rgba(255, 71, 87, 0.8)"
                             />{' '}
                             {/* 투명도 위해 상수 사용 안함 */}
@@ -44,9 +44,10 @@ function DropItem({
                         {memo}
                     </Text>
                     <View style={userProfileScreen.location}>
-                        <SimpleLineIcons
-                            name="location-pin"
-                            size={16}
+                        <Icon
+                            name="location"
+                            width={16}
+                            height={16}
                             color={PRIMARY_COLORS.PLUS_TWENTY}
                         />
                         <Text style={userProfileScreen.locationText}>

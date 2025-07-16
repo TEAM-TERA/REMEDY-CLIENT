@@ -1,21 +1,24 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons';
-import Feather from 'react-native-vector-icons/Feather';
+import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
+import type { RootStackParamList } from '../../../types/navigation';
 import { TEXT_COLORS } from '../../../constants/colors';
 import userProfileScreen from '../styles/userProfileScreen';
 import Header from '../components/Header';
 import DropItem from '../components/DropItem';
 import { dropMockData, likeMockData } from '../utils/mockData';
+import Icon from '../../../components/icon/Icon';
 
 function UserProfileScreen() {
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
     const [activeTab, setActiveTab] = useState<'drop' | 'like'>('drop');
 
     const currentData = activeTab === 'drop' ? dropMockData : likeMockData;
 
     const handleEditPress = () => {
-        // TODO: NameEditScreen으로 네비게이션
+        navigation.navigate('NameEdit');
     };
 
     return (
@@ -25,9 +28,10 @@ function UserProfileScreen() {
                     title="프로필"
                     rightComponent={
                         <TouchableOpacity>
-                            <SimpleLineIcons
-                                name="settings"
-                                size={20}
+                            <Icon
+                                name="setting"
+                                width={20}
+                                height={20}
                                 color={TEXT_COLORS.DEFAULT}
                             />
                         </TouchableOpacity>
@@ -46,9 +50,10 @@ function UserProfileScreen() {
                             User_1
                         </Text>
                         <TouchableOpacity onPress={handleEditPress}>
-                            <Feather
+                            <Icon
                                 name="edit"
-                                size={20}
+                                width={20}
+                                height={20}
                                 color={TEXT_COLORS.CAPTION}
                             />
                         </TouchableOpacity>
