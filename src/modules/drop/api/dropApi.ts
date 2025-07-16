@@ -22,3 +22,10 @@ export async function createDropping({
   });
   return res.data;
 }
+
+export async function searchSongs(query: string) {
+  const res = await axiosInstance.get("/api/v1/songs/search", {
+    params: { query }
+  });
+  return res.data.songSearchResponse;
+}

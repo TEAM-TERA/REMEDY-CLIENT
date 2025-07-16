@@ -11,6 +11,7 @@ import findMusic from "../utils/findMusic";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { DropStackParamList } from '../../../navigation/DropStack';
+import { useSongSearch } from "../hooks/useSongSearch";
 
 function DropSearchScreen(){
     const [searchingText,setSearchingText] = useState("");
@@ -23,6 +24,7 @@ function DropSearchScreen(){
     };
 
     const navigation = useNavigation<StackNavigationProp<DropStackParamList, 'DropSearch'>>();
+    const { data: searchResult, isLoading } = useSongSearch(searchingText);
 
     return(
         <SafeAreaView style = {styles.container}>
@@ -64,25 +66,26 @@ function DropSearchScreen(){
                 style={styles.searchMusicContainer}
                 contentContainerStyle={styles.searchMusicContent}
             >
-                {
-                findMusic(searchingText).map((item, idx) => (
-                    <Music
-                        key={item.musicTitle + item.singer + idx}
-                        musicTitle={item.musicTitle}
-                        singer={item.singer}
-                        imgUrl={item.imgUrl}
-                        onPress={() =>
-                            navigation.navigate("DropDetail", {
-                                musicTitle: item.musicTitle,
-                                singer: item.singer,
-                                musicTime: 120,
-                                location: "부산광역시 해운대구", 
-                            })
-                        }
-                    />
-                ))
-                } 
-                
+                {isLoading ? (
+                    <Text>로딩중...</Text>
+                ) : (
+                    searchResult?.map((item, idx) => (
+                        <Music
+                            key={item.id}
+                            musicTitle={item.title}
+                            singer={item.artist}
+                            imgUrl={""}
+                            onPress={() =>
+                                navigation.navigate("DropDetail", {
+                                    musicTitle: item.title,
+                                    singer: item.artist,
+                                    musicTime: item.duration,
+                                    location: "부산광역시 강서구 가락대로 1393",
+                                })
+                            }
+                        />
+                    ))
+                )}
             </ScrollView>
             }
         </SafeAreaView>
