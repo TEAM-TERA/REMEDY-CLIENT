@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // import { NewAppScreen } from '@react-native/new-app-screen';
 // import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 
@@ -39,3 +40,11 @@ function App() {
 }
 
 export default App;
+=======
+import React from 'react';
+import RootNavigation from './src/navigation';
+
+export default function App() {
+  return <RootNavigation />;
+}
+>>>>>>> 2c9ebdcb6dd6aee356952caedcae13a79b5fcbc2
