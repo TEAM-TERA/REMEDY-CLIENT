@@ -7,7 +7,7 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import nameEditScreen from '../styles/nameEditScreen';
+import nameEditScreen from '../styles/NameEditScreen';
 import Header from '../components/Header';
 
 function NameEditScreen() {
