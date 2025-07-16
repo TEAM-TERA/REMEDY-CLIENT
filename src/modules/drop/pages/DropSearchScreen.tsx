@@ -8,6 +8,9 @@ import History from "../components/History/History";
 import Music from "../components/Music/Music";
 import { scale } from "../../../utils/scalers";
 import findMusic from "../utils/findMusic";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from '@react-navigation/stack';
+import { DropStackParamList } from '../../../navigation/DropStack';
 
 function DropSearchScreen(){
     const [searchingText,setSearchingText] = useState("");
@@ -18,6 +21,8 @@ function DropSearchScreen(){
           setSearchHistory([searchingText, ...searchHistory].slice(0, 5));
         }
     };
+
+    const navigation = useNavigation<StackNavigationProp<DropStackParamList, 'DropSearch'>>();
 
     return(
         <SafeAreaView style = {styles.container}>
@@ -65,6 +70,15 @@ function DropSearchScreen(){
                         key={item.musicTitle + item.singer + idx}
                         musicTitle={item.musicTitle}
                         singer={item.singer}
+                        imgUrl={item.imgUrl}
+                        onPress={() =>
+                            navigation.navigate("DropDetail", {
+                                musicTitle: item.musicTitle,
+                                singer: item.singer,
+                                musicTime: 0,
+                                location: "부산광역시 해운대구", 
+                            })
+                        }
                     />
                 ))
                 } 

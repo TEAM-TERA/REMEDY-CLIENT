@@ -2,8 +2,14 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DropSearchScreen from "../modules/drop/pages/DropSearchScreen";
 import DropScreen from "../modules/drop/pages/DropScreen";
+import { DropScreenProps } from "../modules/drop/types/DropScreen";
 
-const Stack = createNativeStackNavigator();
+export type DropStackParamList = {
+  DropSearch: undefined;
+  DropDetail: DropScreenProps;
+};
+
+const Stack = createNativeStackNavigator<DropStackParamList>();
 
 function DropStack() {
   return (
