@@ -74,13 +74,13 @@ function DropSearchScreen(){
                             key={item.id}
                             musicTitle={item.title}
                             singer={item.artist}
-                            imgUrl={""} // 서버에서 이미지 URL 주면 넣기
+                            imgUrl={""}
                             onPress={() =>
                                 navigation.navigate("DropDetail", {
                                     musicTitle: item.title,
                                     singer: item.artist,
                                     musicTime: item.duration,
-                                    location: "부산광역시 해운대구",
+                                    location: "부산광역시 강서구 가락대로 1393",
                                 })
                             }
                         />
