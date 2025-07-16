@@ -12,7 +12,7 @@ export default function RootNavigation() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Main">
-        <Stack.Screen name = "auth" component = {AuthStack}/>
+        <Stack.Screen name = "Auth" component = {AuthStack}/>
         <Stack.Screen name = "Profile" component = {ProfileStack} />
         <Stack.Screen name = "Drop" component = {DropStack} />
       </Stack.Navigator>
