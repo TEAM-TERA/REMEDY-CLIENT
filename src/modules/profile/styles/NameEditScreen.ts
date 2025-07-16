@@ -5,6 +5,7 @@ import {
     UI_COLORS,
     TEXT_COLORS,
 } from '../../../constants/colors';
+
 import { TYPOGRAPHY } from '../../../constants/typography';
 
 export const styles= StyleSheet.create({
