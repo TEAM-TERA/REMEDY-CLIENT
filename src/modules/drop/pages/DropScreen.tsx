@@ -9,11 +9,36 @@ import CdPlayer from "../components/CdPlayer/CdPlayer";
 import LocationMarkerSvg from "../components/LocationMarker/LocationMarkerSvg";
 import GoogleMapView from "../../../components/map/GoogleMapView";
 import { useRoute, RouteProp } from "@react-navigation/native";
-
+import { useCreateDropping } from "../hooks/useCreateDropping";
+import { useContext } from "react";
+import { AuthContext } from "../../auth/auth-context";
 
 function DropScreen(){
     const route = useRoute<RouteProp<{params : DropScreenProps}, 'params'>>();
     const { musicTitle, singer, musicTime, location } = route.params;
+
+    const {userToken} = useContext(AuthContext);
+    const createDroppingMutation = useCreateDropping();
+
+    const handleCreateDropping = () => {
+        createDroppingMutation.mutate(
+            {
+                songId : "test",
+                content : "test",
+                latitude : 35,
+                longitude : 127,
+                address : location
+            },
+            {
+                onSuccess : (data) => {
+                    
+                },
+                onError : (err : any) => {
+
+                },
+            }
+        )
+    }
     
     const [currentTime, setCurrentTime] = useState(0);
 
