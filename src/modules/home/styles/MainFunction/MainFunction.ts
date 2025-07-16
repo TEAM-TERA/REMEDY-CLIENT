@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { rem } from "../../../../utils/scalerRem";
+import { scale } from "../../../../utils/scalers";
 
 export const styles = StyleSheet.create({
     container : {
@@ -7,8 +7,8 @@ export const styles = StyleSheet.create({
         left: 0,
         display: "flex",
         width: "100%",
-        height: rem(13.875),
-        padding: rem(0.625),
+        height: scale(13.875),
+        padding: scale(0.625),
         justifyContent: "space-between",
         alignItems: "flex-start",
         alignSelf: "stretch",
