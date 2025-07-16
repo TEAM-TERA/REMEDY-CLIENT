@@ -21,7 +21,7 @@ function DateInput({
                     value={value}
                     onChangeText={onChangeText}
                     placeholder={placeholder}
-                    placeholderTextColor="#434356"
+                    placeholderTextColor={TEXT_COLORS.CAPTION}
                     keyboardType="numeric"
                 />
                 <TouchableOpacity onPress={onDatePickerPress}>
