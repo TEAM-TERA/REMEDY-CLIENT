@@ -1,4 +1,3 @@
-// src/modules/drop/navigation/DropStack.tsx
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DropSearchScreen from "../modules/drop/pages/DropSearchScreen";
