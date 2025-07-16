@@ -6,14 +6,28 @@ import Input from "../../../components/input/Input";
 import Button from "../../../components/button/Button";
 import HeaderNav from "../components/HeaderNav/HeaderNav";
 import { AuthContext } from "../auth-context";
+import { useLogin } from "../hooks/useLogin";
 
 function LoginScreen() {
   const { login, isLoading } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error,setError] = useState(null);
+  const loginMutation = useLogin();
 
-  const handleLogin = async () => {
-    await login("dummy_token");
+  const handleLogin = () => {
+    setError(null);
+    loginMutation.mutate(
+        { email, password },
+        {
+            onSuccess : async (accssToken) => {
+                await login(accssToken);
+            },
+            onError : (err : any) => {
+                setError(err.response?.data?.message || err.message);
+            },
+        }
+    )
   };
 
   return (
