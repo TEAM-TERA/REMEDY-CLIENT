@@ -1,7 +1,10 @@
 import axios from "axios";
+import Config from 'react-native-config';
+
+const API_BASE_URL = Config.API_BASE_URL;
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/api/v1",
+  baseURL: API_BASE_URL,
   withCredentials: true,
 });
 
