@@ -12,6 +12,7 @@ import { useRoute, RouteProp } from "@react-navigation/native";
 import { useCreateDropping } from "../hooks/useCreateDropping";
 import { useContext } from "react";
 import { AuthContext } from "../../auth/auth-context";
+import Button from "../../../components/button/Button";
 
 function DropScreen(){
     const route = useRoute<RouteProp<{params : DropScreenProps}, 'params'>>();
@@ -78,6 +79,13 @@ function DropScreen(){
                     <GoogleMapView></GoogleMapView>
                 </View>
             </View>
+            <View style = {styles.buttonContainer}>
+                <Button 
+                title = "드롭핑 생성"
+                onPress = {handleCreateDropping}
+                disabled = {createDroppingMutation.isPending}/>
+            </View>
+            
         </ScrollView>
     )
 }
