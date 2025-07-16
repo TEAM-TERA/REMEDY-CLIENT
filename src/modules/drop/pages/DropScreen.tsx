@@ -8,10 +8,13 @@ import PlayBar from "../../../components/playBar/PlayBar";
 import CdPlayer from "../components/CdPlayer/CdPlayer";
 import LocationMarkerSvg from "../components/LocationMarker/LocationMarkerSvg";
 import GoogleMapView from "../../../components/map/GoogleMapView";
+import { useRoute, RouteProp } from "@react-navigation/native";
 
 
-function DropScreen({musicTitle, singer, musicTime, location} : DropScreenProps){
-
+function DropScreen(){
+    const route = useRoute<RouteProp<{params : DropScreenProps}, 'params'>>();
+    const { musicTitle, singer, musicTime, location } = route.params;
+    
     const [currentTime, setCurrentTime] = useState(0);
 
     return(
