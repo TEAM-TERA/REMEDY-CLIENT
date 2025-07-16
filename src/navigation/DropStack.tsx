@@ -6,7 +6,7 @@ import DropScreen from "../modules/drop/pages/DropScreen";
 
 const Stack = createNativeStackNavigator();
 
-export default function DropStack() {
+function DropStack() {
   return (
     <Stack.Navigator initialRouteName="DropSearch">
       <Stack.Screen name="DropSearch" component={DropSearchScreen} />
@@ -14,3 +14,5 @@ export default function DropStack() {
     </Stack.Navigator>
   );
 }
+
+export default DropStack;
