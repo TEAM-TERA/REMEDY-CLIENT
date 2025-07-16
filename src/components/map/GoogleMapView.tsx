@@ -4,6 +4,7 @@ import { WebView } from 'react-native-webview';
 import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
 import { PRIMARY_COLORS } from '../../constants/colors';
 import { MAP_RADIUS, MAP_ZOOM, MAP_STYLE, MARKER_STYLES, GOOGLE_MAPS_API_KEY } from '../../constants/map';
+import { useDroppings } from '../../modules/drop/hooks/useDroppings';
 
 
 export default function GoogleMapView() {
@@ -36,6 +37,11 @@ export default function GoogleMapView() {
     }
     requestLocation();
   }, []);
+
+  const { data: droppings, isLoading: isDroppingLoading } = useDroppings(
+    location ? location.longitude : 0,
+    location ? location.latitude : 0
+  );
 
   const html = location ? `
     <!DOCTYPE html>
@@ -82,6 +88,19 @@ export default function GoogleMapView() {
               map: map,
               center: center,
               radius: ${MAP_RADIUS}
+            });
+
+            var droppings = ${JSON.stringify(droppings || [])};
+            droppings.forEach(function(drop) {
+              new google.maps.Marker({
+                position: { lat: drop.latitude, lng: drop.longitude },
+                map: map,
+                title: drop.content,
+                icon: {
+                  url: "https://water-icon-dc4.notion.site/image/attachment%3A3292e931-4479-40da-ab55-719824478764%3Aimage.png?table=block&id=2322845a-0c9f-8069-8720-e3a085f5acfa&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&width=300&userId=&cache=v2",
+                  scaledSize: new google.maps.Size(32, 32)
+                }
+              });
             });
           }
         </script>

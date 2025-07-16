@@ -7,30 +7,30 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import nameEditScreen from '../styles/nameEditScreen';
+import { styles } from '../styles/nameEditScreen';
 import Header from '../components/Header';
 
 function NameEditScreen() {
     const [userName, setUserName] = useState('User_1');
 
     return (
-        <SafeAreaView style={nameEditScreen.safeAreaView}>
+        <SafeAreaView style={styles.safeAreaView}>
             <StatusBar translucent={false} />
 
-            <View style={nameEditScreen.container}>
+            <View style={styles.container}>
                 <Header title="이름 수정" />
 
-                <View style={nameEditScreen.nameEditContainer}>
-                    <Text style={nameEditScreen.title}>이름</Text>
+                <View style={styles.nameEditContainer}>
+                    <Text style={styles.title}>이름</Text>
                     <TextInput
-                        style={nameEditScreen.nameEditInput}
+                        style={styles.nameEditInput}
                         value={userName}
                         onChangeText={setUserName}
                     />
                 </View>
 
-                <TouchableOpacity style={nameEditScreen.button}>
-                    <Text style={nameEditScreen.buttonText}>수정하기</Text>
+                <TouchableOpacity style={styles.button}>
+                    <Text style={styles.buttonText}>수정하기</Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

@@ -7,7 +7,7 @@ import {
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
-const nameEditScreen = StyleSheet.create({
+export const styles= StyleSheet.create({
     safeAreaView: {
         flex: 1,
         backgroundColor: BACKGROUND_COLORS.BACKGROUND,
@@ -57,4 +57,3 @@ const nameEditScreen = StyleSheet.create({
         ...TYPOGRAPHY.BUTTON_TEXT,
     },
 });
-export default nameEditScreen;
