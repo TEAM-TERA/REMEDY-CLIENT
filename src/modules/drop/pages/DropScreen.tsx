@@ -79,10 +79,13 @@ function DropScreen(){
                     <GoogleMapView></GoogleMapView>
                 </View>
             </View>
-            <Button 
+            <View style = {styles.buttonContainer}>
+                <Button 
                 title = "드롭핑 생성"
                 onPress = {handleCreateDropping}
-                disabled = {createDroppingMutation.isPending}></Button>
+                disabled = {createDroppingMutation.isPending}/>
+            </View>
+            
         </ScrollView>
     )
 }
