@@ -29,3 +29,10 @@ export async function searchSongs(query: string) {
   });
   return res.data.songSearchResponse;
 }
+
+export async function getDroppings({ longitude, latitude }: { longitude: number; latitude: number }) {
+  const res = await axiosInstance.get("/droppings", {
+    params: { longitude, latitude }
+  });
+  return res.data.droppings;
+}
