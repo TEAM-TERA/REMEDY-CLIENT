@@ -10,7 +10,7 @@ const Stack = createNativeStackNavigator();
 export default function RootNavigation() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Main">
         <Stack.Screen name="Profile" component={UserProfileScreen} />
         <Stack.Screen name="Drop" component={DropSearchScreen} />
       </Stack.Navigator>
