@@ -1,4 +1,4 @@
-import { SafeAreaView, View } from "react-native";
+import { SafeAreaView, Text, View } from "react-native";
 import { styles } from "../styles/HomeScreen";
 import MainFunction from "../components/MainFunction";
 import GoogleMapView from "../../../components/map/GoogleMapView";

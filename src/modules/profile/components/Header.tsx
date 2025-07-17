@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import BackButton from './BackButton';
-import nameEditScreen from '../styles/nameEditScreen';
+import { styles } from '../styles/editScreen';
 import { HeaderProps } from '../types/Header';
 
 function Header({
@@ -12,13 +12,13 @@ function Header({
     titleStyle = {},
 }: HeaderProps) {
     return (
-        <View style={[nameEditScreen.headerContainer, headerStyle]}>
+        <View style={[styles.headerContainer, headerStyle]}>
             <BackButton
-                textStyle={nameEditScreen.backButton}
+                textStyle={styles.backButton}
                 onPress={onBackPress}
             />
-            <Text style={[nameEditScreen.title, titleStyle]}>{title}</Text>
-            {rightComponent || <View style={nameEditScreen.rightComponent} />}
+            <Text style={[styles.title, titleStyle]}>{title}</Text>
+            {rightComponent || <View style={styles.rightComponent} />}
         </View>
     );
 }
