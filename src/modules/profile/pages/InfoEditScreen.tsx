@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
+import type { ProfileStackParamList } from '../../../types/navigation';
 import infoEditScreen from '../styles/infoEditScreen';
 import Header from '../components/Header';
 import FormInput from '../components/FormInput';
@@ -9,6 +12,7 @@ import GenderButton from '../components/GenderButton';
 import { InfoEditFormData, GenderType } from '../types/InfoEdit';
 
 function InfoEditScreen() {
+    const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
     const [formData, setFormData] = useState<InfoEditFormData>({
         name: '',
         birthDate: '',
@@ -38,12 +42,13 @@ function InfoEditScreen() {
 
     const handleSubmit = () => {
         // TODO: 정보 수정 API 호출
+        navigation.goBack();
     };
 
     return (
         <SafeAreaView style={infoEditScreen.safeAreaView}>
             <View style={infoEditScreen.container}>
-                <Header title="정보 수정" onBackPress={() => {}} />
+                <Header title="정보 수정" />
 
                 <View style={infoEditScreen.content}>
                     <FormInput
