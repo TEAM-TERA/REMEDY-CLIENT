@@ -11,11 +11,11 @@ const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
 function ProfileStack() {
   return (
-    <Stack.Navigator initialRouteName="UserProfile" screenOptions={{ headerShown: false }}>
-      <Stack.Screen name = "UserProfile" component={UserProfileScreen} />
-      <Stack.Screen name = "NameEdit" component={NameEditScreen} />
-      <Stack.Screen name = "Setting" component={SettingScreen} />
-      <Stack.Screen name = "InfoEdit" component={InfoEditScreen} />
+    <Stack.Navigator initialRouteName="UserProfile">
+      <Stack.Screen name = "UserProfile" component={UserProfileScreen} options={{ headerShown: false }}/>
+      <Stack.Screen name = "NameEdit" component={NameEditScreen} options={{ headerShown: false }}/>
+      <Stack.Screen name = "Setting" component={SettingScreen} options={{ headerShown: false }}/>
+      <Stack.Screen name = "InfoEdit" component={InfoEditScreen} options={{ headerShown: false }}/>
     </Stack.Navigator>
   );
 }

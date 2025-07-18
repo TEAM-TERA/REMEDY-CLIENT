@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { rem } from "../../../../utils/scalerRem";
+import { scale } from "../../../../utils/scalers";
 
 export const styles = StyleSheet.create({
   container: {
