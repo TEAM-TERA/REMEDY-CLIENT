@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { rem } from "../../../../utils/scalerRem";
+import { scale } from "../../../../utils/scalers";
 import { TYPOGRAPHY } from "../../../../constants/typography";
 import { UI_COLORS, TEXT_COLORS } from "../../../../constants/colors";
 
@@ -9,8 +9,8 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
-    height: rem(4),
-    paddingHorizontal: rem(1),
+    height: scale(4),
+    paddingHorizontal: scale(1),
     backgroundColor: UI_COLORS.BACKGROUND
   },
   leftSection: {
@@ -19,29 +19,29 @@ export const styles = StyleSheet.create({
   },
   userName: {
     color: TEXT_COLORS.DEFAULT,
-    marginBottom: rem(0.2)
+    marginBottom: scale(0.2)
   },
   badge: {
     backgroundColor: UI_COLORS.BACKGROUND_RED,
-    borderRadius: rem(0.5),
-    paddingHorizontal: rem(0.5),
-    paddingVertical: rem(0.15),
+    borderRadius: scale(0.5),
+    paddingHorizontal: scale(0.5),
+    paddingVertical: scale(0.15),
     alignSelf: "flex-start",
-    marginTop: rem(0.1)
+    marginTop: scale(0.1)
   },
   badgeText: {
     color: TEXT_COLORS.CAPTION_RED
   },
   menuButton: {
-    padding: rem(0.5),
+    padding: scale(0.5),
     justifyContent: "center",
     alignItems: "center"
   },
   hamburgerLine: {
-    width: rem(1.5),
-    height: rem(0.18),
+    width: scale(1.5),
+    height: scale(0.18),
     backgroundColor: TEXT_COLORS.DEFAULT,
-    marginVertical: rem(0.13),
-    borderRadius: rem(0.1)
+    marginVertical: scale(0.13),
+    borderRadius: scale(0.1)
   },
 });
