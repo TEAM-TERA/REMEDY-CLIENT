@@ -1,20 +1,14 @@
 import { TouchableOpacity, Text } from 'react-native';
-import Entypo from 'react-native-vector-icons/Entypo';
-import { TEXT_COLORS } from '../../../constants/colors';
+import { useNavigation } from '@react-navigation/native';
 import { BackButtonProps } from '../types/BackButton';
+import Icon from '../../../components/icon/Icon';
 
 function BackButton({ label = '', onPress, textStyle = {} }: BackButtonProps) {
-    const handlePress = () => {
-        // 뒤로가기 네비게이션 구현
-    };
+    const navigation = useNavigation();
 
     return (
-        <TouchableOpacity onPress={onPress || handlePress}>
-            <Entypo
-                name="chevron-small-left"
-                size={24}
-                color={TEXT_COLORS.DEFAULT}
-            />
+        <TouchableOpacity onPress={onPress || navigation.goBack}>
+            <Icon name="left" width={24} height={24} />
             {label ? <Text style={textStyle}>{label}</Text> : null}
         </TouchableOpacity>
     );

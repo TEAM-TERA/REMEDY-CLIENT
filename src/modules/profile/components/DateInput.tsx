@@ -4,6 +4,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { TEXT_COLORS } from '../../../constants/colors';
 import infoEditScreen from '../styles/infoEditScreen';
 import { DateInputProps } from '../types/InfoEdit';
+import Icon from '../../../components/icon/Icon';
 
 function DateInput({
     value,
@@ -25,11 +26,7 @@ function DateInput({
                     keyboardType="numeric"
                 />
                 <TouchableOpacity onPress={onDatePickerPress}>
-                    <MaterialIcons
-                        name="calendar-today"
-                        size={20}
-                        color={TEXT_COLORS.CAPTION}
-                    />
+                    <Icon name="calendar" width={24} height={24} />
                 </TouchableOpacity>
             </View>
         </View>
