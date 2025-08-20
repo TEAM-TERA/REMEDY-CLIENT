@@ -1,5 +1,6 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from './src/modules/auth/auth-context';
 import RootNavigation from './src/navigation';
 
 const queryClient = new QueryClient({
@@ -14,7 +15,9 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RootNavigation />
+      <AuthProvider>
+        <RootNavigation />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

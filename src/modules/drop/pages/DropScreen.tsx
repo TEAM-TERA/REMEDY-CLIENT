@@ -1,4 +1,4 @@
-import { View, SafeAreaView, Text, TextInput, ScrollView } from "react-native";
+import { View, SafeAreaView, Text, TextInput, ScrollView, Alert } from "react-native";
 import { useState } from "react";
 import { styles } from "../styles/DropScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
@@ -22,6 +22,11 @@ function DropScreen(){
     const createDroppingMutation = useCreateDropping();
 
     const handleCreateDropping = () => {
+        if (!userToken) {
+            Alert.alert('로그인 필요', '드롭핑을 생성하려면 로그인이 필요합니다.');
+            return;
+        }
+        
         createDroppingMutation.mutate(
             {
                 songId : "test",
@@ -32,10 +37,11 @@ function DropScreen(){
             },
             {
                 onSuccess : (data) => {
-                    
+                    Alert.alert('성공', '드롭핑이 성공적으로 생성되었습니다!');
                 },
                 onError : (err : any) => {
-
+                    console.error('드롭핑 생성 실패:', err);
+                    Alert.alert('실패', '드롭핑 생성에 실패했습니다.');
                 },
             }
         )

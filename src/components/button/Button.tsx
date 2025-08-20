@@ -1,13 +1,16 @@
-import { Text, View } from "react-native";
+import { Text, View, TouchableOpacity } from "react-native";
 import { ButtonProps } from "../../types/Button";
 import { styles } from "./styles";
 import { TYPOGRAPHY } from "../../constants/typography";
 
-function Button({title} : ButtonProps){
+function Button({title, onPress, disabled} : ButtonProps){
     return(
-        <View style = {styles.container}>
+        <TouchableOpacity 
+        onPress={onPress}
+        disabled={disabled}
+        style = {styles.container}>
             <Text style = {[styles.text, TYPOGRAPHY.BUTTON_TEXT]}>{title}</Text>
-        </View>       
+        </TouchableOpacity>       
     )
 }
 
