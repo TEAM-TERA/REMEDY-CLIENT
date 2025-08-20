@@ -7,6 +7,8 @@ import ProfileStack from './ProfileStack';
 import AuthStack from './AuthStack';
 import HomeScreen from '../modules/home/pages/HomeScreen';
 
+import GoogleMapView from '../components/map/GoogleMapView';
+
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigation() {
