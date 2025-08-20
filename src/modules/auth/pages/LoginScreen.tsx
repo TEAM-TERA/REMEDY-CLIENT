@@ -12,7 +12,7 @@ function LoginScreen() {
   const { login, isLoading } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error,setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const loginMutation = useLogin();
 
   const handleLogin = () => {
@@ -24,7 +24,16 @@ function LoginScreen() {
                 await login(accssToken);
             },
             onError : (err : any) => {
-                setError(err.response?.data?.message || err.message);
+                console.error('Login error:', err);
+                if (err.code === 'NETWORK_ERROR') {
+                    setError('네트워크 연결을 확인해주세요.');
+                } else if (err.response?.status === 401) {
+                    setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+                } else if (err.response?.status === 403) {
+                    setError('접근 권한이 없습니다. 관리자에게 문의하세요.');
+                } else {
+                    setError(err.response?.data?.message || err.message || '로그인에 실패했습니다.');
+                }
             },
         }
     )
