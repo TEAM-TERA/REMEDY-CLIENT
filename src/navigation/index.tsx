@@ -12,9 +12,9 @@ const Stack = createNativeStackNavigator();
 export default function RootNavigation() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Auth">
         <Stack.Screen name = "Home" component = {HomeScreen}/>
-        <Stack.Screen name = "Auth" component = {AuthStack}/>
+        <Stack.Screen name = "Auth" component = {AuthStack} options={{ headerShown: false }}/>
         <Stack.Screen name = "Profile" component = {ProfileStack} />
         <Stack.Screen name = "Drop" component = {DropStack} />
       </Stack.Navigator>
