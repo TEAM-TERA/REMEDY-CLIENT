@@ -45,6 +45,11 @@ function LoginScreen() {
           onChangeText={setPassword}
           secureTextEntry
         />
+        {error && (
+          <Text style={[styles.errorText, TYPOGRAPHY.CAPTION_1]}>
+            {error}
+          </Text>
+        )}
       </View>
       <View style={styles.buttonContainer}>
         <Button title="로그인" onPress={handleLogin} disabled={isLoading} />

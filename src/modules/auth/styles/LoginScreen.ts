@@ -48,5 +48,10 @@ export const styles = StyleSheet.create({
     justifyContent : "center",
     alignItems : "center",
     gap : scale(16)
+  },
+  errorText : {
+    color : "#FF3B30",
+    textAlign : "center",
+    marginTop : scale(8)
   }
 });
