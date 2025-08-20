@@ -6,11 +6,9 @@ import { PRIMARY_COLORS } from '../../constants/colors';
 import { MAP_RADIUS, MAP_ZOOM, MAP_STYLE, MARKER_STYLES, GOOGLE_MAPS_API_KEY } from '../../constants/map';
 import { useDroppings } from '../../modules/drop/hooks/useDroppings';
 
-
 export default function GoogleMapView() {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const webviewRef = useRef<WebView>(null);
-  const apiKey = GOOGLE_MAPS_API_KEY;
 
   useEffect(() => {
     async function requestLocation() {
@@ -19,31 +17,30 @@ export default function GoogleMapView() {
           const granted = await PermissionsAndroid.request(
             PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
           );
-          if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
-            return;
-          }
+          if (granted !== PermissionsAndroid.RESULTS.GRANTED) return;
         }
         Geolocation.getCurrentPosition(
-          (pos: GeoPosition) => {
-            setLocation({
-              latitude: pos.coords.latitude,
-              longitude: pos.coords.longitude,
-            });
-          },
-          (err: any) => {},
+          (pos: GeoPosition) => setLocation({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude
+          }),
+          () => {},
           { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
         );
-      } catch (e) {}
+      } catch {}
     }
     requestLocation();
   }, []);
 
+  const defaultLocation = { latitude: 37.5665, longitude: 126.9780 };
+  const currentLocation = location ?? defaultLocation;
+
   const { data: droppings, isLoading: isDroppingLoading } = useDroppings(
-    location ? location.longitude : 0,
-    location ? location.latitude : 0
+    currentLocation.longitude,
+    currentLocation.latitude
   );
 
-  const html = location ? `
+  const html = `
     <!DOCTYPE html>
     <html>
       <head>
@@ -51,47 +48,47 @@ export default function GoogleMapView() {
         <style>
           html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; }
         </style>
-        <script src="https://maps.googleapis.com/maps/api/js?key=${apiKey}"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}"></script>
         <script>
-          var map, marker;
+          var map;
+
           function initMap() {
-            var center = { lat: ${location.latitude}, lng: ${location.longitude} };
+            const center = { lat: ${currentLocation.latitude}, lng: ${currentLocation.longitude} };
+
             map = new google.maps.Map(document.getElementById('map'), {
-              center: center,
+              center,
               zoom: ${MAP_ZOOM},
-              minZoom: ${MAP_ZOOM},
-              maxZoom: ${MAP_ZOOM},
               styles: ${JSON.stringify(MAP_STYLE)},
               disableDefaultUI: true,
-              zoomControl: false,
-              scrollwheel: false,
-              disableDoubleClickZoom: true,
               gestureHandling: 'none'
             });
-            marker = new google.maps.Marker({
+
+            new google.maps.Marker({
               position: center,
-              map: map,
+              map,
               title: '내 위치',
               icon: {
                 url: "${MARKER_STYLES.MY_LOCATION}",
-                scaledSize: new google.maps.Size(40, 40),
-                anchor: new google.maps.Point(20, 20)
+                scaledSize: new google.maps.Size(40, 40)
               }
             });
-            // 40m 반경 원 추가
+
             new google.maps.Circle({
-              strokeColor: "#FFFFFF",   
-              strokeOpacity: 0,      
-              strokeWeight: 0,    
+              strokeColor: "#FFFFFF",
+              strokeOpacity: 0,
+              strokeWeight: 0,
               fillColor: "${PRIMARY_COLORS.DEFAULT}",
               fillOpacity: 0.2,
-              map: map,
-              center: center,
+              map,
+              center,
               radius: ${MAP_RADIUS}
             });
 
-            var droppings = ${JSON.stringify(droppings || [])};
-            droppings.forEach(function(drop) {
+            window.ReactNativeWebView?.postMessage("✅ initMap called");
+          }
+
+          function addDroppings(drops) {
+            drops.forEach(function(drop) {
               new google.maps.Marker({
                 position: { lat: drop.latitude, lng: drop.longitude },
                 map: map,
@@ -103,31 +100,65 @@ export default function GoogleMapView() {
               });
             });
           }
+
+          window.addEventListener('message', function(event) {
+            try {
+              const data = JSON.parse(event.data);
+              if (data.type === 'droppings') {
+                addDroppings(data.payload);
+              }
+            } catch (e) {
+              window.ReactNativeWebView?.postMessage("❌ droppings error: " + e.message);
+            }
+          });
+
+          window.onerror = function(message, source, lineno, colno, error) {
+            window.ReactNativeWebView?.postMessage("❌ JS error: " + message);
+          };
+
+          window.onload = initMap;
         </script>
       </head>
-      <body onload="initMap()">
+      <body>
         <div id="map"></div>
       </body>
     </html>
-  ` : null;
+  `;
+
+  useEffect(() => {
+    if (webviewRef.current && droppings && droppings.length > 0) {
+      webviewRef.current.postMessage(JSON.stringify({ type: 'droppings', payload: droppings }));
+    }
+  }, [droppings]);
+
+  if (!currentLocation) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {html ? (
-        <WebView
-          ref={webviewRef}
-          style={styles.map}
-          originWhitelist={['*']}
-          source={{ html }}
-          javaScriptEnabled={true}
-          domStorageEnabled={true}
-          automaticallyAdjustContentInsets={false}
-          scrollEnabled={false}
-          userAgent="Mozilla/5.0 (iPhone; CPU iPhone OS 18_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1"
-        />
-      ) : (
-        <ActivityIndicator size="large" color="#888" style={{ flex: 1 }} />
-      )}
+      <WebView
+        ref={webviewRef}
+        source={{
+          html,
+          baseUrl: 'https://remedy.test'
+        }}
+        originWhitelist={['*']}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        allowFileAccess={true}
+        allowUniversalAccessFromFileURLs={true}
+        mixedContentMode="always"
+        onMessage={(event) => {
+          console.log('📩 WebView:', event.nativeEvent.data);
+        }}
+        style={styles.map}
+        scrollEnabled={false}
+      />
     </View>
   );
 }
