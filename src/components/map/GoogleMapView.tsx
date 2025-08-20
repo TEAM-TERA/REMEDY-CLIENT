@@ -10,6 +10,7 @@ export default function GoogleMapView() {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const webviewRef = useRef<WebView>(null);
 
+  // 위치 요청
   useEffect(() => {
     async function requestLocation() {
       try {
@@ -20,26 +21,34 @@ export default function GoogleMapView() {
           if (granted !== PermissionsAndroid.RESULTS.GRANTED) return;
         }
         Geolocation.getCurrentPosition(
-          (pos: GeoPosition) => setLocation({
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude
-          }),
-          () => {},
+          (pos: GeoPosition) => {
+            setLocation({
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude
+            });
+          },
+          (error) => {
+            console.warn("Location error", error);
+            setLocation(null);
+          },
           { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
         );
-      } catch {}
+      } catch (e) {
+        console.error("Permission error", e);
+      }
     }
     requestLocation();
   }, []);
 
-  const defaultLocation = { latitude: 37.5665, longitude: 126.9780 };
-  const currentLocation = location ?? defaultLocation;
+  // fallback 위치 (서울)
+  const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
 
-  const { data: droppings, isLoading: isDroppingLoading } = useDroppings(
+  const { data: droppings } = useDroppings(
     currentLocation.longitude,
     currentLocation.latitude
   );
 
+  // 지도 HTML 생성
   const html = `
     <!DOCTYPE html>
     <html>
@@ -113,7 +122,7 @@ export default function GoogleMapView() {
           });
 
           window.onerror = function(message, source, lineno, colno, error) {
-            window.ReactNativeWebView?.postMessage("❌ JS error: " + message);
+            window.ReactNativeWebView?.postMessage("❌ JS Error: " + message);
           };
 
           window.onload = initMap;
@@ -125,41 +134,35 @@ export default function GoogleMapView() {
     </html>
   `;
 
+  // droppings 전달
   useEffect(() => {
-    if (webviewRef.current && droppings && droppings.length > 0) {
+    if (webviewRef.current && droppings) {
       webviewRef.current.postMessage(JSON.stringify({ type: 'droppings', payload: droppings }));
     }
   }, [droppings]);
 
-  if (!currentLocation) {
-    return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
-      </View>
-    );
-  }
-
   return (
-    <View style={styles.container}>
+    <>
+      {!location && (
+        <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
+      )}
       <WebView
+        style={{ flex: 1 }}
         ref={webviewRef}
-        source={{
-          html,
-          baseUrl: 'https://remedy.test'
-        }}
         originWhitelist={['*']}
+        source={{ html, baseUrl: 'https://remedy.test' }}
         javaScriptEnabled={true}
         domStorageEnabled={true}
         allowFileAccess={true}
         allowUniversalAccessFromFileURLs={true}
         mixedContentMode="always"
-        onMessage={(event) => {
-          console.log('📩 WebView:', event.nativeEvent.data);
-        }}
-        style={styles.map}
+        geolocationEnabled={true}
         scrollEnabled={false}
+        onMessage={(event) => {
+          console.log('📩 WebView says:', event.nativeEvent.data);
+        }}
       />
-    </View>
+    </>
   );
 }
 
