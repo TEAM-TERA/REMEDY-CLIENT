@@ -6,11 +6,7 @@ import HeaderBar from "../components/HeaderBar";
 
 function HomeScreen(){
     return(
-        <SafeAreaView style = {styles.container}>
-            <HeaderBar></HeaderBar>
-            <GoogleMapView></GoogleMapView>
-            <MainFunction></MainFunction>
-        </SafeAreaView>
+        <GoogleMapView></GoogleMapView>
     )
 }
 

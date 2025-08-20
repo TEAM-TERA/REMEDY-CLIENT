@@ -7,18 +7,16 @@ import ProfileStack from './ProfileStack';
 import AuthStack from './AuthStack';
 import HomeScreen from '../modules/home/pages/HomeScreen';
 
-import GoogleMapView from '../components/map/GoogleMapView';
-
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigation() {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home">
-        <Stack.Screen name = "Home" component = {HomeScreen} options={{ headerShown: false }}/>
-        <Stack.Screen name = "Auth" component = {AuthStack} options={{ headerShown: false }}/>
-        <Stack.Screen name = "Profile" component = {ProfileStack} options={{ headerShown: false }} />
-        <Stack.Screen name = "Drop" component = {DropStack} options={{ headerShown: false }} />
+        <Stack.Screen name = "Home" component = {HomeScreen}/>
+        <Stack.Screen name = "Auth" component = {AuthStack}/>
+        <Stack.Screen name = "Profile" component = {ProfileStack} />
+        <Stack.Screen name = "Drop" component = {DropStack} />
       </Stack.Navigator>
     </NavigationContainer>
   );
