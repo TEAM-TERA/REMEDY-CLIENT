@@ -26,11 +26,11 @@ export const AuthProvider = ({ children } : AuthProviderProps) => {
   const login = async (token: string) => {
     try {
       if (!token || typeof token !== 'string') {
-        console.warn('[Auth] invalid token:', token);
+        console.warn('[Auth] invalid token:');
         return;
       }
-      setUserToken(token);
       await AsyncStorage.setItem('userToken', token);
+      setUserToken(token);
       console.log('[Auth] token saved');
     } catch (e) {
       console.error('[Auth] save token failed:', e);
