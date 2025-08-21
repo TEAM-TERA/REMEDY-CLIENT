@@ -7,6 +7,7 @@ import Button from "../../../components/button/Button";
 import HeaderNav from "../components/HeaderNav/HeaderNav";
 import { AuthContext } from "../auth-context";
 import { useLogin } from "../hooks/useLogin";
+import { useAppNavigation } from "../../../hooks/navigation/useAppNavigation";
 
 function LoginScreen() {
   const { login, isLoading } = useContext(AuthContext);
@@ -14,6 +15,7 @@ function LoginScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const loginMutation = useLogin();
+  const navigation = useAppNavigation();
 
   const handleLogin = () => {
     setError(null);
@@ -22,6 +24,8 @@ function LoginScreen() {
         {
             onSuccess : async (accssToken) => {
                 await login(accssToken);
+                console.log("로그인 완료");
+                navigation.navigate('Home');
             },
             onError : (err : any) => {
                 console.error('Login error:', err);
