@@ -11,6 +11,8 @@
 	<string>이 앱이 사용자의 위치를 사용하려고 합니다.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>이 앱이 사용자의 위치를 항상 사용하려고 합니다.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>이 앱이 항상 사용자의 위치를 사용합니다.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
