@@ -23,7 +23,7 @@ export const TERTIARY_COLORS = {
 }
 
 export const BACKGROUND_COLORS = {
-    BACKGROUND : "#111118",
+    BACKGROUND : "#0D0E16",
     BACKGROUND_RED : "#130309",
     BACKGROUND_BLUE : "#070313",
 }
