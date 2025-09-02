@@ -93,7 +93,7 @@ export default function GoogleMapView() {
               radius: ${MAP_RADIUS}
             });
 
-            window.ReactNativeWebView?.postMessage("✅ initMap called");
+            window.ReactNativeWebView?.postMessage("initMap called");
           }
 
           function addDroppings(drops) {
@@ -117,12 +117,12 @@ export default function GoogleMapView() {
                 addDroppings(data.payload);
               }
             } catch (e) {
-              window.ReactNativeWebView?.postMessage("❌ droppings error: " + e.message);
+              window.ReactNativeWebView?.postMessage("droppings error: " + e.message);
             }
           });
 
           window.onerror = function(message, source, lineno, colno, error) {
-            window.ReactNativeWebView?.postMessage("❌ JS Error: " + message);
+            window.ReactNativeWebView?.postMessage("JS Error: " + message);
           };
 
           window.onload = initMap;
@@ -159,7 +159,7 @@ export default function GoogleMapView() {
         geolocationEnabled={true}
         scrollEnabled={false}
         onMessage={(event) => {
-          console.log('📩 WebView says:', event.nativeEvent.data);
+          console.log('WebView says:', event.nativeEvent.data);
         }}
       />
     </>
