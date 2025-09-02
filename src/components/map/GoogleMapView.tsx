@@ -5,6 +5,8 @@ import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
 import { PRIMARY_COLORS } from '../../constants/colors';
 import { MAP_RADIUS, MAP_ZOOM, MAP_STYLE, MARKER_STYLES, GOOGLE_MAPS_API_KEY } from '../../constants/map';
 import { useDroppings } from '../../modules/drop/hooks/useDroppings';
+import { Linking } from 'react-native';
+
 
 export default function GoogleMapView() {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -14,31 +16,48 @@ export default function GoogleMapView() {
   useEffect(() => {
     async function requestLocation() {
       try {
+        let enableHighAccuracy = true;
+  
         if (Platform.OS === 'android') {
-          const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION
-          );
-          if (granted !== PermissionsAndroid.RESULTS.GRANTED) return;
+          const res = await PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+            PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
+          ]);
+          const fineGranted   = res[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] === PermissionsAndroid.RESULTS.GRANTED;
+          const coarseGranted = res[PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION] === PermissionsAndroid.RESULTS.GRANTED;
+          if (!fineGranted && !coarseGranted) {
+            Linking.openSettings();
+            return;
+          }
+          enableHighAccuracy = fineGranted;
+        } else {
+          const auth = await Geolocation.requestAuthorization('whenInUse'); 
+          if (auth !== 'granted') return;
         }
+  
         Geolocation.getCurrentPosition(
-          (pos: GeoPosition) => {
-            setLocation({
-              latitude: pos.coords.latitude,
-              longitude: pos.coords.longitude
-            });
+          (pos) => {
+            setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
           },
           (error) => {
-            console.warn("Location error", error);
+            console.warn('Location error', error);
             setLocation(null);
           },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+          {
+            enableHighAccuracy, 
+            timeout: 15000,
+            maximumAge: 10000,
+            forceRequestLocation: true,     
+            showLocationDialog: true,     
+          }
         );
       } catch (e) {
-        console.error("Permission error", e);
+        console.error('Permission error', e);
       }
     }
     requestLocation();
   }, []);
+  
 
   // fallback 위치 (서울)
   const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
