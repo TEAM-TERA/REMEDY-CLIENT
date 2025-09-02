@@ -1,44 +1,83 @@
-import { Dropping } from "../types/musicList";
+import { Dropping } from '../types/musicList';
 
-
-export const musicList : {droppings : Dropping[]} = {
-    "droppings" : [
-      {
-        "droppingId": "64f1c2e1a8b9c7d6e5f4g3h1",
-        "userId": 12345,
-        "title" : "좋은날",
-        "songId": "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
-        "latitude": 35.08,
-        "longitude": 127.22,
-        "address": "부산광역시 해운대구"
-      },
-      {
-        "droppingId": "64f1c2e1a8b9c7d6e5f4g3h2",
-        "userId": 12345,
-        "title" : "좋은날",
-        "songId": "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
-        "latitude": 35.08,
-        "longitude": 127.22,
-        "address": "부산광역시 해운대구"
-      },
-      {
-        "droppingId": "64f1c2e1a8b9c7d6e5f4g3h3",
-        "userId": 12345,
-        "title" : "좋은날",
-        "songId": "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
-        "latitude": 35.08,
-        "longitude": 127.22,
-        "address": "부산광역시 해운대구"
-      },
-      {
-        "droppingId": "64f1c2e1a8b9c7d6e5f4g3h4",
-        "userId": 12345,
-        "title" : "좋은날",
-        "songId": "spotify:track:4iV5W9uYEdYUVa79Axb7Rh",
-        "latitude": 35.08,
-        "longitude": 127.22,
-        "address": "부산광역시 해운대구"
-      }
-    ]
-  }
-  
+export const musicList: { droppings: Dropping[] } = {
+    droppings: [
+        {
+            droppingId: '64f1c2e1a8b9c7d6e5f4g3h1',
+            userId: 12345,
+            title: '좋은날',
+            singer: '아이유',
+            songId: 'spotify:track:4iV5W9uYEdYUVa79Axb7Rh',
+            latitude: 35.08,
+            longitude: 127.22,
+            address: '부산광역시 해운대구',
+            imageSource: require('../../../assets/images/good-day.jpg'),
+        },
+        {
+            droppingId: '64f1c2e1a8b9c7d6e5f4g3h2',
+            userId: 12345,
+            title: 'LILAC',
+            singer: '아이유',
+            songId: 'spotify:track:4iV5W9uYEdYUVa79Axb7Rh',
+            latitude: 35.08,
+            longitude: 127.22,
+            address: '부산광역시 강서구',
+            imageSource: require('../../../assets/images/lilac.jpg'),
+        },
+        {
+            droppingId: '64f1c2e1a8b9c7d6e5f4g3h3',
+            userId: 12345,
+            title: 'Hot 뜨거',
+            singer: '원타임',
+            songId: 'spotify:track:4iV5W9uYEdYUVa79Axb7Rh',
+            latitude: 35.08,
+            longitude: 127.22,
+            address: '부산광역시 강동구',
+            imageSource: require('../../../assets/images/hot.jpg'),
+        },
+        {
+            droppingId: '64f1c2e1a8b9c7d6e5f4g3h4',
+            userId: 12345,
+            title: '복숭아',
+            singer: '아이유',
+            songId: 'spotify:track:4iV5W9uYEdYUVa79Axb7Rh',
+            latitude: 35.08,
+            longitude: 127.22,
+            address: '부산광역시 사상구',
+            imageSource: require('../../../assets/images/peach.jpg'),
+        },
+        {
+            droppingId: '64f1c2e1a8b9c7d6e5f4g3h4',
+            userId: 12345,
+            title: '마지막처럼',
+            singer: '블랙핑크',
+            songId: 'spotify:track:4iV5W9uYEdYUVa79Axb7Rh',
+            latitude: 35.08,
+            longitude: 127.22,
+            address: '부산광역시 사하구',
+            imageSource: require('../../../assets/images/last.jpg'),
+        },
+        {
+            droppingId: '64f1c2e1a8b9c7d6e5f4g3h4',
+            userId: 12345,
+            title: '가을 아침',
+            singer: '아이유',
+            songId: 'spotify:track:4iV5W9uYEdYUVa79Axb7Rh',
+            latitude: 35.08,
+            longitude: 127.22,
+            address: '부산광역시 동래구',
+            imageSource: require('../../../assets/images/autumn-morning.jpg'),
+        },
+        {
+            droppingId: '64f1c2e1a8b9c7d6e5f4g3h4',
+            userId: 12345,
+            title: '선물',
+            singer: '멜로망스',
+            songId: 'spotify:track:4iV5W9uYEdYUVa79Axb7Rh',
+            latitude: 35.08,
+            longitude: 127.22,
+            address: '부산광역시 부산진구',
+            imageSource: require('../../../assets/images/gift.jpg'),
+        },
+    ],
+};
