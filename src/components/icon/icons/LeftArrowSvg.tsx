@@ -1,9 +1,11 @@
 import React from 'react';
 import Svg, { Path, SvgProps } from 'react-native-svg';
+import { Pressable } from 'react-native';
 
 const LeftArrowSvg = (props: SvgProps) => {
     return (
-        <Svg width={20} height={20} viewBox="0 0 20 20" fill="none" {...props}>
+        <Pressable>
+            <Svg width={20} height={20} viewBox="0 0 20 20" fill="none" {...props}>
             <Path
                 fillRule="evenodd"
                 clipRule="evenodd"
@@ -11,6 +13,8 @@ const LeftArrowSvg = (props: SvgProps) => {
                 fill={props.color || "white"}
             />
         </Svg>
+        </Pressable>
+        
     );
 };
 
