@@ -3,19 +3,22 @@ import { scale } from '../../../../utils/scalers';
 
 export const styles = StyleSheet.create({
   container: {
-    width: scale(19.625),
-    height: scale(21.375),
+    width: scale(300),
+    height: scale(300),
     position: 'absolute',
-    right: scale(-7.5),
-    bottom: scale(-10.5),
+    left: '92%',
+    bottom: scale(-140), 
+    transform: [{ translateX: -scale(150) }],
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    borderRadius: scale(9.8125),
+    borderRadius: scale(150),
+    zIndex: 10,
+    elevation: 10,
   },
   nodeGroup: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    top: -30,
+    top: -50,
   },
 });
