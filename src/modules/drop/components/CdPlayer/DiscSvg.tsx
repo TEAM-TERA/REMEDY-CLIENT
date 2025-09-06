@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import Svg, { Defs, Filter, FeFlood, FeColorMatrix, FeMorphology, FeOffset, FeGaussianBlur, FeComposite, FeBlend, G, Circle, ClipPath, Image as SvgImage } from "react-native-svg";
 
-function DiscSvg({ imageUrl }: { imageUrl?: string }) {
-  const [tilt, setTilt] = useState(0);
+function DiscSvg({ imageUrl, tilt = 0 }: { imageUrl?: string, tilt?: number }) {
+  // const [tilt, setTilt] = useState(0);
   // const reqRef = useRef<number | null>(null);
 
   // useEffect(() => {
