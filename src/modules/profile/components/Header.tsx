@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text } from 'react-native';
 import BackButton from './BackButton';
-import { styles as nameEditScreen } from '../styles/NameEditScreen';
+import { styles } from '../styles/NameEditScreen';
 import { HeaderProps } from '../types/Header';
 
 function Header({

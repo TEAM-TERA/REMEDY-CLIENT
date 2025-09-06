@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { TEXT_COLORS } from '../../../constants/colors';
 import infoEditScreen from '../styles/infoEditScreen';
 import { DateInputProps } from '../types/InfoEdit';

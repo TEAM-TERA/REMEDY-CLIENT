@@ -8,7 +8,7 @@ import { TEXT_COLORS } from '../../../constants/colors';
 import userProfileScreen from '../styles/userProfileScreen';
 import Header from '../components/Header';
 import DropItem from '../components/DropItem';
-import { dropMockData, likeMockData } from '../utils/mockData';
+import { dropMockData, likeMockData } from '../datas/mockData';
 import Icon from '../../../components/icon/Icon';
 
 function UserProfileScreen() {
