@@ -19,7 +19,7 @@ export default function RootNavigation() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName={userToken ? "Home" : "Auth"}>
+      <Stack.Navigator initialRouteName={"Home"}>
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Auth" component={AuthStack} options={{ headerShown: false }}/>
         <Stack.Screen name="Profile" component={ProfileStack} />
