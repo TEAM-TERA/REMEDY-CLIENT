@@ -25,7 +25,10 @@ function LoginScreen() {
             onSuccess : async (accssToken) => {
                 await login(accssToken);
                 console.log("로그인 완료");
-                navigation.navigate('Home');
+                navigation.reset({
+                  index: 0,
+                  routes: [{ name: 'Home' }],
+                });
             },
             onError : (err : any) => {
                 console.error('Login error:', err);
