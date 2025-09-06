@@ -1,10 +1,18 @@
 import React from 'react';
 import Svg, { Path, SvgProps } from 'react-native-svg';
 import { Pressable } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const LeftArrowSvg = (props: SvgProps) => {
+    
+    const navigation = useNavigation();
+
     return (
-        <Pressable>
+        <Pressable
+            onPress={() => navigation.goBack()}
+            hitSlop={12}
+            style={{ padding: 6 }}
+        >
             <Svg width={20} height={20} viewBox="0 0 20 20" fill="none" {...props}>
             <Path
                 fillRule="evenodd"
