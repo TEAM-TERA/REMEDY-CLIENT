@@ -3,8 +3,14 @@ import { styles } from "../../styles/HeaderBar/Headerbar";
 import Profile from "./Profile";
 import { scale } from "../../../../utils/scalers";
 import { TYPOGRAPHY } from "../../../../constants/typography";
+import { useNavigation } from "@react-navigation/native";
 
 function HeaderBar() {
+
+  const navigation = useNavigation();
+  const pressHandlerProfile = ()=>{
+    navigation.navigate("Profile");
+  }
   return (
     <SafeAreaView>
     <View style={styles.container}>
@@ -17,7 +23,9 @@ function HeaderBar() {
           </View>
         </View>
       </View>
-      <TouchableOpacity style={styles.menuButton}>
+      <TouchableOpacity 
+        onPress={pressHandlerProfile}
+        style={styles.menuButton}>
         <View style={styles.hamburgerLine} />
         <View style={styles.hamburgerLine} />
         <View style={styles.hamburgerLine} />
