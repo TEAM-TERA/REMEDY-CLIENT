@@ -1,4 +1,4 @@
-import { Image, View } from "react-native";
+import { View } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import { styles } from "./styles";
 import CircleSvg from "../CircleSvg/CircleSvg";
@@ -25,9 +25,9 @@ function CdPlayer() {
             <DiscSvg
                 imageUrl = "https://entertainimg.kbsmedia.co.kr/cms/uploads/CONTENTS_20230425095757_b457a570577d7444e7cef5c0a6e73bd7.png"
                 tilt = {tilt}
-            ></DiscSvg>
-            <CircleSvg></CircleSvg>
-            <CircleBlurSvg></CircleBlurSvg>
+            />
+            <CircleSvg />
+            <CircleBlurSvg />
         </View>
     )
 }
