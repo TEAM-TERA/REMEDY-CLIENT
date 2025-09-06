@@ -24,6 +24,8 @@ function HeaderBar() {
         </View>
       </View>
       <TouchableOpacity 
+        accessibilityRole="button"
+        accessibilityLabel="프로필 메뉴 열기"
         onPress={pressHandlerProfile}
         style={styles.menuButton}>
         <View style={styles.hamburgerLine} />
