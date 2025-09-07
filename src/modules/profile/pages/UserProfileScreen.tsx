@@ -10,6 +10,7 @@ import styles from '../styles/userProfileScreen';
 import Header from '../components/Header';
 import DropItem from '../components/DropItem';
 import Icon from '../../../components/icon/Icon';
+import Button from '../../../components/button/Button';
 import { useMyProfile } from '../hooks/useMyProfile';
 
 function UserProfileScreen() {
@@ -26,6 +27,10 @@ function UserProfileScreen() {
     const handleSettingPress = () => {
         navigation.navigate('Setting');
     };
+
+    const handleRefetchProfile = () => {
+        refetch();
+    }
     
     if(isLoading){
         return (
@@ -35,6 +40,17 @@ function UserProfileScreen() {
                 <Text style={{ marginTop: 8 }}>프로필 정보를 불러오고 있습니다!</Text>
               </View>
             </SafeAreaView>
+        );
+    }
+
+    if (isError) {
+        return (
+          <SafeAreaView style={styles.safeAreaView}>
+            <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+              <Text>프로필 정보를 가져오는데 실패했어요!.</Text>
+              <Button title = "다시 시도하기" onPress = {handleRefetchProfile}></Button>
+            </View>
+          </SafeAreaView>
         );
     }
 
