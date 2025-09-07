@@ -81,7 +81,7 @@ function UserProfileScreen() {
                     </View>
                     <View style={styles.profileNameContainer}>
                         <Text style={styles.userNameText}>
-                            User_1
+                            {me?.username ?? '테스트'}
                         </Text>
                         <TouchableOpacity onPress={handleEditPress}>
                             <Icon
