@@ -1,21 +1,25 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../types/navigation';
 import { TEXT_COLORS } from '../../../constants/colors';
-import userProfileScreen from '../styles/userProfileScreen';
+import { dropMockData, likeMockData } from '../datas/mockData';
+import styles from '../styles/userProfileScreen';
 import Header from '../components/Header';
 import DropItem from '../components/DropItem';
-import { dropMockData, likeMockData } from '../datas/mockData';
 import Icon from '../../../components/icon/Icon';
+import Button from '../../../components/button/Button';
+import { useMyProfile } from '../hooks/useMyProfile';
 
 function UserProfileScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
     const [activeTab, setActiveTab] = useState<'drop' | 'like'>('drop');
-
     const currentData = activeTab === 'drop' ? dropMockData : likeMockData;
+    const defaultProfileImg = require('../../../assets/images/profileImage.png');
+
+    const {data : me, isLoading, isError, refetch, isFetching } = useMyProfile();
 
     const handleEditPress = () => {
         navigation.navigate('NameEdit');
@@ -25,9 +29,35 @@ function UserProfileScreen() {
         navigation.navigate('Setting');
     };
 
+    const handleRefetchProfile = () => {
+        refetch();
+    }
+    
+    if(isLoading){
+        return (
+            <SafeAreaView style={styles.safeAreaView}>
+              <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+                <ActivityIndicator />
+                <Text style={{ marginTop: 8 }}>프로필 정보를 불러오고 있습니다!</Text>
+              </View>
+            </SafeAreaView>
+        );
+    }
+
+    if (isError) {
+        return (
+          <SafeAreaView style={styles.safeAreaView}>
+            <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
+              <Text>프로필 정보를 가져오는데 실패했어요!.</Text>
+              <Button title = "다시 시도하기" onPress = {handleRefetchProfile}></Button>
+            </View>
+          </SafeAreaView>
+        );
+    }
+
     return (
-        <SafeAreaView style={userProfileScreen.safeAreaView}>
-            <View style={userProfileScreen.container}>
+        <SafeAreaView style={styles.safeAreaView}>
+            <View style={styles.container}>
                 <Header
                     title="프로필"
                     rightComponent={
@@ -41,17 +71,17 @@ function UserProfileScreen() {
                         </TouchableOpacity>
                     }
                 />
-                <View style={userProfileScreen.profileContainer}>
+                <View style={styles.profileContainer}>
                     <Image
-                        source={require('../../../assets/images/profileImage.png')}
-                        style={userProfileScreen.profileImage}
+                        source={me?.profileImageUrl ? {uri : me.profileImageUrl} : defaultProfileImg}
+                        style={styles.profileImage}
                     />
-                    <View style={userProfileScreen.aliasContainer}>
-                        <Text style={userProfileScreen.aliasText}>모험가</Text>
+                    <View style={styles.aliasContainer}>
+                        <Text style={styles.aliasText}>모험가</Text>
                     </View>
-                    <View style={userProfileScreen.profileNameContainer}>
-                        <Text style={userProfileScreen.userNameText}>
-                            User_1
+                    <View style={styles.profileNameContainer}>
+                        <Text style={styles.userNameText}>
+                            {me?.username ?? '테스트'}
                         </Text>
                         <TouchableOpacity onPress={handleEditPress}>
                             <Icon
@@ -64,17 +94,17 @@ function UserProfileScreen() {
                     </View>
                 </View>
 
-                <View style={userProfileScreen.tabContainer}>
-                    <View style={userProfileScreen.nav}>
+                <View style={styles.tabContainer}>
+                    <View style={styles.nav}>
                         <TouchableOpacity
                             onPress={() => setActiveTab('drop')}
                             activeOpacity={1}
                         >
                             <Text
                                 style={[
-                                    userProfileScreen.navText,
+                                    styles.navText,
                                     activeTab === 'drop' &&
-                                        userProfileScreen.navTextActive,
+                                        styles.navTextActive,
                                 ]}
                             >
                                 드랍
@@ -86,9 +116,9 @@ function UserProfileScreen() {
                         >
                             <Text
                                 style={[
-                                    userProfileScreen.navText,
+                                    styles.navText,
                                     activeTab === 'like' &&
-                                        userProfileScreen.navTextActive,
+                                        styles.navTextActive,
                                 ]}
                             >
                                 좋아요
