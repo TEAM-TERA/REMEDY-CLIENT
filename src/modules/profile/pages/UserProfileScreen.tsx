@@ -6,7 +6,7 @@ import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../types/navigation';
 import { TEXT_COLORS } from '../../../constants/colors';
 import { dropMockData, likeMockData } from '../datas/mockData';
-import userProfileScreen from '../styles/userProfileScreen';
+import styles from '../styles/userProfileScreen';
 import Header from '../components/Header';
 import DropItem from '../components/DropItem';
 import Icon from '../../../components/icon/Icon';
@@ -27,10 +27,10 @@ function UserProfileScreen() {
         navigation.navigate('Setting');
     };
     
-    if(!isLoading){
+    if(isLoading){
         return (
-            <SafeAreaView style={userProfileScreen.safeAreaView}>
-              <View style={[userProfileScreen.container, { alignItems: 'center', justifyContent: 'center' }]}>
+            <SafeAreaView style={styles.safeAreaView}>
+              <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
                 <ActivityIndicator />
                 <Text style={{ marginTop: 8 }}>프로필 정보를 불러오고 있습니다!</Text>
               </View>
@@ -39,8 +39,8 @@ function UserProfileScreen() {
     }
 
     return (
-        <SafeAreaView style={userProfileScreen.safeAreaView}>
-            <View style={userProfileScreen.container}>
+        <SafeAreaView style={styles.safeAreaView}>
+            <View style={styles.container}>
                 <Header
                     title="프로필"
                     rightComponent={
@@ -54,16 +54,16 @@ function UserProfileScreen() {
                         </TouchableOpacity>
                     }
                 />
-                <View style={userProfileScreen.profileContainer}>
+                <View style={styles.profileContainer}>
                     <Image
                         source={require('../../../assets/images/profileImage.png')}
-                        style={userProfileScreen.profileImage}
+                        style={styles.profileImage}
                     />
-                    <View style={userProfileScreen.aliasContainer}>
-                        <Text style={userProfileScreen.aliasText}>모험가</Text>
+                    <View style={styles.aliasContainer}>
+                        <Text style={styles.aliasText}>모험가</Text>
                     </View>
-                    <View style={userProfileScreen.profileNameContainer}>
-                        <Text style={userProfileScreen.userNameText}>
+                    <View style={styles.profileNameContainer}>
+                        <Text style={styles.userNameText}>
                             User_1
                         </Text>
                         <TouchableOpacity onPress={handleEditPress}>
@@ -77,17 +77,17 @@ function UserProfileScreen() {
                     </View>
                 </View>
 
-                <View style={userProfileScreen.tabContainer}>
-                    <View style={userProfileScreen.nav}>
+                <View style={styles.tabContainer}>
+                    <View style={styles.nav}>
                         <TouchableOpacity
                             onPress={() => setActiveTab('drop')}
                             activeOpacity={1}
                         >
                             <Text
                                 style={[
-                                    userProfileScreen.navText,
+                                    styles.navText,
                                     activeTab === 'drop' &&
-                                        userProfileScreen.navTextActive,
+                                        styles.navTextActive,
                                 ]}
                             >
                                 드랍
@@ -99,9 +99,9 @@ function UserProfileScreen() {
                         >
                             <Text
                                 style={[
-                                    userProfileScreen.navText,
+                                    styles.navText,
                                     activeTab === 'like' &&
-                                        userProfileScreen.navTextActive,
+                                        styles.navTextActive,
                                 ]}
                             >
                                 좋아요
