@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
@@ -26,6 +26,17 @@ function UserProfileScreen() {
     const handleSettingPress = () => {
         navigation.navigate('Setting');
     };
+    
+    if(!isLoading){
+        return (
+            <SafeAreaView style={userProfileScreen.safeAreaView}>
+              <View style={[userProfileScreen.container, { alignItems: 'center', justifyContent: 'center' }]}>
+                <ActivityIndicator />
+                <Text style={{ marginTop: 8 }}>프로필 정보를 불러오고 있습니다!</Text>
+              </View>
+            </SafeAreaView>
+        );
+    }
 
     return (
         <SafeAreaView style={userProfileScreen.safeAreaView}>
