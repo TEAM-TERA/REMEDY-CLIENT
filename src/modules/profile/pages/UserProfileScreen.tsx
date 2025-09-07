@@ -16,8 +16,9 @@ import { useMyProfile } from '../hooks/useMyProfile';
 function UserProfileScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
     const [activeTab, setActiveTab] = useState<'drop' | 'like'>('drop');
-
     const currentData = activeTab === 'drop' ? dropMockData : likeMockData;
+    const defaultProfileImg = require('../../../assets/images/profileImage.png');
+
     const {data : me, isLoading, isError, refetch, isFetching } = useMyProfile();
 
     const handleEditPress = () => {
