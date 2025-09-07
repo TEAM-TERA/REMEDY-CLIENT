@@ -73,7 +73,7 @@ function UserProfileScreen() {
                 />
                 <View style={styles.profileContainer}>
                     <Image
-                        source={require('../../../assets/images/profileImage.png')}
+                        source={me?.profileImageUrl ? {uri : me.profileImageUrl} : defaultProfileImg}
                         style={styles.profileImage}
                     />
                     <View style={styles.aliasContainer}>
