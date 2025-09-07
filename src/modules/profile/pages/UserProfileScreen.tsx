@@ -5,17 +5,19 @@ import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../types/navigation';
 import { TEXT_COLORS } from '../../../constants/colors';
+import { dropMockData, likeMockData } from '../datas/mockData';
 import userProfileScreen from '../styles/userProfileScreen';
 import Header from '../components/Header';
 import DropItem from '../components/DropItem';
-import { dropMockData, likeMockData } from '../datas/mockData';
 import Icon from '../../../components/icon/Icon';
+import { useMyProfile } from '../hooks/useMyProfile';
 
 function UserProfileScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
     const [activeTab, setActiveTab] = useState<'drop' | 'like'>('drop');
 
     const currentData = activeTab === 'drop' ? dropMockData : likeMockData;
+    const {data : me, isLoading, isError, refetch, isFetching } = useMyProfile();
 
     const handleEditPress = () => {
         navigation.navigate('NameEdit');
