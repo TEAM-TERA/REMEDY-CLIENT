@@ -21,4 +21,9 @@ export const styles = StyleSheet.create({
     position: 'relative',
     top: -50,
   },
+  dropButtonWrapper: {
+    position: 'absolute',
+    bottom: 120,
+    alignSelf: 'center',
+  },
 });
