@@ -41,7 +41,6 @@ function DropScreen() {
     }).catch(e => console.warn('preview error', e));
   }, [previewUrl, musicTitle, singer, imgUrl]);
 
-  // 드롭핑 생성
   const handleCreateDropping = () => {
     if (!userToken) {
       Alert.alert('로그인 필요', '드롭핑을 생성하려면 로그인이 필요합니다.');
@@ -49,9 +48,9 @@ function DropScreen() {
     }
     createDroppingMutation.mutate(
       {
-        songId: 'test',         // TODO: 선택한 곡의 실제 ID로 교체
+        songId: 'test',
         content: content.trim(),
-        latitude: 35,           // TODO: 현재 지도/위치 값으로 교체
+        latitude: 35, 
         longitude: 127,
         address: location,
       },
@@ -76,9 +75,6 @@ function DropScreen() {
           <Text style={[TYPOGRAPHY.HEADLINE_1, styles.titleText]}>{musicTitle}</Text>
           <Text style={[TYPOGRAPHY.SUBTITLE, styles.singerText]}>{singer}</Text>
         </View>
-
-        {/* ✅ PlayBar에 현재 진행도/전체 길이 전달
-            - Spotify preview는 30초가 많지만, duration 훅 값이 우선 */}
         <PlayBar
           currentTime={Math.floor(position)}
           musicTime={Math.floor(duration || musicTime || 30)}

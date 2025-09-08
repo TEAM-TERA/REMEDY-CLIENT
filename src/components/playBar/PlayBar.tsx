@@ -7,7 +7,7 @@ import formatTime from "../../modules/drop/utils/formatTime";
 import { PlayBarProps } from "../../modules/drop/types/PlayBar";
 import PlaySvg from "./PlaySvg";
 
-function PlayBar({currentTime, musicTime, onSeek} : PlayBarProps){
+function PlayBar({currentTime, musicTime, onSeek, } : PlayBarProps){
     return(
         <View style = {styles.container}>
             <PlaySvg></PlaySvg>
