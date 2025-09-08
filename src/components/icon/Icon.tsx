@@ -1,5 +1,4 @@
 import React from 'react';
-import { SvgProps } from 'react-native-svg';
 import EditSvg from './icons/EditSvg';
 import LeftArrowSvg from './icons/LeftArrowSvg';
 import LocationSvg from './icons/LocationSvg';
@@ -7,6 +6,8 @@ import SettingSvg from './icons/SettingSvg';
 import CalendarSvg from './icons/CalendarSvg';
 import HeartSvg from './icons/HeartSvg';
 import RightArrowSvg from './icons/RightArrowSvg';
+import ChatSvg from './icons/ChatSvg';
+import LikeSvg from './icons/LikeSvg';
 
 const icons = {
     edit: EditSvg,
@@ -16,6 +17,8 @@ const icons = {
     calendar: CalendarSvg,
     heart: HeartSvg,
     right: RightArrowSvg,
+    chat: ChatSvg,
+    like: LikeSvg,
 };
 
 type IconName = keyof typeof icons;
