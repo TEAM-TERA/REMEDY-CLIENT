@@ -22,12 +22,18 @@ export async function searchTracks(q: string, signal?: AbortSignal): Promise<Spo
   });
 
   const items = (data?.tracks?.items ?? []) as any[];
-  return items.map((t) => ({
-    id: t.id,
-    title: t.name,
-    artist: t.artists?.map((a: any) => a.name).join(', ') ?? '',
-    duration: Math.round((t.duration_ms ?? 0) / 1000),
-    imageUrl: t.album?.images?.[0]?.url,
-    previewUrl: t.preview_url ?? undefined,
-  }));
+  const playable = items.filter((t) => !!t.preview_url);
+
+  return playable.map((t) => {
+    const imgs = t.album?.images ?? [];
+    const imageUrl = imgs[1]?.url || imgs[0]?.url || imgs[2]?.url;
+    return {
+      id: t.id,
+      title: t.name,
+      artist: t.artists?.map((a: any) => a.name).join(', ') ?? '',
+      duration: Math.round((t.duration_ms ?? 0) / 1000),
+      imageUrl,
+      previewUrl: t.preview_url,
+    } as SpotifyTrack;
+  });
 }
