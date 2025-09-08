@@ -74,7 +74,7 @@ function DropSearchScreen(){
                             key={item.id}
                             musicTitle={item.title}
                             singer={item.artist}
-                            imgUrl={""}
+                            imgUrl={item.imageUrl ?? ""}
                             onPress={() =>
                                 navigation.navigate("DropDetail", {
                                     musicTitle: item.title,
