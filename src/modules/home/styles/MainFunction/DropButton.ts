@@ -3,7 +3,7 @@ import { Platform, StyleSheet } from 'react-native';
 export const DROP = '#FF2D55';
 export const DROP_DIM = 'rgba(255,45,85,0.28)';
 export const SIZE = 140;
-export const INNER = 88;
+export const INNER = 120;
 
 export const styles = StyleSheet.create({
   container: {
