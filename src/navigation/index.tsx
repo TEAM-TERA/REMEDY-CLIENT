@@ -22,8 +22,8 @@ export default function RootNavigation() {
       <Stack.Navigator initialRouteName={userToken ? "Home" : "Auth"}>
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
         <Stack.Screen name="Auth" component={AuthStack} options={{ headerShown: false }}/>
-        <Stack.Screen name="Profile" component={ProfileStack} />
-        <Stack.Screen name="Drop" component={DropStack} />
+        <Stack.Screen name="Profile" component={ProfileStack} options={{ headerShown: false }} />
+        <Stack.Screen name="Drop" component={DropStack} options={{ headerShown : false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
