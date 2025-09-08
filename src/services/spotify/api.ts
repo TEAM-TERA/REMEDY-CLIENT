@@ -9,6 +9,7 @@ export type SpotifyTrack = {
   artist: string;
   duration: number;
   imageUrl?: string;
+  previewUrl?: string;
 };
 
 export async function searchTracks(q: string, signal?: AbortSignal): Promise<SpotifyTrack[]> {

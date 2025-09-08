@@ -4,4 +4,5 @@ export type DropScreenProps = {
     musicTime : number;
     location : string;
     imgUrl?: string;
+    previewUrl?: string;
 };
