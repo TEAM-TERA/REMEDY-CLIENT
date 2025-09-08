@@ -5,7 +5,7 @@ import { TYPOGRAPHY } from "../../../constants/typography";
 import { TEXT_COLORS } from "../../../constants/colors";
 import { DropScreenProps } from "../types/DropScreen";
 import PlayBar from "../../../components/playBar/PlayBar";
-import CdPlayer from "../components/CdPlayer/CdPlayer";
+import CdPlayer from "../../../components/cdPlayer/CdPlayer";
 import LocationMarkerSvg from "../components/LocationMarker/LocationMarkerSvg";
 import GoogleMapView from "../../../components/map/GoogleMapView";
 import { useRoute, RouteProp } from "@react-navigation/native";
