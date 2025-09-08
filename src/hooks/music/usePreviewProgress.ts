@@ -7,18 +7,23 @@ export function usePreviewProgress(pollMs = 250) {
 
   useEffect(() => {
     let mounted = true;
-    const tick = async () => {
-      const [p, d] = await Promise.all([getPosition(), getDuration()]);
-      if (mounted) {
-        setPosition(p || 0);
-        if (d) setDuration(d);
+    const interval = setInterval(async () => {
+      try {
+        const pos = await getPosition();
+        const dur = await getDuration();
+
+        if (mounted) {
+          setPosition(pos ?? 0);
+          setDuration(dur ?? 30);
+        }
+      } catch (e) {
+        console.warn('Failed to get progress:', e);
       }
-    };
-    tick();
-    const id = setInterval(tick, pollMs);
+    }, pollMs);
+
     return () => {
       mounted = false;
-      clearInterval(id);
+      clearInterval(interval);
     };
   }, [pollMs]);
 
