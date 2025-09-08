@@ -1,177 +1,173 @@
 import React, { useState } from 'react';
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    FlatList,
-    ScrollView,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  FlatList,
+  ScrollView,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from '../styles/MusicScreen.ts';
-import Icon from '../../../components/icon/Icon.tsx';
-import { PRIMARY_COLORS } from '../../../constants/colors';
-import { TEXT_COLORS } from '../../../constants/colors';
+import { styles } from '../styles/MusicScreen';
+import Icon from '../../../components/icon/Icon';
+import { PRIMARY_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import CdPlayer from '../../../components/cdPlayer/CdPlayer';
-import PlayBar from '../../../components/playBar/PlayBar.tsx';
+import PlayBar from '../../../components/playBar/PlayBar';
 
-const comments = [
-    {
-        id: '1',
-        user: 'User_2',
-        color: '#FFA726',
-        text: '마음이 편안해지는 노래네요',
-    },
-    { id: '2', user: 'User_3', color: '#7C4DFF', text: '쉬고 싶다' },
-];
+import { useMusicComments } from '../hooks/useMusicComments.ts';
+import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
+import type { Comment } from '../types/comment';
 
-function MusicScreen() {
-    const [comment, setComment] = useState('');
-    const [commentList, setCommentList] = useState(comments);
-
-    const handlePost = () => {
-        if (comment.trim()) {
-            setCommentList([
-                ...commentList,
-                {
-                    id: String(commentList.length + 1),
-                    user: 'User_1',
-                    color: '#FF1744',
-                    text: comment,
-                },
-            ]);
-            setComment('');
-        }
+type Props = {
+  route: {
+    params: {
+      droppingId: string;
+      title?: string;
+      artist?: string;
+      message?: string;
+      location?: string;
+      likeCount?: number;
     };
+  };
+};
 
-    return (
-        <SafeAreaView style={styles.container}>
-            <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-                <View style={styles.innerContainer}>
-                    <CdPlayer />
-                    <View style={styles.content}>
-                        <View style={styles.infoRow}>
-                            <View style={styles.infoTextWrapper}>
-                                <Text style={styles.title}>LILAC</Text>
-                                <Text style={styles.artist}>by IU</Text>
-                            </View>
+function MusicScreen({ route }: Props) {
+  const { droppingId, title, artist, message, location, likeCount } = route.params;
 
-                            <View style={styles.likeCommentRow}>
-                                <TouchableOpacity
-                                    style={styles.smallLikeCommentRow}
-                                >
-                                    <Icon
-                                        name="like"
-                                        width={16}
-                                        height={16}
-                                        color={TEXT_COLORS.DEFAULT}
-                                    />
-                                    <Text style={styles.likeCommentText}>
-                                        21
-                                    </Text>
-                                </TouchableOpacity>
+  const [comment, setComment] = useState('');
 
-                                <TouchableOpacity
-                                    style={styles.smallLikeCommentRow}
-                                >
-                                    <Icon
-                                        name="chat"
-                                        width={16}
-                                        height={16}
-                                        color={TEXT_COLORS.DEFAULT}
-                                    />
-                                    <Text style={styles.likeCommentText}>
-                                        3
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+  const { data: comments, isLoading, isError, refetch, isFetching } =
+    useMusicComments(droppingId);
 
-                        <PlayBar
-                            currentTime={0}
-                            musicTime={192}
-                            onSeek={value => console.log('Seek to:', value)}
-                        />
-                    </View>
+  const createComment = useCreateMusicComment(droppingId);
 
-                    <View style={styles.inner}>
-                        <View style={styles.userRow}>
-                            <View style={styles.userDot} />
-                            <View style={styles.userInfo}>
-                                <Text style={styles.userName}>User_1</Text>
-                                <View style={styles.userBadge}>
-                                    <Text style={styles.userBadgeText}>
-                                        모험가
-                                    </Text>
-                                </View>
-                            </View>
-                        </View>
+  const handlePost = () => {
+    const text = comment.trim();
+    if (!text) return;
+    createComment.mutate(text, {
+      onSuccess: () => setComment(''),
+    });
+  };
 
-                        <View style={styles.messageBox}>
-                            <Text style={styles.messageText}>
-                                이 길을 지날때마다 이 노래가 생각 나더군요.
-                                여러분도 노래 듣고 힘내시길
-                            </Text>
-                            <View style={styles.messageLocationRow}>
-                                <Icon
-                                    name="location"
-                                    width={14}
-                                    height={14}
-                                    color={PRIMARY_COLORS.DEFAULT}
-                                />
-                                <Text style={styles.messageLocation}>
-                                    부산광역시 강서구 가락대로 1393
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
+  const commentCount = comments?.length ?? 0;
 
-                    <View style={styles.commentSection}>
-                        <Text style={styles.commentTitle}>댓글</Text>
-                        <View style={styles.commentInputRow}>
-                            <TextInput
-                                style={styles.commentInput}
-                                placeholder="댓글 작성"
-                                placeholderTextColor={TEXT_COLORS.CAPTION_RED}
-                                value={comment}
-                                onChangeText={setComment}
-                            />
-                            <TouchableOpacity
-                                style={styles.commentButton}
-                                onPress={handlePost}
-                            >
-                                <Text style={styles.commentButtonText}>
-                                    게시
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-                        <FlatList
-                            data={commentList}
-                            keyExtractor={item => item.id}
-                            renderItem={({ item }) => (
-                                <View style={styles.commentItemWrapper}>
-                                    <View style={styles.commentItemInfo}>
-                                        <View
-                                            style={[
-                                                styles.userDot,
-                                                { backgroundColor: item.color },
-                                            ]}
-                                        />
-                                        <Text style={[styles.userName]}>
-                                            {item.user}
-                                        </Text>
-                                    </View>
-                                    <Text style={styles.commentItemText}>
-                                        {item.text}
-                                    </Text>
-                                </View>
-                            )}
-                        />
-                    </View>
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={isFetching && !isLoading}
+            onRefresh={() => { void refetch(); }}
+          />
+        }
+      >
+        <View style={styles.innerContainer}>
+          <CdPlayer />
+
+          <View style={styles.content}>
+            <View style={styles.infoRow}>
+              <View style={styles.infoTextWrapper}>
+                {title ? <Text style={styles.title}>{title}</Text> : null}
+                {artist ? <Text style={styles.artist}>by {artist}</Text> : null}
+              </View>
+
+              <View style={styles.likeCommentRow}>
+                {typeof likeCount === 'number' ? (
+                  <TouchableOpacity style={styles.smallLikeCommentRow}>
+                    <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
+                    <Text style={styles.likeCommentText}>{likeCount}</Text>
+                  </TouchableOpacity>
+                ) : null}
+
+                <TouchableOpacity style={styles.smallLikeCommentRow}>
+                  <Icon name="chat" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
+                  <Text style={styles.likeCommentText}>{commentCount}</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            <PlayBar
+              currentTime={0}
+              musicTime={192}
+              onSeek={(value) => console.log('Seek to:', value)}
+            />
+          </View>
+
+          {(message || location) && (
+            <View style={styles.inner}>
+              <View style={styles.messageBox}>
+                {message ? <Text style={styles.messageText}>{message}</Text> : null}
+                {location ? (
+                  <View style={styles.messageLocationRow}>
+                    <Icon name="location" width={14} height={14} color={PRIMARY_COLORS.DEFAULT} />
+                    <Text style={styles.messageLocation}>{location}</Text>
+                  </View>
+                ) : null}
+              </View>
+            </View>
+          )}
+
+          <View style={styles.commentSection}>
+            <Text style={styles.commentTitle}>댓글</Text>
+
+            {isLoading ? (
+              <View style={{ paddingVertical: 12, alignItems: 'center' }}>
+                <ActivityIndicator />
+                <Text style={{ marginTop: 8, color: TEXT_COLORS.CAPTION_RED }}>
+                  댓글 불러오는 중…
+                </Text>
+              </View>
+            ) : isError ? (
+              <TouchableOpacity
+                onPress={() => { void refetch(); }}
+                style={{ paddingVertical: 12 }}
+              >
+                <Text style={{ color: TEXT_COLORS.DEFAULT }}>
+                  불러오기에 실패했어요. 탭해서 재시도
+                </Text>
+              </TouchableOpacity>
+            ) : null}
+
+            <View style={styles.commentInputRow}>
+              <TextInput
+                style={styles.commentInput}
+                placeholder="댓글 작성"
+                placeholderTextColor={TEXT_COLORS.CAPTION_RED}
+                value={comment}
+                onChangeText={setComment}
+              />
+              <TouchableOpacity
+                style={styles.commentButton}
+                onPress={handlePost}
+                disabled={createComment.isPending || comment.trim().length === 0}
+              >
+                <Text style={styles.commentButtonText}>
+                  {createComment.isPending ? '등록중…' : '게시'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <FlatList<Comment>
+              data={comments || []}
+              keyExtractor={(item) => String(item.id)}
+              renderItem={({ item }) => (
+                <View style={styles.commentItemWrapper}>
+                  <View style={styles.commentItemInfo}>
+                    <View style={[styles.userDot, { backgroundColor: '#7C4DFF' }]} />
+                    <Text style={styles.userName}>익명</Text>
+                  </View>
+                  <Text style={styles.commentItemText}>{item.content}</Text>
                 </View>
-            </ScrollView>
-        </SafeAreaView>
-    );
+              )}
+            />
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 export default MusicScreen;
