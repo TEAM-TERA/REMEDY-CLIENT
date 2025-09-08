@@ -28,5 +28,6 @@ export async function searchTracks(q: string, signal?: AbortSignal): Promise<Spo
     artist: t.artists?.map((a: any) => a.name).join(', ') ?? '',
     duration: Math.round((t.duration_ms ?? 0) / 1000),
     imageUrl: t.album?.images?.[0]?.url,
+    previewUrl: t.preview_url ?? undefined,
   }));
 }
