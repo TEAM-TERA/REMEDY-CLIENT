@@ -10,30 +10,36 @@ import {
   RefreshControl,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from '../styles/MusicScreen.ts';
-import Icon from '../../../components/icon/Icon.tsx';
+import { styles } from '../styles/MusicScreen';
+import Icon from '../../../components/icon/Icon';
 import { PRIMARY_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import CdPlayer from '../../../components/cdPlayer/CdPlayer';
-import PlayBar from '../../../components/playBar/PlayBar.tsx';
+import PlayBar from '../../../components/playBar/PlayBar';
 
-import { useMusicComments } from '../hooks/useMusiceComments.ts';
-import { useCreateMusicComment } from '../hooks/useCreateMusicComment.ts';
+import { useMusicComments } from '../hooks/useMusicComments.ts';
+import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import type { Comment } from '../types/comment';
 
-type Props = { route: { params: { droppingId: string } } };
+type Props = {
+  route: {
+    params: {
+      droppingId: string;
+      title?: string;
+      artist?: string;
+      message?: string;
+      location?: string;
+      likeCount?: number;
+    };
+  };
+};
 
 function MusicScreen({ route }: Props) {
-  const { droppingId } = route.params;
+  const { droppingId, title, artist, message, location, likeCount } = route.params;
 
   const [comment, setComment] = useState('');
 
-  const {
-    data: comments,
-    isLoading,
-    isError,
-    refetch,
-    isFetching,
-  } = useMusicComments(droppingId);
+  const { data: comments, isLoading, isError, refetch, isFetching } =
+    useMusicComments(droppingId);
 
   const createComment = useCreateMusicComment(droppingId);
 
@@ -52,23 +58,29 @@ function MusicScreen({ route }: Props) {
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         refreshControl={
-          <RefreshControl refreshing={isFetching && !isLoading} onRefresh={refetch} />
+          <RefreshControl
+            refreshing={isFetching && !isLoading}
+            onRefresh={() => { void refetch(); }}
+          />
         }
       >
         <View style={styles.innerContainer}>
           <CdPlayer />
+
           <View style={styles.content}>
             <View style={styles.infoRow}>
               <View style={styles.infoTextWrapper}>
-                <Text style={styles.title}>LILAC</Text>
-                <Text style={styles.artist}>by IU</Text>
+                {title ? <Text style={styles.title}>{title}</Text> : null}
+                {artist ? <Text style={styles.artist}>by {artist}</Text> : null}
               </View>
 
               <View style={styles.likeCommentRow}>
-                <TouchableOpacity style={styles.smallLikeCommentRow}>
-                  <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
-                  <Text style={styles.likeCommentText}>21</Text>
-                </TouchableOpacity>
+                {typeof likeCount === 'number' ? (
+                  <TouchableOpacity style={styles.smallLikeCommentRow}>
+                    <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
+                    <Text style={styles.likeCommentText}>{likeCount}</Text>
+                  </TouchableOpacity>
+                ) : null}
 
                 <TouchableOpacity style={styles.smallLikeCommentRow}>
                   <Icon name="chat" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
@@ -84,27 +96,19 @@ function MusicScreen({ route }: Props) {
             />
           </View>
 
-          <View style={styles.inner}>
-            <View style={styles.userRow}>
-              <View style={styles.userDot} />
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>User_1</Text>
-                <View style={styles.userBadge}>
-                  <Text style={styles.userBadgeText}>모험가</Text>
-                </View>
+          {(message || location) && (
+            <View style={styles.inner}>
+              <View style={styles.messageBox}>
+                {message ? <Text style={styles.messageText}>{message}</Text> : null}
+                {location ? (
+                  <View style={styles.messageLocationRow}>
+                    <Icon name="location" width={14} height={14} color={PRIMARY_COLORS.DEFAULT} />
+                    <Text style={styles.messageLocation}>{location}</Text>
+                  </View>
+                ) : null}
               </View>
             </View>
-
-            <View style={styles.messageBox}>
-              <Text style={styles.messageText}>
-                이 길을 지날때마다 이 노래가 생각 나더군요. 여러분도 노래 듣고 힘내시길
-              </Text>
-              <View style={styles.messageLocationRow}>
-                <Icon name="location" width={14} height={14} color={PRIMARY_COLORS.DEFAULT} />
-                <Text style={styles.messageLocation}>부산광역시 강서구 가락대로 1393</Text>
-              </View>
-            </View>
-          </View>
+          )}
 
           <View style={styles.commentSection}>
             <Text style={styles.commentTitle}>댓글</Text>
@@ -117,8 +121,13 @@ function MusicScreen({ route }: Props) {
                 </Text>
               </View>
             ) : isError ? (
-              <TouchableOpacity onPress={() => { void refetch(); }} style={{ paddingVertical: 12 }}>
-                <Text style={{ color: TEXT_COLORS.DEFAULT }}>불러오기에 실패했어요. 탭해서 재시도</Text>
+              <TouchableOpacity
+                onPress={() => { void refetch(); }}
+                style={{ paddingVertical: 12 }}
+              >
+                <Text style={{ color: TEXT_COLORS.DEFAULT }}>
+                  불러오기에 실패했어요. 탭해서 재시도
+                </Text>
               </TouchableOpacity>
             ) : null}
 
@@ -148,7 +157,7 @@ function MusicScreen({ route }: Props) {
                 <View style={styles.commentItemWrapper}>
                   <View style={styles.commentItemInfo}>
                     <View style={[styles.userDot, { backgroundColor: '#7C4DFF' }]} />
-                    <Text style={[styles.userName]}>익명</Text>
+                    <Text style={styles.userName}>익명</Text>
                   </View>
                   <Text style={styles.commentItemText}>{item.content}</Text>
                 </View>
