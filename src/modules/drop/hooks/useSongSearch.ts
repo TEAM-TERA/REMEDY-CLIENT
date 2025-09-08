@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { searchSongs } from "../api/dropApi";
+import { searchTracks } from '../../../services/spotify/api';
 
 export interface SongSearchItem {
     id: string;
@@ -9,9 +10,14 @@ export interface SongSearchItem {
 }
 
 export function useSongSearch(query : string) {
-  return useQuery<SongSearchItem[]>({
-    queryKey: ["songSearch", query],
-    queryFn: () => searchSongs(query),
-    enabled: !!query, 
+
+  const q = (query ?? '').trim();
+
+  return useQuery({
+    queryKey: ['songSearch', q],
+    queryFn: ({ signal }) => searchTracks(q, signal),
+    enabled: q.length > 0,
+    staleTime: 60 * 1000,
+    retry: 1,
   });
 }
