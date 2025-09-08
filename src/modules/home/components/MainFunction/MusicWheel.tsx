@@ -6,6 +6,7 @@ import { musicList } from '../../datas/index';
 import { styles } from '../../styles/MainFunction/MusicWheel';
 import MusicNode from './MusicNode';
 import { VisibleNode } from '../../types/musicList';
+import { navigate } from '../../../../navigation';
 import DropButton from './DropButton';
 const SWIPE_THRESHOLD = 30;
 
@@ -13,6 +14,10 @@ function MusicWheel() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const totalSongs = musicList.droppings.length;
   const rotation = useSharedValue(0);
+
+  const handlerPressDrop = ()=>{
+    navigate('Drop');
+  }
 
   const getVisibleNodes = () => {
     const nodes: VisibleNode[] = [];
@@ -81,7 +86,7 @@ function MusicWheel() {
           ))}
         </View>
         <View style={styles.dropButtonWrapper}>
-          <DropButton onPress={() => console.log('Drop 눌림!')} />
+          <DropButton onPress={handlerPressDrop} />
         </View>
       </Animated.View>
     </GestureDetector>
