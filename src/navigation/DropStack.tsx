@@ -14,7 +14,7 @@ const Stack = createNativeStackNavigator<DropStackParamList>();
 function DropStack() {
   return (
     <Stack.Navigator initialRouteName="DropSearch">
-      <Stack.Screen name="DropSearch" component={DropSearchScreen}options={{ headerShown: false }}/>
+      <Stack.Screen name="DropSearch" component={DropSearchScreen} options={{ headerShown: false }}/>
       <Stack.Screen name="DropDetail" component={DropScreen} options={{ headerShown: false }}/>
     </Stack.Navigator>
   );
