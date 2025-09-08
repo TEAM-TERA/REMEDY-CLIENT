@@ -10,6 +10,7 @@ import DropStack from './DropStack';
 import ProfileStack from './ProfileStack';
 import AuthStack from './AuthStack';
 import HomeScreen from '../modules/home/pages/HomeScreen';
+import MusicScreen from '../modules/music/pages/MusicScreen';
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 export function navigate<Screen extends keyof RootStackParamList>(
@@ -38,11 +39,12 @@ export default function RootNavigation() {
 
   return (
     <NavigationContainer ref={navigationRef}>
-      <Stack.Navigator initialRouteName={userToken ? 'Home' : 'Auth'}>
+      <Stack.Navigator initialRouteName={'Home'}>
         <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Auth" component={AuthStack} options={{ headerShown: false }} />
         <Stack.Screen name="Profile" component={ProfileStack} options={{ headerShown: false }} />
         <Stack.Screen name="Drop" component={DropStack} options={{ headerShown: false }} />
+        <Stack.Screen name="Music" component={MusicScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

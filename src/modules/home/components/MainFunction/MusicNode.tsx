@@ -2,6 +2,9 @@ import React from 'react';
 import { Image, TouchableOpacity, Text } from 'react-native';
 import Animated, { useAnimatedStyle } from 'react-native-reanimated';
 import { styles } from '../../styles/MainFunction/MusicNode';
+import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
+import type { RootStackParamList } from '../../../../types/navigation';
 import { Dropping } from '../../types/musicList';
 
 interface MusicNodeProps {
@@ -11,6 +14,8 @@ interface MusicNodeProps {
 }
 
 function MusicNode({ data, isMain, index }: MusicNodeProps) {
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
     // 각 노드의 반지름 설정. 클수록 원의 중심에서 멀어짐.
     const getRadius = () => {
         switch (index) {
@@ -61,9 +66,19 @@ function MusicNode({ data, isMain, index }: MusicNodeProps) {
         };
     });
 
+    const handlePress = () => {
+        navigation.navigate('Music', {
+          droppingId: data.droppingId,
+          title: data.title,
+          artist: data.singer,
+          location: data.address,
+        });
+    };
+
     return (
         <Animated.View style={[styles.nodeContainer, animatedStyle]}>
             <TouchableOpacity
+                onPress={handlePress}
                 style={isMain ? styles.container : styles.subContainer}
             >
                 <Image
