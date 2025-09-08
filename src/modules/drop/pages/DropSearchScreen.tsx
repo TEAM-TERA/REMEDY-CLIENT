@@ -80,6 +80,7 @@ function DropSearchScreen(){
                                     musicTitle: item.title,
                                     singer: item.artist,
                                     musicTime: item.duration,
+                                    imgUrl: item.imageUrl ?? "",
                                     location: "부산광역시 강서구 가락대로 1393",
                                 })
                             }
