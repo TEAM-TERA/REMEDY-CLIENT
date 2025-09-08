@@ -1,6 +1,7 @@
 import React from 'react';
 import { Pressable, View, Text } from 'react-native';
 import { styles } from '../../styles/MainFunction/DropButton';
+import { TYPOGRAPHY } from '../../../../constants/typography';
 
 type Props = {
   onPress?: () => void;
@@ -20,7 +21,7 @@ export default function DropButton({ onPress }: Props) {
         <View style={styles.inner} />
       </View>
       <View style={styles.badge}>
-        <Text style={styles.badgeText}>DROP</Text>
+        <Text style={[TYPOGRAPHY.BUTTON_TEXT, styles.badgeText]}>DROP</Text>
       </View>
     </Pressable>
   );

@@ -1,7 +1,9 @@
 import { Platform, StyleSheet } from 'react-native';
+import { TYPOGRAPHY } from '../../../../constants/typography';
+import { PRIMARY_COLORS } from '../../../../constants/colors';
 
-export const DROP = '#FF2D55';
-export const DROP_DIM = 'rgba(255,45,85,0.28)';
+export const DROP = PRIMARY_COLORS.MINUS_TEN
+export const DROP_DIM = PRIMARY_COLORS.DEFAULT
 export const SIZE = 140;
 export const INNER = 120;
 
@@ -38,8 +40,8 @@ export const styles = StyleSheet.create({
   },
   badge: {
     position: 'absolute',
-    right: 10,
-    bottom: 10,
+    right: 40,
+    bottom: 60,
     paddingHorizontal: 14,
     paddingVertical: 6,
     backgroundColor: DROP,
@@ -47,7 +49,7 @@ export const styles = StyleSheet.create({
   },
   badgeText: {
     color: '#fff',
-    fontWeight: '700',
+    fontSize : 18,
     letterSpacing: 0.5,
   },
 });
