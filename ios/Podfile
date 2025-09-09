@@ -31,5 +31,14 @@ target 'Remedy' do
       :mac_catalyst_enabled => false,
       # :ccache_enabled => true
     )
+
+    # 👇 이 부분을 post_install 블록 안으로 옮김
+    installer.pods_project.targets.each do |target|
+      if target.name == 'react-native-track-player'
+        target.build_configurations.each do |config|
+          config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+        end
+      end
+    end
   end
 end
