@@ -3,7 +3,11 @@ import { useEffect, useRef, useState } from 'react';
 import { styles } from './styles';
 import DiscSvg from './DiscSvg';
 
-function CdPlayer() {
+interface CdPlayerProps {
+    imageUrl: string;
+}
+
+function CdPlayer({ imageUrl }: CdPlayerProps) {
     const [tilt, setTilt] = useState(0);
     const reqRef = useRef<number | null>(null);
 
@@ -20,10 +24,7 @@ function CdPlayer() {
 
     return (
         <View style={styles.container}>
-            <DiscSvg
-                imageUrl="https://entertainimg.kbsmedia.co.kr/cms/uploads/CONTENTS_20230425095757_b457a570577d7444e7cef5c0a6e73bd7.png"
-                tilt={tilt}
-            />
+            <DiscSvg imageUrl={imageUrl} tilt={tilt} />
         </View>
     );
 }
