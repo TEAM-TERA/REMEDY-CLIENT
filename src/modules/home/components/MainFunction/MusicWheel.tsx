@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useSharedValue, withDecay } from 'react-native-reanimated';
+import Animated, { runOnJS, useSharedValue } from 'react-native-reanimated';
 import { musicList } from '../../datas/index';
 import { styles } from '../../styles/MainFunction/MusicWheel';
 import MusicNode from './MusicNode';
 import { VisibleNode } from '../../types/musicList';
 import { navigate } from '../../../../navigation';
 import DropButton from './DropButton';
+
 const SWIPE_THRESHOLD = 30;
+const INVERT_DIRECTION = false;
+const sign = INVERT_DIRECTION ? -1 : 1;
 
 function MusicWheel() {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const totalSongs = musicList.droppings.length;
   const rotation = useSharedValue(0);
+  const startRotation = useSharedValue(0);
 
   const handlerPressDrop = ()=>{
     navigate('Drop');
@@ -46,24 +50,21 @@ function MusicWheel() {
   };
 
   const pan = Gesture.Pan()
-    .onUpdate((event) => {
-      'worklet';
-      const deltaX = event.translationX;
-      rotation.value += deltaX * 0.1;
-
-      if (Math.abs(deltaX) > SWIPE_THRESHOLD) {
-        if (deltaX > 0) {
-          runOnJS(updateIndex)('prev');
-        } else {
-          runOnJS(updateIndex)('next');
-        }
-      }
+    .onBegin(() => {
+        // 제스처 시작 시 현재 rotation 저장
+        startRotation.value = rotation.value;
     })
-    .onEnd((event) => {
-      rotation.value = withDecay({
-        velocity: event.velocityX * 0.1,
-        clamp: [0, 100],
-      });
+    .onUpdate(event => {
+        'worklet';
+        // 시작할 때 rotation + 이동 거리
+        rotation.value =
+        startRotation.value + sign * event.translationX * 0.25;
+    })
+    .onEnd(event => {
+        const drag = sign * event.translationX;
+        if (Math.abs(drag) > SWIPE_THRESHOLD) {
+            runOnJS(updateIndex)(drag > 0 ? 'next' : 'prev');
+        }
     });
 
   const visibleNodes = getVisibleNodes();
