@@ -3,4 +3,6 @@ export type DropScreenProps = {
     singer : string;
     musicTime : number;
     location : string;
+    imgUrl?: string;
+    previewUrl?: string;
 };

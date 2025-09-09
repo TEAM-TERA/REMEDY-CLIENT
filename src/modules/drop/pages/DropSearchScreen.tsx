@@ -74,12 +74,14 @@ function DropSearchScreen(){
                             key={item.id}
                             musicTitle={item.title}
                             singer={item.artist}
-                            imgUrl={""}
+                            imgUrl={item.imageUrl ?? ""}
                             onPress={() =>
                                 navigation.navigate("DropDetail", {
                                     musicTitle: item.title,
                                     singer: item.artist,
                                     musicTime: item.duration,
+                                    imgUrl: item.imageUrl ?? "",
+                                    previewUrl: item.previewUrl ?? '',
                                     location: "부산광역시 강서구 가락대로 1393",
                                 })
                             }
