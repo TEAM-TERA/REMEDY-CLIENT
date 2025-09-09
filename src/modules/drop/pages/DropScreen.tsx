@@ -75,7 +75,7 @@ function DropScreen() {
   
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        <CdPlayer />
+        <CdPlayer imageUrl={imgUrl} />
   
         <View style={styles.playerContainer}>
           <View style={styles.textContainer}>
