@@ -4,7 +4,7 @@ import { styles } from './styles';
 import DiscSvg from './DiscSvg';
 
 interface CdPlayerProps {
-    imageUrl: string;
+    imageUrl?: string;
 }
 
 function CdPlayer({ imageUrl }: CdPlayerProps) {

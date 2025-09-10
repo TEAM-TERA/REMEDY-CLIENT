@@ -16,7 +16,7 @@ import { PRIMARY_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import CdPlayer from '../../../components/cdPlayer/CdPlayer';
 import PlayBar from '../../../components/playBar/PlayBar';
 
-import { useMusicComments } from '../hooks/useMusicComments.ts';
+import { useMusicComments } from '../hooks/useMusicComments';
 import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import type { Comment } from '../types/comment';
 

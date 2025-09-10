@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { remote } from 'react-native-spotify-remote';
+//import { remote } from 'react-native-spotify-remote';
 
 export function useSpotifyPlayer(token: string | null) {
   useEffect(() => {
@@ -9,13 +9,13 @@ export function useSpotifyPlayer(token: string | null) {
 
     (async () => {
       try {
-        const ok = await remote.connect(token);
+        //const ok = await remote.connect(token);
         console.log('remote.connect ->', ok);
 
         // 준비 완료 이벤트
         const onConnected = () => console.log('remoteConnected (player ready)');
-        remote.addListener('remoteConnected', onConnected);
-        unsubConnected = () => remote.removeListener('remoteConnected', onConnected);
+        //remote.addListener('remoteConnected', onConnected);
+        //unsubConnected = () => remote.removeListener('remoteConnected', onConnected);
       } catch (e) {
         console.error('Spotify connect failed', e);
       }
@@ -24,14 +24,14 @@ export function useSpotifyPlayer(token: string | null) {
     return () => {
       try {
         unsubConnected?.();
-        remote.disconnect();
+        //remote.disconnect();
       } catch {}
     };
   }, [token]);
 
   const play = async (uri: string) => {
     try {
-      await remote.playUri(uri);
+      //await remote.playUri(uri);
     } catch (err) {
       console.error('Spotify play failed:', err);
     }
@@ -39,7 +39,7 @@ export function useSpotifyPlayer(token: string | null) {
 
   const pause = async () => {
     try {
-      await remote.pause();
+      //await remote.pause();
     } catch (err) {
       console.error('Spotify pause failed:', err);
     }
@@ -47,7 +47,7 @@ export function useSpotifyPlayer(token: string | null) {
 
   const resume = async () => {
     try {
-      await remote.resume();
+      //await remote.resume();
     } catch (err) {
       console.error('Spotify resume failed:', err);
     }
