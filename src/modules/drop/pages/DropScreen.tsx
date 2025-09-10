@@ -27,7 +27,7 @@ function DropScreen() {
   
     const [content, setContent] = useState('');
   
-    const { play, pause, resume } = useSpotifyPlayer(userToken);
+    //const { play, pause, resume } = useSpotifyPlayer(userToken);
   
     // 기존 previewPlayer는 제거하거나 주석 처리
     // useEffect(() => {
@@ -35,18 +35,18 @@ function DropScreen() {
     //   loadAndPlayPreview({ ... });
     // }, [previewUrl]);
   
-    const handlePlay = () => {
-      const trackUri = "spotify:track:4uLU6hMCjMI75M1A2tKUQC";
-      void play(trackUri);
-    };
+    //const handlePlay = () => {
+    //  const trackUri = "spotify:track:4uLU6hMCjMI75M1A2tKUQC";
+    //  void play(trackUri);
+    //};
   
-    const handlePause = () => {
-      void pause();
-    };
+    //const handlePause = () => {
+    //  void pause();
+    //};
   
-    const handleResume = () => {
-      void resume();
-    };
+    //const handleResume = () => {
+     // void resume();
+    //};
   
     const handleCreateDropping = () => {
       if (!userToken) {
@@ -86,9 +86,9 @@ function DropScreen() {
             currentTime={0}  // SpotifyRemote는 position sync 별도 필요
             musicTime={musicTime || 30}
             onSeek={() => {}}
-            onTogglePlay={() => {
-              handlePlay();
-            }}
+            //onTogglePlay={() => {
+            //  handlePlay();
+            //}}
           />
         </View>
   
