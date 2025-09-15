@@ -26,3 +26,11 @@ export const getDropLikeCount = async (droppingId: string): Promise<LikeCountRes
     );
     return res.data;
 };
+
+// /api/v1/likes/count/user
+export const getUserLikeCount = async (): Promise<LikeCountResponse> => {
+    const res = await axiosInstance.get<LikeCountResponse>(
+      "/api/v1/likes/count/user"
+    );
+    return res.data;
+};
