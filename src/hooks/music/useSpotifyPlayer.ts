@@ -10,7 +10,7 @@ export function useSpotifyPlayer(token: string | null) {
     (async () => {
       try {
         //const ok = await remote.connect(token);
-        console.log('remote.connect ->', ok);
+        //console.log('remote.connect ->', ok);
 
         // 준비 완료 이벤트
         const onConnected = () => console.log('remoteConnected (player ready)');
