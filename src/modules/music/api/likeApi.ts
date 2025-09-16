@@ -1,7 +1,6 @@
 import axiosInstance from "../../auth/api/axiosInstance";
 
 export interface LikeRequest {
-  userId: number;
   droppingId: string;
 }
 

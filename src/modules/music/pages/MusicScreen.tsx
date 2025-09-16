@@ -1,23 +1,15 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  FlatList,
-  ScrollView,
-  ActivityIndicator,
-  RefreshControl,
-} from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '../styles/MusicScreen';
 import Icon from '../../../components/icon/Icon';
 import { PRIMARY_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import CdPlayer from '../../../components/cdPlayer/CdPlayer';
 import PlayBar from '../../../components/playBar/PlayBar';
-
 import { useMusicComments } from '../hooks/useMusicComments';
 import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
+import { useDropLikeCount } from '../hooks/useLike';
+import { useToggleLike } from '../hooks/useLike'
 import type { Comment } from '../types/comment';
 
 type Props = {
@@ -35,7 +27,8 @@ type Props = {
 
 function MusicScreen({ route }: Props) {
   const { droppingId, title, artist, message, location, likeCount } = route.params;
-
+  const musicLikeCount = useDropLikeCount(droppingId);
+  const toggleLike = useToggleLike(droppingId);
   const [comment, setComment] = useState('');
 
   const { data: comments, isLoading, isError, refetch, isFetching } =
@@ -76,9 +69,13 @@ function MusicScreen({ route }: Props) {
 
               <View style={styles.likeCommentRow}>
                 {typeof likeCount === 'number' ? (
-                  <TouchableOpacity style={styles.smallLikeCommentRow}>
+                  <TouchableOpacity 
+                    style={styles.smallLikeCommentRow}
+                    onPress={() => toggleLike.mutate()}
+                    disabled={toggleLike.isPending}
+                  >
                     <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
-                    <Text style={styles.likeCommentText}>{likeCount}</Text>
+                    <Text style={styles.likeCommentText}>{musicLikeCount.data?.likeCount}</Text>
                   </TouchableOpacity>
                 ) : null}
 
