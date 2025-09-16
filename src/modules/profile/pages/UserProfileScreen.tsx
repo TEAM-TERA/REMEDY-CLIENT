@@ -32,14 +32,14 @@ function UserProfileScreen() {
             droppingId: d.droppingId,
             memo: d.songId,
             location: d.address,
-            imageSource: null,
+            imageSource: undefined,
             hasHeart: false, 
     }))
         : (myLikes ?? []).map((id) => ({
             droppingId: id,
             memo: "좋아요한 곡",
             location: "",
-            imageSource: null,
+            imageSource: undefined,
             hasHeart: true,
     }));
 
