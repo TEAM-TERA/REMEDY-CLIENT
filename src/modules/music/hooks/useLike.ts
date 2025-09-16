@@ -23,11 +23,11 @@ export const useMyLikes = () => {
   });
 };
 
-export const useToggleLike = (droppingId: string, userId: number) => {
+export const useToggleLike = (droppingId: string) => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => toggleLike({ userId, droppingId }),
+    mutationFn: () => toggleLike({ droppingId }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dropLikeCount", droppingId] });
       queryClient.invalidateQueries({ queryKey: ["userLikeCount"] });

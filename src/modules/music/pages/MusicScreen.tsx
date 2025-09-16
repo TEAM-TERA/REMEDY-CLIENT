@@ -9,6 +9,7 @@ import PlayBar from '../../../components/playBar/PlayBar';
 import { useMusicComments } from '../hooks/useMusicComments';
 import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import { useDropLikeCount } from '../hooks/useLike';
+import { useToggleLike } from '../hooks/useLike'
 import type { Comment } from '../types/comment';
 
 type Props = {
@@ -27,6 +28,7 @@ type Props = {
 function MusicScreen({ route }: Props) {
   const { droppingId, title, artist, message, location, likeCount } = route.params;
   const musicLikeCount = useDropLikeCount(droppingId);
+  const toggleLike = useToggleLike(droppingId);
   const [comment, setComment] = useState('');
 
   const { data: comments, isLoading, isError, refetch, isFetching } =
@@ -67,7 +69,11 @@ function MusicScreen({ route }: Props) {
 
               <View style={styles.likeCommentRow}>
                 {typeof likeCount === 'number' ? (
-                  <TouchableOpacity style={styles.smallLikeCommentRow}>
+                  <TouchableOpacity 
+                    style={styles.smallLikeCommentRow}
+                    onPress={() => toggleLike.mutate()}
+                    disabled={toggleLike.isPending}
+                  >
                     <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
                     <Text style={styles.likeCommentText}>{musicLikeCount.data?.likeCount}</Text>
                   </TouchableOpacity>
