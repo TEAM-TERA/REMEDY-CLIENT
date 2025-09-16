@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../types/navigation';
+import type { DropItemData } from '../types/DropItemData';
 import { TEXT_COLORS } from '../../../constants/colors';
 import { dropMockData, likeMockData } from '../datas/mockData';
 import styles from '../styles/userProfileScreen';
@@ -12,14 +13,35 @@ import DropItem from '../components/DropItem';
 import Icon from '../../../components/icon/Icon';
 import Button from '../../../components/button/Button';
 import { useMyProfile } from '../hooks/useMyProfile';
+import { useMyDrop } from '../hooks/useMyDrop';
+import { useMyLikes } from '../hooks/useMyLike';
 
 function UserProfileScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
     const [activeTab, setActiveTab] = useState<'drop' | 'like'>('drop');
-    const currentData = activeTab === 'drop' ? dropMockData : likeMockData;
     const defaultProfileImg = require('../../../assets/images/profileImage.png');
 
+    const { data: myDrops, isLoading: dropLoading } = useMyDrop();
+    const { data: myLikes, isLoading: likeLoading } = useMyLikes();
+
     const {data : me, isLoading, isError, refetch, isFetching } = useMyProfile();
+
+    const currentData: DropItemData[] =
+    activeTab === "drop"
+        ? (myDrops ?? []).map((d) => ({
+            droppingId: d.droppingId,
+            memo: d.songId,
+            location: d.address,
+            imageSource: null,
+            hasHeart: false, 
+    }))
+        : (myLikes ?? []).map((id) => ({
+            droppingId: id,
+            memo: "좋아요한 곡",
+            location: "",
+            imageSource: null,
+            hasHeart: true,
+    }));
 
     const handleEditPress = () => {
         navigation.navigate('NameEdit');
@@ -126,9 +148,9 @@ function UserProfileScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    {currentData.map((item, index) => (
+                    {currentData.map((item) => (
                         <DropItem
-                            key={`${item.memo}-${item.location}-${index}`}
+                            key={item.droppingId}
                             memo={item.memo}
                             location={item.location}
                             imageSource={item.imageSource}
