@@ -1,8 +1,10 @@
+import { ImageSourcePropType } from "react-native";
+
 type DropItemData = {
     droppingId: string;
     memo: string;
     location: string;
-    imageSource: string | null;
+    imageSource?: ImageSourcePropType;
     hasHeart: boolean;
 };
 
