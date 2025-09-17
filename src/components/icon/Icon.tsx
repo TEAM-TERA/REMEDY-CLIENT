@@ -8,6 +8,10 @@ import HeartSvg from './icons/HeartSvg';
 import RightArrowSvg from './icons/RightArrowSvg';
 import ChatSvg from './icons/ChatSvg';
 import LikeSvg from './icons/LikeSvg';
+import TargetSvg from './icons/TargetSvg';
+import PaintSvg from './icons/PaintSvg';
+import RunningSvg from './icons/RunningSvg';
+import MusicSvg from './icons/MusicSvg';
 
 const icons = {
     edit: EditSvg,
@@ -19,6 +23,10 @@ const icons = {
     right: RightArrowSvg,
     chat: ChatSvg,
     like: LikeSvg,
+    target: TargetSvg,
+    paint: PaintSvg,
+    running: RunningSvg,
+    music: MusicSvg,
 };
 
 type IconName = keyof typeof icons;
