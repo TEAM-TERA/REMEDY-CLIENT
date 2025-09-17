@@ -10,6 +10,7 @@ import ChatSvg from './icons/ChatSvg';
 import LikeSvg from './icons/LikeSvg';
 import TargetSvg from './icons/TargetSvg';
 import PaintSvg from './icons/PaintSvg';
+import RunningSvg from './icons/RunningSvg';
 
 const icons = {
     edit: EditSvg,
@@ -23,6 +24,7 @@ const icons = {
     like: LikeSvg,
     target: TargetSvg,
     paint: PaintSvg,
+    running: RunningSvg,
 };
 
 type IconName = keyof typeof icons;
