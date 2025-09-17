@@ -11,6 +11,7 @@ import LikeSvg from './icons/LikeSvg';
 import TargetSvg from './icons/TargetSvg';
 import PaintSvg from './icons/PaintSvg';
 import RunningSvg from './icons/RunningSvg';
+import MusicSvg from './icons/MusicSvg';
 
 const icons = {
     edit: EditSvg,
@@ -25,6 +26,7 @@ const icons = {
     target: TargetSvg,
     paint: PaintSvg,
     running: RunningSvg,
+    music: MusicSvg,
 };
 
 type IconName = keyof typeof icons;
