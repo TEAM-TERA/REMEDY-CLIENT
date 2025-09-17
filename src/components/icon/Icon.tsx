@@ -10,7 +10,6 @@ import ChatSvg from './icons/ChatSvg';
 import LikeSvg from './icons/LikeSvg';
 import CoinSvg from './icons/CoinSvg';
 import TargetSvg from './icons/TargetSvg';
-import TargetSvg from './icons/TargetSvg';
 import PaintSvg from './icons/PaintSvg';
 import RunningSvg from './icons/RunningSvg';
 import MusicSvg from './icons/MusicSvg';
@@ -26,7 +25,6 @@ const icons = {
     chat: ChatSvg,
     like: LikeSvg,
     coin: CoinSvg,
-    target: TargetSvg,
     target: TargetSvg,
     paint: PaintSvg,
     running: RunningSvg,
