@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { TEXT_COLORS } from '../../../constants/colors';
 import Svg, { G, Defs, ClipPath, Path } from 'react-native-svg';
 
