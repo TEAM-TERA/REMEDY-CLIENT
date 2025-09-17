@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity,SafeAreaView } from "react-native";
+import { View, Text, Image, TouchableOpacity,SafeAreaView, Pressable } from "react-native";
 import { styles } from "../../styles/HeaderBar/Headerbar";
 import Profile from "./Profile";
 import { scale } from "../../../../utils/scalers";
@@ -17,12 +17,16 @@ function HeaderBar() {
     <View style={styles.container}>
       <View style={styles.leftSection}>
         <Profile />
-        <View style={{ marginLeft: scale(0.75) }}>
-          <Text style={[styles.userName, TYPOGRAPHY.HEADLINE_3]}>User_1</Text>
-          <View style={styles.badge}>
-            <Text style={[styles.badgeText, TYPOGRAPHY.CAPTION_2]}>모험가</Text>
+        <Pressable
+          onPress={pressHandlerProfile}
+          >
+          <View style={{ marginLeft: scale(0.75) }}>
+            <Text style={[styles.userName, TYPOGRAPHY.HEADLINE_3]}>User_1</Text>
+            <View style={styles.badge}>
+              <Text style={[styles.badgeText, TYPOGRAPHY.CAPTION_2]}>모험가</Text>
+            </View>
           </View>
-        </View>
+        </Pressable>
       </View>
       <View style = {styles.iconsContainer}>
         <Icon name="music"/>
