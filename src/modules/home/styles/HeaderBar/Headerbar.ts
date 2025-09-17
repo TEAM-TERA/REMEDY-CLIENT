@@ -1,6 +1,5 @@
 import { StyleSheet } from "react-native";
 import { scale } from "../../../../utils/scalers";
-import { TYPOGRAPHY } from "../../../../constants/typography";
 import { BACKGROUND_COLORS, TEXT_COLORS } from "../../../../constants/colors";
 
 export const styles = StyleSheet.create({
@@ -11,6 +10,7 @@ export const styles = StyleSheet.create({
     width: "100%",
     height: scale(68),
     paddingHorizontal: scale(1),
+    padding: scale(16),
     backgroundColor: BACKGROUND_COLORS.BACKGROUND
   },
   leftSection: {
@@ -32,16 +32,16 @@ export const styles = StyleSheet.create({
   badgeText: {
     color: TEXT_COLORS.CAPTION_RED
   },
-  menuButton: {
-    padding: scale(20),
-    justifyContent: "center",
-    alignItems: "center"
+  rightSection: {
+    flexDirection: "row",
+    gap: scale(1)
   },
-  hamburgerLine: {
-    width: scale(25),
-    height: scale(5),
-    backgroundColor: TEXT_COLORS.DEFAULT,
-    marginVertical: scale(1),
-    borderRadius: scale(5)
-  },
+  iconsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    display: "flex",
+    alignItems: "center",
+    gap: scale(20),
+    marginRight: scale(16)
+  }
 });

@@ -4,6 +4,7 @@ import Profile from "./Profile";
 import { scale } from "../../../../utils/scalers";
 import { TYPOGRAPHY } from "../../../../constants/typography";
 import { useNavigation } from "@react-navigation/native";
+import Icon from "../../../../components/icon/Icon";
 
 function HeaderBar() {
 
@@ -23,15 +24,12 @@ function HeaderBar() {
           </View>
         </View>
       </View>
-      <TouchableOpacity 
-        accessibilityRole="button"
-        accessibilityLabel="프로필 메뉴 열기"
-        onPress={pressHandlerProfile}
-        style={styles.menuButton}>
-        <View style={styles.hamburgerLine} />
-        <View style={styles.hamburgerLine} />
-        <View style={styles.hamburgerLine} />
-      </TouchableOpacity>
+      <View style = {styles.iconsContainer}>
+        <Icon name="music"/>
+        <Icon name="target"/>
+        <Icon name="paint"/>
+        <Icon name="running"/>
+      </View>
     </View>
     </SafeAreaView>
   );
