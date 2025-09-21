@@ -125,13 +125,40 @@ export default function GoogleMapView() {
                 ? "https://www.notion.so/image/attachment%3Aa6b92c55-063d-4be3-9e07-2863714d55f1%3Aimage.png?table=block&id=2752845a-0c9f-80c2-a2b9-ffceba8ca2ed&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&width=2000&userId=620d2e09-6c4e-4ca6-875c-c0f20106c899&cache=v2"
                 : "https://water-icon-dc4.notion.site/image/attachment%3A3292e931-4479-40da-ab55-719824478764%3Aimage.png?table=block&id=2322845a-0c9f-8069-8720-e3a085f5acfa&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&width=300&userId=&cache=v2";
 
-              new google.maps.Marker({
+              const marker = new google.maps.Marker({
                 position: { lat: drop.latitude, lng: drop.longitude },
                 map: map,
                 title: drop.content,
                 icon: {
-                  url: "https://water-icon-dc4.notion.site/image/attachment%3A3292e931-4479-40da-ab55-719824478764%3Aimage.png?table=block&id=2322845a-0c9f-8069-8720-e3a085f5acfa&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&width=300&userId=&cache=v2",
+                  url: iconUrl,
                   scaledSize: new google.maps.Size(60, 60)
+                }
+              });
+              
+              marker.addListener('click', function() {
+                const isInCircle = distance <= radius;
+                if (isInCircle) {
+                  window.ReactNativeWebView?.postMessage(JSON.stringify({
+                    type: 'markerClick',
+                    action: 'navigateToMusic',
+                    payload: {
+                      id: drop.id,
+                      content: drop.content,
+                      latitude: drop.latitude,
+                      longitude: drop.longitude,
+                    }
+                  }));
+                } else {
+                  window.ReactNativeWebView?.postMessage(JSON.stringify({
+                    type: 'markerClick',
+                    action: 'showDetails',
+                    payload: {
+                      id: drop.id,
+                      content: drop.content,
+                      latitude: drop.latitude,
+                      longitude: drop.longitude,
+                    }
+                  }));
                 }
               });
             });
