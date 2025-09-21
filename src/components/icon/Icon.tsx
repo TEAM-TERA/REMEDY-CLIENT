@@ -14,6 +14,7 @@ import TargetSvg from './icons/TargetSvg';
 import PaintSvg from './icons/PaintSvg';
 import RunningSvg from './icons/RunningSvg';
 import MusicSvg from './icons/MusicSvg';
+import TurnRunningSvg from './icons/TurnRunningSvg';
 
 const icons = {
     edit: EditSvg,
@@ -30,21 +31,24 @@ const icons = {
     paint: PaintSvg,
     running: RunningSvg,
     music: MusicSvg,
+    turnRunning: TurnRunningSvg,
 };
 
 type IconName = keyof typeof icons;
 
 interface Props {
     name: IconName;
+    pressname?: IconName;
     width?: number;
     height?: number;
     color?: string;
     onPress?: () => void;
 }
 
-const Icon: React.FC<Props> = ({ name, onPress, ...props }) => {
+const Icon: React.FC<Props> = ({ name, onPress, pressname = name, ...props }) => {
     const SvgIcon = icons[name];
     if (onPress) {
+        const SvgIcon = icons[pressname];
         return (
             <TouchableOpacity onPress={onPress}>
                 <SvgIcon {...props} />
