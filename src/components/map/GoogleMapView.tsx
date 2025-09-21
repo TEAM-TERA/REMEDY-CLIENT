@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View, Platform, PermissionsAndroid, ActivityIndicator } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { useNavigation } from '@react-navigation/native';
 import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
 import { PRIMARY_COLORS } from '../../constants/colors';
 import { MAP_RADIUS, MAP_ZOOM, MAP_STYLE, MARKER_STYLES, GOOGLE_MAPS_API_KEY } from '../../constants/map';
@@ -11,6 +12,7 @@ import { Linking } from 'react-native';
 export default function GoogleMapView() {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const webviewRef = useRef<WebView>(null);
+  const navigation = useNavigation();
 
   useEffect(() => {
     async function requestLocation() {
@@ -132,6 +134,27 @@ export default function GoogleMapView() {
                   scaledSize: new google.maps.Size(60, 60)
                 }
               });
+            });
+            marker.addListener('click', function() {
+              const isInCircle = distance <= radius;
+              if (isInCircle) {
+                window.ReactNativeWebView?.postMessage(JSON.stringify({
+                  type: 'markerClick',
+                  action: 'navigateToMusic',
+                  payload: {
+                    id: drop.id,
+                    content: drop.content,
+                    latitude: drop.latitude,
+                    longitude: drop.longitude,
+                  }
+                }));
+              } else {
+                Toast.show({
+                  type: 'error',
+                  text1: '확인할 수 없는 드랍입니다',
+                  position: 'bottom',
+                });
+              }
             });
           }
 
