@@ -22,7 +22,6 @@ const RunningStats: React.FC<RunningStatsProps> = ({
   const [timeComponents, setTimeComponents] = useState({ hours: '00', minutes: '00', seconds: '00' });
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // 시간 포맷팅 함수
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
@@ -35,16 +34,13 @@ const RunningStats: React.FC<RunningStatsProps> = ({
     };
   };
 
-  // isRunning이 변경될 때마다 타이머 시작/정지 및 초기화
   useEffect(() => {
     if (isRunning) {
-      // 타이머 시작
-      setCurrentTime(0); // 초기화
+      setCurrentTime(0);
       intervalRef.current = setInterval(() => {
         setCurrentTime(prev => prev + 1);
       }, 1000);
     } else {
-      // 타이머 정지 및 초기화
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -52,7 +48,6 @@ const RunningStats: React.FC<RunningStatsProps> = ({
       setCurrentTime(0);
     }
 
-    // 컴포넌트 언마운트 시 타이머 정리
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -60,7 +55,6 @@ const RunningStats: React.FC<RunningStatsProps> = ({
     };
   }, [isRunning]);
 
-  // currentTime이 변경될 때마다 timeComponents 업데이트
   useEffect(() => {
     setTimeComponents(formatTime(currentTime));
   }, [currentTime]);

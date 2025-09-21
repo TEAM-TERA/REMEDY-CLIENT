@@ -214,21 +214,26 @@ export default function GoogleMapView() {
         scrollEnabled={false}
         onMessage={(event) => {
           console.log('WebView says:', event.nativeEvent.data);
-          try {
-            const data = JSON.parse(event.nativeEvent.data);
-            if (data.type === 'markerClick') {
-              if (data.action === 'navigateToMusic') {
-                (navigation as any).navigate('Music', { dropData: data.payload });
-              } else if (data.action === 'showDetails') {
-                Alert.alert(
-                  "알림",
-                  "확인할 수 없는 드랍입니다",
-                  [{ text: "확인", style: "default" }]
-                );
+          const message = event.nativeEvent.data;
+          if (message.startsWith('{') && message.endsWith('}')) {
+            try {
+              const data = JSON.parse(message);
+              if (data.type === 'markerClick') {
+                if (data.action === 'navigateToMusic') {
+                  (navigation as any).navigate('Music', { dropData: data.payload });
+                } else if (data.action === 'showDetails') {
+                  Alert.alert(
+                    "알림",
+                    "확인할 수 없는 드랍입니다",
+                    [{ text: "확인", style: "default" }]
+                  );
+                }
               }
+            } catch (e) {
+              console.log('JSON 파싱 에러:', e);
             }
-          } catch (e) {
-            console.log('메시지 파싱 에러:', e);
+          } else {
+            console.log('WebView 메시지:', message);
           }
         }}
       />
