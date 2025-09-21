@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Platform, PermissionsAndroid, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Platform, PermissionsAndroid, ActivityIndicator, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { useNavigation } from '@react-navigation/native';
 import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
 import { PRIMARY_COLORS } from '../../constants/colors';
 import { MAP_RADIUS, MAP_ZOOM, MAP_STYLE, MARKER_STYLES, GOOGLE_MAPS_API_KEY } from '../../constants/map';
@@ -11,8 +12,8 @@ import { Linking } from 'react-native';
 export default function GoogleMapView() {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const webviewRef = useRef<WebView>(null);
+  const navigation = useNavigation();
 
-  // 위치 요청
   useEffect(() => {
     async function requestLocation() {
       try {
@@ -38,6 +39,7 @@ export default function GoogleMapView() {
         Geolocation.getCurrentPosition(
           (pos) => {
             setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+            console.log(pos.coords.latitude, pos.coords.longitude);
           },
           (error) => {
             console.warn('Location error', error);
@@ -57,9 +59,7 @@ export default function GoogleMapView() {
     }
     requestLocation();
   }, []);
-  
 
-  // fallback 위치 (서울)
   const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
 
   const { data: droppings } = useDroppings(
@@ -67,7 +67,6 @@ export default function GoogleMapView() {
     currentLocation.latitude
   );
 
-  // 지도 HTML 생성
   const html = `
     <!DOCTYPE html>
     <html>
@@ -76,10 +75,9 @@ export default function GoogleMapView() {
         <style>
           html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; }
         </style>
-        <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=geometry"></script>
         <script>
           var map;
-
           function initMap() {
             const center = { lat: ${currentLocation.latitude}, lng: ${currentLocation.longitude} };
 
@@ -117,13 +115,50 @@ export default function GoogleMapView() {
 
           function addDroppings(drops) {
             drops.forEach(function(drop) {
-              new google.maps.Marker({
+              const dropPosition = new google.maps.LatLng(drop.latitude, drop.longitude);
+              const centerPosition = new google.maps.LatLng(${currentLocation.latitude}, ${currentLocation.longitude});
+              const distance = google.maps.geometry.spherical.computeDistanceBetween(centerPosition, dropPosition);
+
+              const radius = ${MAP_RADIUS};
+
+              const iconUrl = distance <= radius 
+                ? "https://www.notion.so/image/attachment%3Aa6b92c55-063d-4be3-9e07-2863714d55f1%3Aimage.png?table=block&id=2752845a-0c9f-80c2-a2b9-ffceba8ca2ed&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&width=2000&userId=620d2e09-6c4e-4ca6-875c-c0f20106c899&cache=v2"
+                : "https://water-icon-dc4.notion.site/image/attachment%3A3292e931-4479-40da-ab55-719824478764%3Aimage.png?table=block&id=2322845a-0c9f-8069-8720-e3a085f5acfa&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&width=300&userId=&cache=v2";
+
+              const marker = new google.maps.Marker({
                 position: { lat: drop.latitude, lng: drop.longitude },
                 map: map,
                 title: drop.content,
                 icon: {
-                  url: "https://water-icon-dc4.notion.site/image/attachment%3A3292e931-4479-40da-ab55-719824478764%3Aimage.png?table=block&id=2322845a-0c9f-8069-8720-e3a085f5acfa&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&width=300&userId=&cache=v2",
-                  scaledSize: new google.maps.Size(32, 32)
+                  url: iconUrl,
+                  scaledSize: new google.maps.Size(60, 60)
+                }
+              });
+              
+              marker.addListener('click', function() {
+                const isInCircle = distance <= radius;
+                if (isInCircle) {
+                  window.ReactNativeWebView?.postMessage(JSON.stringify({
+                    type: 'markerClick',
+                    action: 'navigateToMusic',
+                    payload: {
+                      id: drop.id,
+                      content: drop.content,
+                      latitude: drop.latitude,
+                      longitude: drop.longitude,
+                    }
+                  }));
+                } else {
+                  window.ReactNativeWebView?.postMessage(JSON.stringify({
+                    type: 'markerClick',
+                    action: 'showDetails',
+                    payload: {
+                      id: drop.id,
+                      content: drop.content,
+                      latitude: drop.latitude,
+                      longitude: drop.longitude,
+                    }
+                  }));
                 }
               });
             });
@@ -153,11 +188,11 @@ export default function GoogleMapView() {
     </html>
   `;
 
-  // droppings 전달
   useEffect(() => {
     if (webviewRef.current && droppings) {
       webviewRef.current.postMessage(JSON.stringify({ type: 'droppings', payload: droppings }));
     }
+    console.log(droppings);
   }, [droppings]);
 
   return (
@@ -179,6 +214,22 @@ export default function GoogleMapView() {
         scrollEnabled={false}
         onMessage={(event) => {
           console.log('WebView says:', event.nativeEvent.data);
+          try {
+            const data = JSON.parse(event.nativeEvent.data);
+            if (data.type === 'markerClick') {
+              if (data.action === 'navigateToMusic') {
+                (navigation as any).navigate('Music', { dropData: data.payload });
+              } else if (data.action === 'showDetails') {
+                Alert.alert(
+                  "알림",
+                  "확인할 수 없는 드랍입니다",
+                  [{ text: "확인", style: "default" }]
+                );
+              }
+            }
+          } catch (e) {
+            console.log('메시지 파싱 에러:', e);
+          }
         }}
       />
     </>

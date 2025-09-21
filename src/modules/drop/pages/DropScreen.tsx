@@ -12,11 +12,6 @@ import type { DropStackParamList } from '../../../navigation/DropStack';
 import { useCreateDropping } from '../hooks/useCreateDropping';
 import { AuthContext } from '../../auth/auth-context';
 import Button from '../../../components/button/Button';
-import { useSpotifyPlayer } from '../../../hooks/music/useSpotifyPlayer';
-
-
-import { loadAndPlayPreview, seekTo, togglePlay } from '../../../utils/spotifyPreviewPlayer';
-import { usePreviewProgress } from '../../../hooks/music/usePreviewProgress';
 
 function DropScreen() {
     const route = useRoute<RouteProp<DropStackParamList, 'DropDetail'>>();
@@ -27,27 +22,6 @@ function DropScreen() {
   
     const [content, setContent] = useState('');
   
-    //const { play, pause, resume } = useSpotifyPlayer(userToken);
-  
-    // 기존 previewPlayer는 제거하거나 주석 처리
-    // useEffect(() => {
-    //   if (!previewUrl) return;
-    //   loadAndPlayPreview({ ... });
-    // }, [previewUrl]);
-  
-    //const handlePlay = () => {
-    //  const trackUri = "spotify:track:4uLU6hMCjMI75M1A2tKUQC";
-    //  void play(trackUri);
-    //};
-  
-    //const handlePause = () => {
-    //  void pause();
-    //};
-  
-    //const handleResume = () => {
-     // void resume();
-    //};
-  
     const handleCreateDropping = () => {
       if (!userToken) {
         Alert.alert('로그인 필요', '드롭핑을 생성하려면 로그인이 필요합니다.');
@@ -57,8 +31,8 @@ function DropScreen() {
         {
           songId: 'test',
           content: content.trim(),
-          latitude: 35, 
-          longitude: 127,
+          latitude: 35.188311, 
+          longitude: 128.903133,
           address: location,
         },
         {
