@@ -6,7 +6,11 @@ import { TYPOGRAPHY } from "../../../../constants/typography";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "../../../../components/icon/Icon";
 
-function HeaderBar() {
+interface HeaderBarProps {
+  onLayout?: (height: number) => void;
+}
+
+function HeaderBar({ onLayout }: HeaderBarProps) {
 
   const navigation = useNavigation();
   const pressHandlerProfile = ()=>{
@@ -14,7 +18,13 @@ function HeaderBar() {
   }
   return (
     <SafeAreaView>
-    <View style={styles.container}>
+    <View 
+      style={styles.container}
+      onLayout={(event) => {
+        const { height } = event.nativeEvent.layout;
+        onLayout?.(height);
+      }}
+    >
       <View style={styles.leftSection}>
         <Profile />
         <Pressable
