@@ -162,27 +162,6 @@ export default function GoogleMapView() {
                 }
               });
             });
-            marker.addListener('click', function() {
-              const isInCircle = distance <= radius;
-              if (isInCircle) {
-                window.ReactNativeWebView?.postMessage(JSON.stringify({
-                  type: 'markerClick',
-                  action: 'navigateToMusic',
-                  payload: {
-                    id: drop.id,
-                    content: drop.content,
-                    latitude: drop.latitude,
-                    longitude: drop.longitude,
-                  }
-                }));
-              } else {
-                window.ReactNativeWebView?.postMessage(JSON.stringify({
-                  type: 'markerClick',
-                  action: 'showDetails',
-                  payload: { /* ... */ }
-                }));
-              }
-            });
           }
 
           window.addEventListener('message', function(event) {
