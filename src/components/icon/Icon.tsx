@@ -38,11 +38,12 @@ interface Props {
     width?: number;
     height?: number;
     color?: string;
+    onPress?: () => void;
 }
 
-const Icon: React.FC<Props> = ({ name, ...props }) => {
+const Icon: React.FC<Props> = ({ name, onPress, ...props }) => {
     const SvgIcon = icons[name];
-    return <SvgIcon {...props} />;
+    return <SvgIcon {...props} onPress={onPress} />;
 };
 
 export default Icon;

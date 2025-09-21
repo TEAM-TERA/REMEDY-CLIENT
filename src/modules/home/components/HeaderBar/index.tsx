@@ -8,13 +8,17 @@ import Icon from "../../../../components/icon/Icon";
 
 interface HeaderBarProps {
   onLayout?: (height: number) => void;
+  setIsRunning?: (isRunning: boolean) => void;
 }
 
-function HeaderBar({ onLayout }: HeaderBarProps) {
+function HeaderBar({ onLayout, setIsRunning }: HeaderBarProps) {
 
   const navigation = useNavigation();
   const pressHandlerProfile = ()=>{
     navigation.navigate("Profile");
+  }
+  const pressHandlerRunning = ()=>{
+    setIsRunning?.(true);
   }
   return (
     <SafeAreaView>
@@ -42,7 +46,7 @@ function HeaderBar({ onLayout }: HeaderBarProps) {
         <Icon name="music"/>
         <Icon name="target"/>
         <Icon name="paint"/>
-        <Icon name="running"/>
+        <Icon name="running" onPress={pressHandlerRunning}/>
       </View>
     </View>
     </SafeAreaView>

@@ -13,7 +13,7 @@ function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <View style={{ flex: 1, position: 'relative' }}>
-            <HeaderBar onLayout={setHeaderHeight}/>
+            <HeaderBar setIsRunning={setIsRunning} onLayout={setHeaderHeight}/>
             <RunningStats 
               distance={0.1} 
               time={72} 
