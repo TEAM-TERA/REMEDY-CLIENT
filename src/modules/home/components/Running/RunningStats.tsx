@@ -18,7 +18,7 @@ const RunningStats: React.FC<RunningStatsProps> = ({
   headerHeight = 68
 }) => {
   const [formattedTime, setFormattedTime] = useState('00:00:00');
-  const [formattedDistance, setFormattedDistance] = useState('0.0');
+  const [formattedDistance, setFormattedDistance] = useState(distance);
 
   useEffect(() => {
     const hours = Math.floor(time / 3600);
