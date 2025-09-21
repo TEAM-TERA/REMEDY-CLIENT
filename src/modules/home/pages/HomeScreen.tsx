@@ -7,7 +7,8 @@ import MusicWheel from "../components/MainFunction/MusicWheel";
 import RunningStats from "../components/Running/RunningStats";
 
 function HomeScreen() {
-  const [headerHeight, setHeaderHeight] = useState(68); // 기본값
+  const [headerHeight, setHeaderHeight] = useState(68);
+  const [isRunning, setIsRunning] = useState(false);
 
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>
@@ -16,7 +17,7 @@ function HomeScreen() {
             <RunningStats 
               distance={0.1} 
               time={72} 
-              isRunning={true} 
+              isRunning={isRunning} 
               headerHeight={headerHeight}
             />
             <View style={{ flex: 1 }}>
