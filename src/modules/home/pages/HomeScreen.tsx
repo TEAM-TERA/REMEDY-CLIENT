@@ -18,7 +18,7 @@ function HomeScreen() {
               isRunning && (
                 <RunningStats 
                   distance={0.1} 
-                  time={72} 
+                  time={1} 
                   isRunning={isRunning} 
                   headerHeight={headerHeight}
                 />

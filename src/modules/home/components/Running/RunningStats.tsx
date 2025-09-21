@@ -19,6 +19,7 @@ const RunningStats: React.FC<RunningStatsProps> = ({
 }) => {
   const [formattedTime, setFormattedTime] = useState('00:00:00');
   const [formattedDistance, setFormattedDistance] = useState(distance);
+  const [timeComponents, setTimeComponents] = useState({ hours: '00', minutes: '00', seconds: '00' });
 
   useEffect(() => {
     const hours = Math.floor(time / 3600);
@@ -28,6 +29,12 @@ const RunningStats: React.FC<RunningStatsProps> = ({
     setFormattedTime(
       `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
     );
+    
+    setTimeComponents({
+      hours: hours.toString().padStart(2, '0'),
+      minutes: minutes.toString().padStart(2, '0'),
+      seconds: seconds.toString().padStart(2, '0')
+    });
   }, [time]);
 
   const dynamicStyles = {
@@ -57,8 +64,29 @@ const RunningStats: React.FC<RunningStatsProps> = ({
             <Icon name="clock" />
           </View>
           <View style={styles.textContainer}>
-            <Text style={[styles.statText, TYPOGRAPHY.BODY_1]}>
-              {formattedTime}
+            <Text style={[
+              parseInt(timeComponents.hours) > 0 ? styles.statText : styles.statTextGray, 
+              TYPOGRAPHY.BODY_1
+            ]}>
+              {timeComponents.hours}
+            </Text>
+            <Text style={[styles.statTextGray, TYPOGRAPHY.BODY_1]}>
+              :
+            </Text>
+            <Text style={[
+              parseInt(timeComponents.minutes) > 0 ? styles.statText : styles.statTextGray, 
+              TYPOGRAPHY.BODY_1
+            ]}>
+              {timeComponents.minutes}
+            </Text>
+            <Text style={[styles.statTextGray, TYPOGRAPHY.BODY_1]}>
+              :
+            </Text>
+            <Text style={[
+              parseInt(timeComponents.seconds) > 0 ? styles.statText : styles.statTextGray, 
+              TYPOGRAPHY.BODY_1
+            ]}>
+              {timeComponents.seconds}
             </Text>
           </View>
         </View>
