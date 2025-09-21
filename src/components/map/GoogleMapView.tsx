@@ -12,7 +12,6 @@ export default function GoogleMapView() {
   const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   const webviewRef = useRef<WebView>(null);
 
-  // 위치 요청
   useEffect(() => {
     async function requestLocation() {
       try {
@@ -58,9 +57,7 @@ export default function GoogleMapView() {
     }
     requestLocation();
   }, []);
-  
 
-  // fallback 위치 (서울)
   const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
 
   const { data: droppings } = useDroppings(
@@ -68,7 +65,6 @@ export default function GoogleMapView() {
     currentLocation.latitude
   );
 
-  // 지도 HTML 생성
   const html = `
     <!DOCTYPE html>
     <html>
@@ -125,7 +121,7 @@ export default function GoogleMapView() {
                 title: drop.content,
                 icon: {
                   url: "https://water-icon-dc4.notion.site/image/attachment%3A3292e931-4479-40da-ab55-719824478764%3Aimage.png?table=block&id=2322845a-0c9f-8069-8720-e3a085f5acfa&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&width=300&userId=&cache=v2",
-                  scaledSize: new google.maps.Size(32, 32)
+                  scaledSize: new google.maps.Size(60, 60)
                 }
               });
             });
@@ -155,7 +151,6 @@ export default function GoogleMapView() {
     </html>
   `;
 
-  // droppings 전달
   useEffect(() => {
     if (webviewRef.current && droppings) {
       webviewRef.current.postMessage(JSON.stringify({ type: 'droppings', payload: droppings }));
