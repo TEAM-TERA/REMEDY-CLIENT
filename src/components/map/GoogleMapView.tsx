@@ -38,6 +38,7 @@ export default function GoogleMapView() {
         Geolocation.getCurrentPosition(
           (pos) => {
             setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+            console.log(pos.coords.latitude, pos.coords.longitude);
           },
           (error) => {
             console.warn('Location error', error);
@@ -117,6 +118,7 @@ export default function GoogleMapView() {
 
           function addDroppings(drops) {
             drops.forEach(function(drop) {
+              console.log(1);
               new google.maps.Marker({
                 position: { lat: drop.latitude, lng: drop.longitude },
                 map: map,
@@ -158,6 +160,7 @@ export default function GoogleMapView() {
     if (webviewRef.current && droppings) {
       webviewRef.current.postMessage(JSON.stringify({ type: 'droppings', payload: droppings }));
     }
+    console.log(droppings);
   }, [droppings]);
 
   return (
