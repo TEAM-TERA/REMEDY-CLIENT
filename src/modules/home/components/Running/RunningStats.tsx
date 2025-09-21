@@ -40,23 +40,27 @@ const RunningStats: React.FC<RunningStatsProps> = ({
       <View style={styles.statsContainer}>
         <View style={styles.statItem}>
           <View style={styles.iconContainer}>
-            <Text style={styles.icon}><Icon name="running" /></Text>
+            <Icon name="turnRunning" />
           </View>
-          <Text style={[styles.statText, TYPOGRAPHY.BODY_1]}>
-            {formattedDistance}
-          </Text>
-          <Text style={[styles.statText, TYPOGRAPHY.BODY_1]}>
-            Km
-          </Text>
+          <View style={styles.textContainer}>
+            <Text style={[styles.statText, TYPOGRAPHY.BODY_1]}>
+              {formattedDistance}
+            </Text>
+            <Text style={[styles.statTextGray, TYPOGRAPHY.BODY_1]}>
+              Km
+            </Text>
+          </View>
         </View>
         <View style={styles.divider} />
         <View style={styles.statItem}>
           <View style={styles.iconContainer}>
-            <Text style={styles.icon}><Icon name="running" /></Text>
+            <Icon name="clock" />
           </View>
-          <Text style={[styles.statText, TYPOGRAPHY.BODY_1]}>
-            {formattedTime}
-          </Text>
+          <View style={styles.textContainer}>
+            <Text style={[styles.statText, TYPOGRAPHY.BODY_1]}>
+              {formattedTime}
+            </Text>
+          </View>
         </View>
       </View>
     </View>

@@ -15,6 +15,7 @@ import PaintSvg from './icons/PaintSvg';
 import RunningSvg from './icons/RunningSvg';
 import MusicSvg from './icons/MusicSvg';
 import TurnRunningSvg from './icons/TurnRunningSvg';
+import ClockSvg from './icons/ClockSvg';
 
 const icons = {
     edit: EditSvg,
@@ -32,6 +33,7 @@ const icons = {
     running: RunningSvg,
     music: MusicSvg,
     turnRunning: TurnRunningSvg,
+    clock: ClockSvg,
 };
 
 type IconName = keyof typeof icons;

@@ -38,11 +38,19 @@ export const styles = StyleSheet.create({
   iconContainer: {
     marginRight: scale(0.3),
   },
+  textContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: scale(0.2),
+  },
   icon: {
     fontSize: scale(1.2),
   },
   statText: {
     color: PRIMARY_COLORS.DEFAULT,
+  },
+  statTextGray: {
+    color: TEXT_COLORS.CAPTION,
   },
   divider: {
     width: 1,
