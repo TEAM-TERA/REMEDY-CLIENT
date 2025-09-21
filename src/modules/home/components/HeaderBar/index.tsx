@@ -47,7 +47,7 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
         <Icon name="music"/>
         <Icon name="target"/>
         <Icon name="paint"/>
-        <Icon name="running" onPress={pressHandlerRunning}/>
+        <Icon name="running" onPress={pressHandlerRunning} isPress={isRunning} pressname="turnRunning"/>
       </View>
     </View>
     </SafeAreaView>
