@@ -1,4 +1,5 @@
 import React from 'react';
+import { TouchableOpacity } from 'react-native';
 import EditSvg from './icons/EditSvg';
 import LeftArrowSvg from './icons/LeftArrowSvg';
 import LocationSvg from './icons/LocationSvg';
@@ -43,7 +44,14 @@ interface Props {
 
 const Icon: React.FC<Props> = ({ name, onPress, ...props }) => {
     const SvgIcon = icons[name];
-    return <SvgIcon {...props} onPress={onPress} />;
+    if (onPress) {
+        return (
+            <TouchableOpacity onPress={onPress}>
+                <SvgIcon {...props} />
+            </TouchableOpacity>
+        );
+    }
+    return <SvgIcon {...props} />;
 };
 
 export default Icon;

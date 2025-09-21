@@ -9,16 +9,17 @@ import Icon from "../../../../components/icon/Icon";
 interface HeaderBarProps {
   onLayout?: (height: number) => void;
   setIsRunning?: (isRunning: boolean) => void;
+  isRunning?: boolean;
 }
 
-function HeaderBar({ onLayout, setIsRunning }: HeaderBarProps) {
+function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
 
   const navigation = useNavigation();
   const pressHandlerProfile = ()=>{
     navigation.navigate("Profile");
   }
   const pressHandlerRunning = ()=>{
-    setIsRunning?.(true);
+    setIsRunning?.(!isRunning);
   }
   return (
     <SafeAreaView>

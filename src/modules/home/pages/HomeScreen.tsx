@@ -13,13 +13,17 @@ function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1 }} edges={['top']}>
         <View style={{ flex: 1, position: 'relative' }}>
-            <HeaderBar setIsRunning={setIsRunning} onLayout={setHeaderHeight}/>
-            <RunningStats 
-              distance={0.1} 
-              time={72} 
-              isRunning={isRunning} 
-              headerHeight={headerHeight}
-            />
+            <HeaderBar setIsRunning={setIsRunning} onLayout={setHeaderHeight} isRunning={isRunning}/>
+            {
+              isRunning && (
+                <RunningStats 
+                  distance={0.1} 
+                  time={72} 
+                  isRunning={isRunning} 
+                  headerHeight={headerHeight}
+                />
+              )
+            }
             <View style={{ flex: 1 }}>
                 <GoogleMapView/>
             </View>
