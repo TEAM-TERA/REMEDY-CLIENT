@@ -73,10 +73,9 @@ export default function GoogleMapView() {
         <style>
           html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; }
         </style>
-        <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=geometry"></script>
         <script>
           var map;
-
           function initMap() {
             const center = { lat: ${currentLocation.latitude}, lng: ${currentLocation.longitude} };
 
