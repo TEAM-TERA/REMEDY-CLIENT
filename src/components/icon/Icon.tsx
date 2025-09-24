@@ -1,4 +1,5 @@
 import React from 'react';
+import { TouchableOpacity } from 'react-native';
 import EditSvg from './icons/EditSvg';
 import LeftArrowSvg from './icons/LeftArrowSvg';
 import LocationSvg from './icons/LocationSvg';
@@ -13,6 +14,8 @@ import TargetSvg from './icons/TargetSvg';
 import PaintSvg from './icons/PaintSvg';
 import RunningSvg from './icons/RunningSvg';
 import MusicSvg from './icons/MusicSvg';
+import TurnRunningSvg from './icons/TurnRunningSvg';
+import ClockSvg from './icons/ClockSvg';
 
 const icons = {
     edit: EditSvg,
@@ -29,19 +32,39 @@ const icons = {
     paint: PaintSvg,
     running: RunningSvg,
     music: MusicSvg,
+    turnRunning: TurnRunningSvg,
+    clock: ClockSvg,
 };
 
 type IconName = keyof typeof icons;
 
 interface Props {
     name: IconName;
+    pressname?: IconName;
     width?: number;
     height?: number;
     color?: string;
+    isPress?: boolean;
+    onPress?: () => void;
 }
 
-const Icon: React.FC<Props> = ({ name, ...props }) => {
+const Icon: React.FC<Props> = ({ name, onPress, pressname = name, isPress = false, ...props }) => {
     const SvgIcon = icons[name];
+    if (onPress) {
+        if (isPress){
+            const SvgIconPress = icons[pressname];
+            return (
+                <TouchableOpacity onPress={onPress}>
+                    <SvgIconPress {...props} />
+                </TouchableOpacity>
+            );
+        }
+        return (
+            <TouchableOpacity onPress={onPress}>
+                <SvgIcon {...props} />
+            </TouchableOpacity>
+        );
+    }
     return <SvgIcon {...props} />;
 };
 

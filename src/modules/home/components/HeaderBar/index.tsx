@@ -6,15 +6,30 @@ import { TYPOGRAPHY } from "../../../../constants/typography";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "../../../../components/icon/Icon";
 
-function HeaderBar() {
+interface HeaderBarProps {
+  onLayout?: (height: number) => void;
+  setIsRunning?: (isRunning: boolean) => void;
+  isRunning?: boolean;
+}
+
+function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
 
   const navigation = useNavigation();
   const pressHandlerProfile = ()=>{
     navigation.navigate("Profile");
   }
+  const pressHandlerRunning = ()=>{
+    setIsRunning?.(!isRunning);
+  }
   return (
     <SafeAreaView>
-    <View style={styles.container}>
+    <View 
+      style={styles.container}
+      onLayout={(event) => {
+        const { height } = event.nativeEvent.layout;
+        onLayout?.(height);
+      }}
+    >
       <View style={styles.leftSection}>
         <Profile />
         <Pressable
@@ -32,7 +47,7 @@ function HeaderBar() {
         <Icon name="music"/>
         <Icon name="target"/>
         <Icon name="paint"/>
-        <Icon name="running"/>
+        <Icon name="running" onPress={pressHandlerRunning} isPress={isRunning} pressname="turnRunning"/>
       </View>
     </View>
     </SafeAreaView>
