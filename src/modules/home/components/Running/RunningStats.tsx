@@ -3,12 +3,19 @@ import { View, Text } from 'react-native';
 import Icon from '../../../../components/icon/Icon';
 import { TYPOGRAPHY } from '../../../../constants/typography';
 import { styles } from '../../styles/Running/RunningStats';
+import Geolocation from 'react-native-geolocation-service';
+import calculateDistance from '../../../../utils/calculateDistance';
 
 interface RunningStatsProps {
   distance?: number;
   time?: number;
   isRunning?: boolean;
   headerHeight?: number;
+}
+
+interface Location {
+  latitude: number;
+  longitude: number;
 }
 
 const RunningStats: React.FC<RunningStatsProps> = ({ 
@@ -18,9 +25,11 @@ const RunningStats: React.FC<RunningStatsProps> = ({
   headerHeight = 68
 }) => {
   const [currentTime, setCurrentTime] = useState(0);
-  const [formattedDistance, setFormattedDistance] = useState(distance);
+  const [currentDistance, setCurrentDistance] = useState(0);
   const [timeComponents, setTimeComponents] = useState({ hours: '00', minutes: '00', seconds: '00' });
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const locationWatchId = useRef<number | null>(null);
+  const lastLocation = useRef<Location | null>(null);
 
   const formatTime = (totalSeconds: number) => {
     const hours = Math.floor(totalSeconds / 3600);
@@ -37,20 +46,63 @@ const RunningStats: React.FC<RunningStatsProps> = ({
   useEffect(() => {
     if (isRunning) {
       setCurrentTime(0);
+      setCurrentDistance(0);
+      lastLocation.current = null;
+
       intervalRef.current = setInterval(() => {
         setCurrentTime(prev => prev + 1);
       }, 1000);
+
+      locationWatchId.current = Geolocation.watchPosition(
+        (position) => {
+          const newLocation: Location = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          };
+
+          if (lastLocation.current) {
+            const distanceInMeters = calculateDistance(
+              lastLocation.current.latitude,
+              lastLocation.current.longitude,
+              newLocation.latitude,
+              newLocation.longitude
+            );
+            setCurrentDistance(prev => prev + (distanceInMeters / 1000));
+          }
+
+          lastLocation.current = newLocation;
+        },
+        (error) => {
+          console.log('위치 추적 에러:', error);
+        },
+        {
+          enableHighAccuracy: true,
+          distanceFilter: 5,
+          interval: 1000,
+        }
+      );
     } else {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
       }
+
+      if (locationWatchId.current) {
+        Geolocation.clearWatch(locationWatchId.current);
+        locationWatchId.current = null;
+      }
+
       setCurrentTime(0);
+      setCurrentDistance(0);
+      lastLocation.current = null;
     }
 
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
+      }
+      if (locationWatchId.current) {
+        Geolocation.clearWatch(locationWatchId.current);
       }
     };
   }, [isRunning]);
@@ -73,7 +125,7 @@ const RunningStats: React.FC<RunningStatsProps> = ({
           </View>
           <View style={styles.textContainer}>
             <Text style={[styles.statText, TYPOGRAPHY.BODY_1]}>
-              {formattedDistance}
+              {currentDistance.toFixed(2)}
             </Text>
             <Text style={[styles.statTextGray, TYPOGRAPHY.BODY_1]}>
               Km

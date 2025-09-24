@@ -168,10 +168,23 @@ export default function GoogleMapView() {
             try {
               const data = JSON.parse(event.data);
               if (data.type === 'droppings') {
+                console.log('Received droppings:', data.payload);
                 addDroppings(data.payload);
               }
             } catch (e) {
               window.ReactNativeWebView?.postMessage("droppings error: " + e.message);
+            }
+          });
+          
+          document.addEventListener('message', function(event) {
+            try {
+              const data = JSON.parse(event.data);
+              if (data.type === 'droppings') {
+                console.log('Received droppings (direct):', data.payload);
+                addDroppings(data.payload);
+              }
+            } catch (e) {
+              window.ReactNativeWebView?.postMessage("droppings error (direct): " + e.message);
             }
           });
 
@@ -187,13 +200,6 @@ export default function GoogleMapView() {
       </body>
     </html>
   `;
-
-  useEffect(() => {
-    if (webviewRef.current && droppings) {
-      webviewRef.current.postMessage(JSON.stringify({ type: 'droppings', payload: droppings }));
-    }
-    console.log(droppings);
-  }, [droppings]);
 
   return (
     <>
