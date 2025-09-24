@@ -3,6 +3,7 @@ import { View, Text } from 'react-native';
 import Icon from '../../../../components/icon/Icon';
 import { TYPOGRAPHY } from '../../../../constants/typography';
 import { styles } from '../../styles/Running/RunningStats';
+import Timer from './Timer';
 import useRunningTracker from '../../hooks/useRunningTracker';
 
 interface RunningStatsProps {
@@ -10,11 +11,6 @@ interface RunningStatsProps {
   time?: number;
   isRunning?: boolean;
   headerHeight?: number;
-}
-
-interface Location {
-  latitude: number;
-  longitude: number;
 }
 
 const RunningStats: React.FC<RunningStatsProps> = ({
@@ -49,32 +45,7 @@ const RunningStats: React.FC<RunningStatsProps> = ({
           <View style={styles.iconContainer}>
             <Icon name="clock" />
           </View>
-          <View style={styles.textContainer}>
-            <Text style={[
-              parseInt(timeComponents.hours) > 0 ? styles.statText : styles.statTextGray, 
-              TYPOGRAPHY.BODY_1
-            ]}>
-              {timeComponents.hours}
-            </Text>
-            <Text style={[styles.statTextGray, TYPOGRAPHY.BODY_1]}>
-              :
-            </Text>
-            <Text style={[
-              parseInt(timeComponents.minutes) > 0 ? styles.statText : styles.statTextGray, 
-              TYPOGRAPHY.BODY_1
-            ]}>
-              {timeComponents.minutes}
-            </Text>
-            <Text style={[styles.statTextGray, TYPOGRAPHY.BODY_1]}>
-              :
-            </Text>
-            <Text style={[
-              parseInt(timeComponents.seconds) > 0 ? styles.statText : styles.statTextGray, 
-              TYPOGRAPHY.BODY_1
-            ]}>
-              {timeComponents.seconds}
-            </Text>
-          </View>
+          <Timer timeComponents={timeComponents} />
         </View>
       </View>
     </View>
