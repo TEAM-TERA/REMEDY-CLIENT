@@ -1,6 +1,7 @@
 import { View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState } from 'react';
+import { BACKGROUND_COLORS } from "../../../constants/colors";
 import HeaderBar from "../components/HeaderBar";
 import GoogleMapView from "../../../components/map/GoogleMapView";
 import MusicWheel from "../components/MainFunction/MusicWheel";
@@ -11,7 +12,7 @@ function HomeScreen() {
   const [isRunning, setIsRunning] = useState(false);
 
   return (
-    <SafeAreaView style={{ flex: 1 }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }} edges={['top']}>
         <View style={{ flex: 1, position: 'relative' }}>
             <HeaderBar setIsRunning={setIsRunning} onLayout={setHeaderHeight} isRunning={isRunning}/>
             {
