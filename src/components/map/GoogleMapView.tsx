@@ -66,6 +66,21 @@ export default function GoogleMapView() {
     currentLocation.longitude,
     currentLocation.latitude
   );
+  useEffect(() => {
+    console.log('Droppings data:', droppings);
+    console.log('Droppings length:', droppings?.length);
+    
+    if (webviewRef.current && droppings && droppings.length > 0) {
+      setTimeout(() => {
+        const message = JSON.stringify({ type: 'droppings', payload: droppings });
+        console.log('Sending to WebView:', message);
+        webviewRef.current?.postMessage(message);
+      }, 1000);
+    } else {
+      console.log('Not sending to WebView - webviewRef:', !!webviewRef.current, 'droppings:', !!droppings, 'length:', droppings?.length);
+    }
+  }, [droppings]);
+
 
   const html = `
     <!DOCTYPE html>
@@ -113,17 +128,29 @@ export default function GoogleMapView() {
             window.ReactNativeWebView?.postMessage("initMap called");
           }
 
+          var existingMarkers = [];
+
+          function clearDroppings() {
+            existingMarkers.forEach(marker => marker.setMap(null));
+            existingMarkers = [];
+          }
+
           function addDroppings(drops) {
+            console.log('Adding droppings to map:', drops);
+            clearDroppings();
+            
             drops.forEach(function(drop) {
+              console.log('Processing drop:', drop);
               const dropPosition = new google.maps.LatLng(drop.latitude, drop.longitude);
               const centerPosition = new google.maps.LatLng(${currentLocation.latitude}, ${currentLocation.longitude});
               const distance = google.maps.geometry.spherical.computeDistanceBetween(centerPosition, dropPosition);
 
               const radius = ${MAP_RADIUS};
 
+              // 거리에 따라 다른 아이콘 사용
               const iconUrl = distance <= radius 
-                ? "https://www.notion.so/image/attachment%3Aa6b92c55-063d-4be3-9e07-2863714d55f1%3Aimage.png?table=block&id=2752845a-0c9f-80c2-a2b9-ffceba8ca2ed&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&width=2000&userId=620d2e09-6c4e-4ca6-875c-c0f20106c899&cache=v2"
-                : "https://water-icon-dc4.notion.site/image/attachment%3A3292e931-4479-40da-ab55-719824478764%3Aimage.png?table=block&id=2322845a-0c9f-8069-8720-e3a085f5acfa&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&width=300&userId=&cache=v2";
+                ? "https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/a6b92c55-063d-4be3-9e07-2863714d55f1/image.png?table=block&id=2752845a-0c9f-80c2-a2b9-ffceba8ca2ed&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758823200000&signature=V8FHMorfGi6UzxGFl4YPouDRArDvmc9khkNHftBKRNc&downloadName=image.png"
+                : "https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/3292e931-4479-40da-ab55-719824478764/image.png?table=block&id=2322845a-0c9f-8069-8720-e3a085f5acfa&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758823200000&signature=FiQeTx1MJ7ziAQFXS9phQTK1U5ExF1GZcFCoXPuhvCA&downloadName=image.png";
 
               const marker = new google.maps.Marker({
                 position: { lat: drop.latitude, lng: drop.longitude },
@@ -132,11 +159,15 @@ export default function GoogleMapView() {
                 icon: {
                   url: iconUrl,
                   scaledSize: new google.maps.Size(60, 60)
-                }
+                },
+                animation: google.maps.Animation.DROP
               });
+              
+              existingMarkers.push(marker);
               
               marker.addListener('click', function() {
                 const isInCircle = distance <= radius;
+                console.log('Marker clicked, distance:', distance, 'radius:', radius, 'isInCircle:', isInCircle);
                 if (isInCircle) {
                   window.ReactNativeWebView?.postMessage(JSON.stringify({
                     type: 'markerClick',
@@ -162,29 +193,25 @@ export default function GoogleMapView() {
                 }
               });
             });
+            
+            console.log('Total markers added:', existingMarkers.length);
           }
 
           window.addEventListener('message', function(event) {
             try {
+              console.log('Received message:', event.data);
               const data = JSON.parse(event.data);
               if (data.type === 'droppings') {
                 console.log('Received droppings:', data.payload);
-                addDroppings(data.payload);
+                if (map && data.payload && data.payload.length > 0) {
+                  addDroppings(data.payload);
+                } else {
+                  console.log('Map not ready or no droppings data');
+                }
               }
             } catch (e) {
+              console.error("Message parsing error:", e.message);
               window.ReactNativeWebView?.postMessage("droppings error: " + e.message);
-            }
-          });
-          
-          document.addEventListener('message', function(event) {
-            try {
-              const data = JSON.parse(event.data);
-              if (data.type === 'droppings') {
-                console.log('Received droppings (direct):', data.payload);
-                addDroppings(data.payload);
-              }
-            } catch (e) {
-              window.ReactNativeWebView?.postMessage("droppings error (direct): " + e.message);
             }
           });
 
@@ -218,6 +245,15 @@ export default function GoogleMapView() {
         mixedContentMode="always"
         geolocationEnabled={true}
         scrollEnabled={false}
+        onLoadEnd={() => {
+          if (droppings && droppings.length > 0) {
+            setTimeout(() => {
+              const message = JSON.stringify({ type: 'droppings', payload: droppings });
+              console.log('Sending to WebView on load end:', message);
+              webviewRef.current?.postMessage(message);
+            }, 500);
+          }
+        }}
         onMessage={(event) => {
           console.log('WebView says:', event.nativeEvent.data);
           const message = event.nativeEvent.data;
