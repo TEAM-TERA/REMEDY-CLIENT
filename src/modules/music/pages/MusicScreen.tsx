@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '../styles/MusicScreen';
 import Icon from '../../../components/icon/Icon';
@@ -9,13 +9,18 @@ import PlayBar from '../../../components/playBar/PlayBar';
 import { useMusicComments } from '../hooks/useMusicComments';
 import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import { useDropLikeCount } from '../hooks/useLike';
-import { useToggleLike } from '../hooks/useLike'
+import { useToggleLike } from '../hooks/useLike';
+import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
+import { useBackgroundAudioPermission } from '../../../hooks/useBackgroundAudioPermission';
+import { useQuery } from '@tanstack/react-query';
+import { getSongInfo } from '../../drop/api/dropApi';
 import type { Comment } from '../types/comment';
 
 type Props = {
   route: {
     params: {
       droppingId: string;
+      songId?: string;
       title?: string;
       artist?: string;
       message?: string;
@@ -26,15 +31,47 @@ type Props = {
 };
 
 function MusicScreen({ route }: Props) {
-  const { droppingId, title, artist, message, location, likeCount } = route.params;
+  const { droppingId, songId, title, artist, message, location, likeCount } = route.params;
   const musicLikeCount = useDropLikeCount(droppingId);
   const toggleLike = useToggleLike(droppingId);
   const [comment, setComment] = useState('');
+
+  const serverImageUrl = 'https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/be9dcd92-96bb-4f75-b49b-80ff8b8758f5/image.png?table=block&id=2792845a-0c9f-80e5-9005-fa71e1c2f479&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758844800000&signature=6xTJRZIFgl9yfwuj_TMjTuEBqz8wfkQM7QpcQ5Wk72w&downloadName=image.png';
+  
+  const musicPlayer = useHLSPlayer(songId);
+  const { hasPermission, requestBackgroundAudioPermission } = useBackgroundAudioPermission();
+
+  const { data: songInfo } = useQuery({
+    queryKey: ['songInfo', songId],
+    queryFn: () => getSongInfo(songId || ''),
+    enabled: !!songId,
+  });
 
   const { data: comments, isLoading, isError, refetch, isFetching } =
     useMusicComments(droppingId);
 
   const createComment = useCreateMusicComment(droppingId);
+
+  useEffect(() => {
+    if (songId) {
+      musicPlayer.loadMusic(songId);
+    }
+  }, [songId]);
+
+  const [hasRequestedPermission, setHasRequestedPermission] = useState(false);
+
+  useEffect(() => {
+    if (songId && !hasRequestedPermission) {
+      setHasRequestedPermission(true);
+      requestBackgroundAudioPermission();
+    }
+  }, [songId, hasRequestedPermission, requestBackgroundAudioPermission]);
+
+  useEffect(() => {
+    if (musicPlayer?.error) {
+      Alert.alert('음악 재생 오류', musicPlayer.error);
+    }
+  }, [musicPlayer?.error]);
 
   const handlePost = () => {
     const text = comment.trim();
@@ -42,6 +79,14 @@ function MusicScreen({ route }: Props) {
     createComment.mutate(text, {
       onSuccess: () => setComment(''),
     });
+  };
+
+  const handleTogglePlay = () => {
+    musicPlayer.togglePlay();
+  };
+
+  const handleSeek = (time: number) => {
+    musicPlayer.seekTo(time);
   };
 
   const commentCount = comments?.length ?? 0;
@@ -58,13 +103,17 @@ function MusicScreen({ route }: Props) {
         }
       >
         <View style={styles.innerContainer}>
-          <CdPlayer />
+          <CdPlayer imageUrl={songInfo?.imageUrl || serverImageUrl} />
 
           <View style={styles.content}>
             <View style={styles.infoRow}>
               <View style={styles.infoTextWrapper}>
-                {title ? <Text style={styles.title}>{title}</Text> : null}
-                {artist ? <Text style={styles.artist}>by {artist}</Text> : null}
+                <Text style={styles.title}>
+                  {songInfo?.title || title || '드랍핑 음악'}
+                </Text>
+                <Text style={styles.artist}>
+                  by {songInfo?.artist || artist || '알 수 없는 아티스트'}
+                </Text>
               </View>
 
               <View style={styles.likeCommentRow}>
@@ -87,9 +136,11 @@ function MusicScreen({ route }: Props) {
             </View>
 
             <PlayBar
-              currentTime={0}
-              musicTime={192}
-              onSeek={(value) => console.log('Seek to:', value)}
+              currentTime={musicPlayer.currentTime}
+              musicTime={musicPlayer.duration || 0}
+              onSeek={handleSeek}
+              onTogglePlay={handleTogglePlay}
+              isPlaying={musicPlayer.isPlaying}
             />
           </View>
 
@@ -159,6 +210,8 @@ function MusicScreen({ route }: Props) {
                   <Text style={styles.commentItemText}>{item.content}</Text>
                 </View>
               )}
+              scrollEnabled={false}
+              nestedScrollEnabled={true}
             />
           </View>
         </View>

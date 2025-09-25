@@ -12,27 +12,81 @@ import type { DropStackParamList } from '../../../navigation/DropStack';
 import { useCreateDropping } from '../hooks/useCreateDropping';
 import { AuthContext } from '../../auth/auth-context';
 import Button from '../../../components/button/Button';
+import Geolocation from 'react-native-geolocation-service';
+import { useQuery } from '@tanstack/react-query';
+import { getSongInfo } from '../api/dropApi';
+import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
+import { isPlaying } from 'react-native-track-player';
 
 function DropScreen() {
     const route = useRoute<RouteProp<DropStackParamList, 'DropDetail'>>();
-    const { musicTitle, singer, musicTime, location, imgUrl, previewUrl } = route.params;
+    const { musicTitle, singer, musicTime, location, imgUrl, previewUrl, songId } = route.params;
   
     const { userToken } = useContext(AuthContext);
     const createDroppingMutation = useCreateDropping();
   
     const [content, setContent] = useState('');
+    const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+    const musicPlayer = useHLSPlayer(songId);
+    const serverImageUrl = 'https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/be9dcd92-96bb-4f75-b49b-80ff8b8758f5/image.png?table=block&id=2792845a-0c9f-80e5-9005-fa71e1c2f479&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758844800000&signature=6xTJRZIFgl9yfwuj_TMjTuEBqz8wfkQM7QpcQ5Wk72w&downloadName=image.png';
+
+    const { data: songInfo } = useQuery({
+      queryKey: ['songInfo', songId],
+      queryFn: () => getSongInfo(songId || ''),
+      enabled: !!songId,
+    });
+
+    useEffect(() => {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          setCurrentLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          setCurrentLocation({
+            latitude: 37.5665,
+            longitude: 126.9780,
+          });
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 10000,
+        }
+      );
+    }, []);
+
+    useEffect(() => {
+      if (songId) {
+        musicPlayer.loadMusic(songId, imgUrl || serverImageUrl);
+      }
+    }, [songId, imgUrl]);
   
     const handleCreateDropping = () => {
       if (!userToken) {
         Alert.alert('로그인 필요', '드롭핑을 생성하려면 로그인이 필요합니다.');
         return;
       }
+
+      if (!currentLocation) {
+        Alert.alert('위치 오류', '위치 정보를 가져올 수 없습니다. 다시 시도해주세요.');
+        return;
+      }
+
+      if (!songId) {
+        Alert.alert('음악 오류', '음악 정보를 찾을 수 없습니다.');
+        return;
+      }
+
       createDroppingMutation.mutate(
         {
-          songId: 'test',
+          songId: songId,
           content: content.trim(),
-          latitude: 35.188311, 
-          longitude: 128.903133,
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
           address: location,
         },
         {
@@ -49,20 +103,18 @@ function DropScreen() {
   
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        <CdPlayer imageUrl={imgUrl} />
-  
+        <CdPlayer imageUrl={imgUrl || serverImageUrl} />
         <View style={styles.playerContainer}>
           <View style={styles.textContainer}>
             <Text style={[TYPOGRAPHY.HEADLINE_1, styles.titleText]}>{musicTitle}</Text>
             <Text style={[TYPOGRAPHY.SUBTITLE, styles.singerText]}>{singer}</Text>
           </View>
           <PlayBar
-            currentTime={0}  // SpotifyRemote는 position sync 별도 필요
-            musicTime={musicTime || 30}
-            onSeek={() => {}}
-            //onTogglePlay={() => {
-            //  handlePlay();
-            //}}
+            currentTime={musicPlayer.currentTime}
+            musicTime={musicPlayer.duration || musicTime || 30}
+            onSeek={musicPlayer.seekTo}
+            onTogglePlay={musicPlayer.togglePlay}
+            isPlaying={musicPlayer.isPlaying}
           />
         </View>
   

@@ -16,6 +16,8 @@ import RunningSvg from './icons/RunningSvg';
 import MusicSvg from './icons/MusicSvg';
 import TurnRunningSvg from './icons/TurnRunningSvg';
 import ClockSvg from './icons/ClockSvg';
+import PauseSvg from './icons/PauseSvg';
+import PlaySvg from './icons/PlaySvg';
 
 const icons = {
     edit: EditSvg,
@@ -34,6 +36,8 @@ const icons = {
     music: MusicSvg,
     turnRunning: TurnRunningSvg,
     clock: ClockSvg,
+    pause: PauseSvg,
+    play: PlaySvg,
 };
 
 type IconName = keyof typeof icons;
@@ -44,6 +48,7 @@ interface Props {
     width?: number;
     height?: number;
     color?: string;
+    fill?: string;
     isPress?: boolean;
     onPress?: () => void;
 }

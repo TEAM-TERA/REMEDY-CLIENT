@@ -20,7 +20,11 @@ export default function App() {
 
     (async () => {
       try {
-        await TrackPlayer.setupPlayer({});
+        await TrackPlayer.setupPlayer({
+          autoHandleInterruptions: false,
+          autoUpdateMetadata: true,
+          waitForBuffer: true,
+        });
 
         await TrackPlayer.updateOptions({
             capabilities: [

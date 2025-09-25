@@ -11,7 +11,7 @@ import findMusic from "../utils/findMusic";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { DropStackParamList } from '../../../navigation/DropStack';
-import { useSongSearch } from "../hooks/useSongSearch";
+import { useSongSearch, SongSearchItem } from "../hooks/useSongSearch";
 
 function DropSearchScreen(){
     const [searchingText,setSearchingText] = useState("");
@@ -24,7 +24,7 @@ function DropSearchScreen(){
     };
 
     const navigation = useNavigation<StackNavigationProp<DropStackParamList, 'DropSearch'>>();
-    const { data: searchResult, isLoading } = useSongSearch(searchingText);
+    const { data: searchResult, isLoading, error } = useSongSearch(searchingText);
 
     return(
         <SafeAreaView style = {styles.container}>
@@ -38,58 +38,38 @@ function DropSearchScreen(){
                 onSubmitEditing = {onSearch}
                 ></Input>
             </View>
-            {searchingText === "" ? 
-            (
-                <>
-                <View style = {historyStyles.logContainer}>
-                    <View style = {styles.textContainer}>
-                        <Text style = {[TYPOGRAPHY.BODY_1, historyStyles.logText]}>검색 기록</Text>
-                        <View style = {historyStyles.historyContainer}>
-                        {searchHistory.map((item, idx) => (
-                            <History key={item + idx} musicTitle={item} />
-                        ))}
-                        </View>
-                    </View>
-                </View>
-                <View style = {styles.recommendMusicContainer}>
-                    <View style = {styles.textContainer}>
-                        <Text style = {[TYPOGRAPHY.HEADLINE_2, styles.recommendText]}>추천 음악</Text>
-                        <Music musicTitle="LILAC" singer="아이유"></Music>
-                        <Music musicTitle="LILAC" singer="아이유"></Music>
-                        <Music musicTitle="LILAC" singer="아이유"></Music>
-                    </View>
-                </View>
-                </>
-            )
-            : 
             <ScrollView
                 style={styles.searchMusicContainer}
                 contentContainerStyle={styles.searchMusicContent}
             >
                 {isLoading ? (
                     <Text>로딩중...</Text>
-                ) : (
-                    searchResult?.map((item, idx) => (
+                ) : error ? (
+                    <Text style={{ color: 'red' }}>에러: {error.message}</Text>
+                ) : searchResult && searchResult.length > 0 ? (
+                    searchResult.map((item: SongSearchItem, idx: number) => (
                         <Music
                             key={item.id}
                             musicTitle={item.title}
                             singer={item.artist}
-                            imgUrl={item.imageUrl ?? ""}
+                            imgUrl=""
                             onPress={() =>
                                 navigation.navigate("DropDetail", {
                                     musicTitle: item.title,
                                     singer: item.artist,
                                     musicTime: item.duration,
-                                    imgUrl: item.imageUrl ?? "",
-                                    previewUrl: item.previewUrl ?? '',
+                                    songId: item.id,
+                                    imgUrl: "",
+                                    previewUrl: '', 
                                     location: "부산광역시 강서구 가락대로 1393",
                                 })
                             }
                         />
                     ))
+                ) : (
+                    <Text>음악 목록이 없습니다.</Text>
                 )}
             </ScrollView>
-            }
         </SafeAreaView>
     )
 }
