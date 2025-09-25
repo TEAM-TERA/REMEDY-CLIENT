@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, RefreshControl } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '../styles/MusicScreen';
 import Icon from '../../../components/icon/Icon';
@@ -9,13 +9,17 @@ import PlayBar from '../../../components/playBar/PlayBar';
 import { useMusicComments } from '../hooks/useMusicComments';
 import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import { useDropLikeCount } from '../hooks/useLike';
-import { useToggleLike } from '../hooks/useLike'
+import { useToggleLike } from '../hooks/useLike';
+import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
+import { useQuery } from '@tanstack/react-query';
+import { getSongInfo } from '../../drop/api/dropApi';
 import type { Comment } from '../types/comment';
 
 type Props = {
   route: {
     params: {
       droppingId: string;
+      songId?: string;
       title?: string;
       artist?: string;
       message?: string;
@@ -26,15 +30,37 @@ type Props = {
 };
 
 function MusicScreen({ route }: Props) {
-  const { droppingId, title, artist, message, location, likeCount } = route.params;
+  const { droppingId, songId, title, artist, message, location, likeCount } = route.params;
   const musicLikeCount = useDropLikeCount(droppingId);
   const toggleLike = useToggleLike(droppingId);
   const [comment, setComment] = useState('');
+  
+  // HLS 플레이어 훅 사용
+  const musicPlayer = useHLSPlayer(songId);
+
+  // 음악 정보 가져오기
+  const { data: songInfo } = useQuery({
+    queryKey: ['songInfo', songId],
+    queryFn: () => getSongInfo(songId || ''),
+    enabled: !!songId,
+  });
 
   const { data: comments, isLoading, isError, refetch, isFetching } =
     useMusicComments(droppingId);
 
   const createComment = useCreateMusicComment(droppingId);
+
+  useEffect(() => {
+    if (songId) {
+      musicPlayer.loadMusic(songId);
+    }
+  }, [songId]);
+
+  useEffect(() => {
+    if (musicPlayer?.error) {
+      Alert.alert('음악 재생 오류', musicPlayer.error);
+    }
+  }, [musicPlayer?.error]);
 
   const handlePost = () => {
     const text = comment.trim();
@@ -42,6 +68,22 @@ function MusicScreen({ route }: Props) {
     createComment.mutate(text, {
       onSuccess: () => setComment(''),
     });
+  };
+
+  const handleTogglePlay = () => {
+    console.log('PlayBar 클릭됨');
+    console.log('musicPlayer 상태:', {
+      isPlaying: musicPlayer.isPlaying,
+      isLoading: musicPlayer.isLoading,
+      error: musicPlayer.error,
+      currentTime: musicPlayer.currentTime,
+      duration: musicPlayer.duration
+    });
+    musicPlayer.togglePlay();
+  };
+
+  const handleSeek = (time: number) => {
+    musicPlayer.seekTo(time);
   };
 
   const commentCount = comments?.length ?? 0;
@@ -63,8 +105,12 @@ function MusicScreen({ route }: Props) {
           <View style={styles.content}>
             <View style={styles.infoRow}>
               <View style={styles.infoTextWrapper}>
-                {title ? <Text style={styles.title}>{title}</Text> : null}
-                {artist ? <Text style={styles.artist}>by {artist}</Text> : null}
+                <Text style={styles.title}>
+                  {songInfo?.title || title || '드랍핑 음악'}
+                </Text>
+                <Text style={styles.artist}>
+                  by {songInfo?.artist || artist || '알 수 없는 아티스트'}
+                </Text>
               </View>
 
               <View style={styles.likeCommentRow}>
@@ -87,9 +133,11 @@ function MusicScreen({ route }: Props) {
             </View>
 
             <PlayBar
-              currentTime={0}
-              musicTime={192}
-              onSeek={(value) => console.log('Seek to:', value)}
+              currentTime={musicPlayer.currentTime}
+              musicTime={musicPlayer.duration || 0}
+              onSeek={handleSeek}
+              onTogglePlay={handleTogglePlay}
+              isPlaying={musicPlayer.isPlaying}
             />
           </View>
 

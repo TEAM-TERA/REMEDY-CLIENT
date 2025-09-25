@@ -12,27 +12,63 @@ import type { DropStackParamList } from '../../../navigation/DropStack';
 import { useCreateDropping } from '../hooks/useCreateDropping';
 import { AuthContext } from '../../auth/auth-context';
 import Button from '../../../components/button/Button';
+import Geolocation from 'react-native-geolocation-service';
 
 function DropScreen() {
     const route = useRoute<RouteProp<DropStackParamList, 'DropDetail'>>();
-    const { musicTitle, singer, musicTime, location, imgUrl, previewUrl } = route.params;
+    const { musicTitle, singer, musicTime, location, imgUrl, previewUrl, songId } = route.params;
   
     const { userToken } = useContext(AuthContext);
     const createDroppingMutation = useCreateDropping();
   
     const [content, setContent] = useState('');
+    const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+    useEffect(() => {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          setCurrentLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error('위치 정보 가져오기 실패:', error);
+          setCurrentLocation({
+            latitude: 37.5665,
+            longitude: 126.9780,
+          });
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 10000,
+        }
+      );
+    }, []);
   
     const handleCreateDropping = () => {
       if (!userToken) {
         Alert.alert('로그인 필요', '드롭핑을 생성하려면 로그인이 필요합니다.');
         return;
       }
+
+      if (!currentLocation) {
+        Alert.alert('위치 오류', '위치 정보를 가져올 수 없습니다. 다시 시도해주세요.');
+        return;
+      }
+
+      if (!songId) {
+        Alert.alert('음악 오류', '음악 정보를 찾을 수 없습니다.');
+        return;
+      }
+
       createDroppingMutation.mutate(
         {
-          songId: 'test',
+          songId: songId,
           content: content.trim(),
-          latitude: 35.188311, 
-          longitude: 128.903133,
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
           address: location,
         },
         {

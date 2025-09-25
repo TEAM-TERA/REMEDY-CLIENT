@@ -69,6 +69,7 @@ export default function GoogleMapView() {
   useEffect(() => {
     console.log('Droppings data:', droppings);
     console.log('Droppings length:', droppings?.length);
+    console.log('Droppings structure:', JSON.stringify(droppings, null, 2));
     
     if (webviewRef.current && droppings && droppings.length > 0) {
       setTimeout(() => {
@@ -173,10 +174,12 @@ export default function GoogleMapView() {
                     type: 'markerClick',
                     action: 'navigateToMusic',
                     payload: {
-                      id: drop.id,
+                      droppingId: drop.droppingId,
+                      songId: drop.songId,
                       content: drop.content,
                       latitude: drop.latitude,
                       longitude: drop.longitude,
+                      address: drop.address,
                     }
                   }));
                 } else {
@@ -184,10 +187,12 @@ export default function GoogleMapView() {
                     type: 'markerClick',
                     action: 'showDetails',
                     payload: {
-                      id: drop.id,
+                      droppingId: drop.droppingId,
+                      songId: drop.songId,
                       content: drop.content,
                       latitude: drop.latitude,
                       longitude: drop.longitude,
+                      address: drop.address,
                     }
                   }));
                 }
@@ -262,7 +267,13 @@ export default function GoogleMapView() {
               const data = JSON.parse(message);
               if (data.type === 'markerClick') {
                 if (data.action === 'navigateToMusic') {
-                  (navigation as any).navigate('Music', { dropData: data.payload });
+                  (navigation as any).navigate('Music', { 
+                    droppingId: data.payload.droppingId || data.payload.id,
+                    songId: data.payload.songId || data.payload.song_id,
+                    title: data.payload.content || data.payload.title || '드랍핑 음악',
+                    message: data.payload.content || data.payload.message || '',
+                    location: data.payload.address || data.payload.location || '위치 정보 없음'
+                  });
                 } else if (data.action === 'showDetails') {
                   Alert.alert(
                     "알림",

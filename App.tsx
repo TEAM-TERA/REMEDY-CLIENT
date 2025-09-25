@@ -20,7 +20,11 @@ export default function App() {
 
     (async () => {
       try {
-        await TrackPlayer.setupPlayer({});
+        await TrackPlayer.setupPlayer({
+          autoHandleInterruptions: true,
+          autoUpdateMetadata: true,
+          waitForBuffer: true,
+        });
 
         await TrackPlayer.updateOptions({
             capabilities: [
@@ -33,6 +37,7 @@ export default function App() {
               Capability.Pause,
             ],
         });
+        console.log('TrackPlayer 설정 완료');
       } catch (e) {
         console.warn('TrackPlayer setup failed:', e);
       }

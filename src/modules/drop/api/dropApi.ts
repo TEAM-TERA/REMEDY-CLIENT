@@ -23,11 +23,16 @@ export async function createDropping({
   return res.data;
 }
 
-export async function searchSongs(query: string) {
-  const res = await axiosInstance.get("/api/v1/songs/search", {
-    params: { query }
-  });
-  return res.data.songSearchResponse;
+export async function searchSongs() {
+  console.log('searchSongs API 호출 시작');
+  try {
+    const res = await axiosInstance.get("/songs");
+    console.log('searchSongs API 응답:', res.data);
+    return res.data.songResponses;
+  } catch (error) {
+    console.error('searchSongs API 에러:', error);
+    throw error;
+  }
 }
 
 export async function getDroppings({ longitude, latitude }: { longitude: number; latitude: number }) {
@@ -35,4 +40,9 @@ export async function getDroppings({ longitude, latitude }: { longitude: number;
     params: { longitude, latitude }
   });
   return res.data.droppings;
+}
+
+export async function getSongInfo(songId: string) {
+  const res = await axiosInstance.get(`/songs/${songId}`);
+  return res.data;
 }
