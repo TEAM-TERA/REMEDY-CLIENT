@@ -16,7 +16,8 @@ export function useSongSearch(query : string) {
     queryKey: ['songSearch'],
     queryFn: () => searchSongs(),
     enabled: true,
-    staleTime: 60 * 1000,
-    retry: 1,
+    staleTime: 0,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 }

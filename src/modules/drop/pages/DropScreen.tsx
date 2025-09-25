@@ -13,6 +13,9 @@ import { useCreateDropping } from '../hooks/useCreateDropping';
 import { AuthContext } from '../../auth/auth-context';
 import Button from '../../../components/button/Button';
 import Geolocation from 'react-native-geolocation-service';
+import { useQuery } from '@tanstack/react-query';
+import { getSongInfo } from '../api/dropApi';
+import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
 
 function DropScreen() {
     const route = useRoute<RouteProp<DropStackParamList, 'DropDetail'>>();
@@ -24,6 +27,14 @@ function DropScreen() {
     const [content, setContent] = useState('');
     const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
+    const musicPlayer = useHLSPlayer(songId);
+
+    const { data: songInfo } = useQuery({
+      queryKey: ['songInfo', songId],
+      queryFn: () => getSongInfo(songId || ''),
+      enabled: !!songId,
+    });
+
     useEffect(() => {
       Geolocation.getCurrentPosition(
         (position) => {
@@ -33,7 +44,6 @@ function DropScreen() {
           });
         },
         (error) => {
-          console.error('위치 정보 가져오기 실패:', error);
           setCurrentLocation({
             latitude: 37.5665,
             longitude: 126.9780,
@@ -46,6 +56,12 @@ function DropScreen() {
         }
       );
     }, []);
+
+    useEffect(() => {
+      if (songId) {
+        musicPlayer.loadMusic(songId);
+      }
+    }, [songId]);
   
     const handleCreateDropping = () => {
       if (!userToken) {
@@ -93,12 +109,11 @@ function DropScreen() {
             <Text style={[TYPOGRAPHY.SUBTITLE, styles.singerText]}>{singer}</Text>
           </View>
           <PlayBar
-            currentTime={0}  // SpotifyRemote는 position sync 별도 필요
-            musicTime={musicTime || 30}
-            onSeek={() => {}}
-            //onTogglePlay={() => {
-            //  handlePlay();
-            //}}
+            currentTime={musicPlayer.currentTime}
+            musicTime={musicPlayer.duration || musicTime || 30}
+            onSeek={musicPlayer.seekTo}
+            onTogglePlay={musicPlayer.togglePlay}
+            isPlaying={musicPlayer.isPlaying}
           />
         </View>
   

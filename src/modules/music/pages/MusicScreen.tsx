@@ -35,10 +35,8 @@ function MusicScreen({ route }: Props) {
   const toggleLike = useToggleLike(droppingId);
   const [comment, setComment] = useState('');
   
-  // HLS 플레이어 훅 사용
   const musicPlayer = useHLSPlayer(songId);
 
-  // 음악 정보 가져오기
   const { data: songInfo } = useQuery({
     queryKey: ['songInfo', songId],
     queryFn: () => getSongInfo(songId || ''),
@@ -71,14 +69,6 @@ function MusicScreen({ route }: Props) {
   };
 
   const handleTogglePlay = () => {
-    console.log('PlayBar 클릭됨');
-    console.log('musicPlayer 상태:', {
-      isPlaying: musicPlayer.isPlaying,
-      isLoading: musicPlayer.isLoading,
-      error: musicPlayer.error,
-      currentTime: musicPlayer.currentTime,
-      duration: musicPlayer.duration
-    });
     musicPlayer.togglePlay();
   };
 

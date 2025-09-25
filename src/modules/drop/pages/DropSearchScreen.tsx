@@ -26,10 +26,6 @@ function DropSearchScreen(){
     const navigation = useNavigation<StackNavigationProp<DropStackParamList, 'DropSearch'>>();
     const { data: searchResult, isLoading, error } = useSongSearch(searchingText);
 
-    console.log('DropSearchScreen - searchResult:', searchResult);
-    console.log('DropSearchScreen - isLoading:', isLoading);
-    console.log('DropSearchScreen - error:', error);
-
     return(
         <SafeAreaView style = {styles.container}>
             <View style = {styles.inputContainer}>
