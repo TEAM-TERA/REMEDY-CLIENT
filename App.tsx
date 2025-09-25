@@ -21,7 +21,7 @@ export default function App() {
     (async () => {
       try {
         await TrackPlayer.setupPlayer({
-          autoHandleInterruptions: true,
+          autoHandleInterruptions: false,
           autoUpdateMetadata: true,
           waitForBuffer: true,
         });

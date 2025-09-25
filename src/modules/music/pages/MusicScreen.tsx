@@ -11,6 +11,7 @@ import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import { useDropLikeCount } from '../hooks/useLike';
 import { useToggleLike } from '../hooks/useLike';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
+import { useBackgroundAudioPermission } from '../../../hooks/useBackgroundAudioPermission';
 import { useQuery } from '@tanstack/react-query';
 import { getSongInfo } from '../../drop/api/dropApi';
 import type { Comment } from '../types/comment';
@@ -38,6 +39,7 @@ function MusicScreen({ route }: Props) {
   const serverImageUrl = 'https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/be9dcd92-96bb-4f75-b49b-80ff8b8758f5/image.png?table=block&id=2792845a-0c9f-80e5-9005-fa71e1c2f479&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758844800000&signature=6xTJRZIFgl9yfwuj_TMjTuEBqz8wfkQM7QpcQ5Wk72w&downloadName=image.png';
   
   const musicPlayer = useHLSPlayer(songId);
+  const { hasPermission, requestBackgroundAudioPermission } = useBackgroundAudioPermission();
 
   const { data: songInfo } = useQuery({
     queryKey: ['songInfo', songId],
@@ -55,6 +57,16 @@ function MusicScreen({ route }: Props) {
       musicPlayer.loadMusic(songId);
     }
   }, [songId]);
+
+  const [hasRequestedPermission, setHasRequestedPermission] = useState(false);
+
+  useEffect(() => {
+    if (songId && !hasRequestedPermission) {
+      console.log('백그라운드 권한 요청 시작');
+      setHasRequestedPermission(true);
+      requestBackgroundAudioPermission();
+    }
+  }, [songId, hasRequestedPermission, requestBackgroundAudioPermission]);
 
   useEffect(() => {
     if (musicPlayer?.error) {
