@@ -28,7 +28,6 @@ export function useHLSPlayer(songId?: string) {
 
   useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackTrackChanged, Event.PlaybackError], (event) => {
     if (event.type === Event.PlaybackState) {
-      console.log('TrackPlayer state changed:', event.state, 'isPlaying:', event.state === State.Playing);
       setState(prev => ({
         ...prev,
         isPlaying: event.state === State.Playing,

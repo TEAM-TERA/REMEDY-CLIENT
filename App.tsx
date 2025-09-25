@@ -37,7 +37,6 @@ export default function App() {
               Capability.Pause,
             ],
         });
-        console.log('TrackPlayer 설정 완료');
       } catch (e) {
         console.warn('TrackPlayer setup failed:', e);
       }

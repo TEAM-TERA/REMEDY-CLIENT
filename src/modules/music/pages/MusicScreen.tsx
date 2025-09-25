@@ -62,7 +62,6 @@ function MusicScreen({ route }: Props) {
 
   useEffect(() => {
     if (songId && !hasRequestedPermission) {
-      console.log('백그라운드 권한 요청 시작');
       setHasRequestedPermission(true);
       requestBackgroundAudioPermission();
     }
@@ -211,6 +210,8 @@ function MusicScreen({ route }: Props) {
                   <Text style={styles.commentItemText}>{item.content}</Text>
                 </View>
               )}
+              scrollEnabled={false}
+              nestedScrollEnabled={true}
             />
           </View>
         </View>

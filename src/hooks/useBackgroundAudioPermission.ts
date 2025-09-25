@@ -36,11 +36,9 @@ export const useBackgroundAudioPermission = () => {
                 try {
                   Linking.openURL('App-Prefs:root=General&path=BACKGROUND_APP_REFRESH/Remedy');
                 } catch (error) {
-                  console.error('앱별 백그라운드 설정으로 이동 실패:', error);
                   try {
                     Linking.openURL('App-Prefs:root=General&path=BACKGROUND_APP_REFRESH');
                   } catch (error2) {
-                    console.error('일반 백그라운드 설정으로 이동 실패:', error2);
                     Linking.openURL('App-Prefs:root=General');
                   }
                 }
@@ -50,7 +48,6 @@ export const useBackgroundAudioPermission = () => {
         ]
       );
     } catch (error) {
-      console.error('백그라운드 오디오 권한 요청 실패:', error);
       setHasPermission(false);
       setIsRequesting(false);
     }
@@ -59,10 +56,8 @@ export const useBackgroundAudioPermission = () => {
   const checkBackgroundAudioCapability = async () => {
     try {
       const state = await TrackPlayer.getState();
-      console.log('TrackPlayer 상태:', state);
       setHasPermission(state !== State.Error && state !== State.None);
     } catch (error) {
-      console.error('백그라운드 오디오 권한 확인 실패:', error);
       setHasPermission(false);
     }
   };
