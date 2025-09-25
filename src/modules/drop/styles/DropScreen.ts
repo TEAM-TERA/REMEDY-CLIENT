@@ -64,6 +64,7 @@ export const styles = StyleSheet.create({
         alignItems : "flex-start",
         alignSelf : "stretch",
         borderRadius : scale(12),
+        color : TEXT_COLORS.DEFAULT,
         backgroundColor : UI_COLORS.BACKGROUND_RED
     },
     locationContainer : {
