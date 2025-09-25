@@ -29,6 +29,7 @@ function DropScreen() {
     const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
     const musicPlayer = useHLSPlayer(songId);
+    const serverImageUrl = 'https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/be9dcd92-96bb-4f75-b49b-80ff8b8758f5/image.png?table=block&id=2792845a-0c9f-80e5-9005-fa71e1c2f479&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758844800000&signature=6xTJRZIFgl9yfwuj_TMjTuEBqz8wfkQM7QpcQ5Wk72w&downloadName=image.png';
 
     const { data: songInfo } = useQuery({
       queryKey: ['songInfo', songId],
@@ -102,8 +103,7 @@ function DropScreen() {
   
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        <CdPlayer imageUrl={imgUrl} />
-  
+        <CdPlayer imageUrl={imgUrl || serverImageUrl} />
         <View style={styles.playerContainer}>
           <View style={styles.textContainer}>
             <Text style={[TYPOGRAPHY.HEADLINE_1, styles.titleText]}>{musicTitle}</Text>

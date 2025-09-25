@@ -34,6 +34,8 @@ function MusicScreen({ route }: Props) {
   const musicLikeCount = useDropLikeCount(droppingId);
   const toggleLike = useToggleLike(droppingId);
   const [comment, setComment] = useState('');
+
+  const serverImageUrl = 'https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/be9dcd92-96bb-4f75-b49b-80ff8b8758f5/image.png?table=block&id=2792845a-0c9f-80e5-9005-fa71e1c2f479&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758844800000&signature=6xTJRZIFgl9yfwuj_TMjTuEBqz8wfkQM7QpcQ5Wk72w&downloadName=image.png';
   
   const musicPlayer = useHLSPlayer(songId);
 
@@ -90,7 +92,7 @@ function MusicScreen({ route }: Props) {
         }
       >
         <View style={styles.innerContainer}>
-          <CdPlayer />
+          <CdPlayer imageUrl={songInfo?.imageUrl || serverImageUrl} />
 
           <View style={styles.content}>
             <View style={styles.infoRow}>
