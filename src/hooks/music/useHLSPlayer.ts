@@ -97,7 +97,7 @@ export function useHLSPlayer(songId?: string) {
   };
 
 
-  const loadMusic = async (songId: string) => {
+  const loadMusic = async (songId: string, imgUrl?: string) => {
     if (!songId) return;
 
     setState(prev => ({ ...prev, isLoading: true, error: null }));
@@ -106,6 +106,7 @@ export function useHLSPlayer(songId?: string) {
       await TrackPlayer.reset();
 
       const hlsStreamUrl = `${axiosInstance.defaults.baseURL}/songs/${songId}/stream`;
+      const serverImageUrl = 'https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/be9dcd92-96bb-4f75-b49b-80ff8b8758f5/image.png?table=block&id=2792845a-0c9f-80e5-9005-fa71e1c2f479&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758844800000&signature=6xTJRZIFgl9yfwuj_TMjTuEBqz8wfkQM7QpcQ5Wk72w&downloadName=image.png';
       
       let processedHlsUrl = hlsStreamUrl;
       let trackTitle = '음악';
@@ -149,6 +150,10 @@ export function useHLSPlayer(songId?: string) {
         url: processedHlsUrl,
         title: trackTitle,
         artist: trackArtist,
+        artwork: imgUrl || serverImageUrl,
+        album: trackTitle,
+        genre: 'Music',
+        date: new Date().toISOString(),
       };
       await TrackPlayer.add(track);
 

@@ -61,9 +61,9 @@ function DropScreen() {
 
     useEffect(() => {
       if (songId) {
-        musicPlayer.loadMusic(songId);
+        musicPlayer.loadMusic(songId, imgUrl || serverImageUrl);
       }
-    }, [songId]);
+    }, [songId, imgUrl]);
   
     const handleCreateDropping = () => {
       if (!userToken) {
