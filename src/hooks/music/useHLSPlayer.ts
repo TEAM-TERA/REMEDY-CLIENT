@@ -28,6 +28,7 @@ export function useHLSPlayer(songId?: string) {
 
   useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackTrackChanged, Event.PlaybackError], (event) => {
     if (event.type === Event.PlaybackState) {
+      console.log('TrackPlayer state changed:', event.state, 'isPlaying:', event.state === State.Playing);
       setState(prev => ({
         ...prev,
         isPlaying: event.state === State.Playing,
@@ -163,7 +164,7 @@ export function useHLSPlayer(songId?: string) {
           await TrackPlayer.play();
           setState(prev => ({ ...prev, isPlaying: true }));
         } catch (error) {
-          // 자동 재생 실패 시 무시
+          console.error('자동 재생 실패:', error);
         }
       }, 1000);
 

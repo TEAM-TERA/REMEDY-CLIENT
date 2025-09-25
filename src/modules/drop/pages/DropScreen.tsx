@@ -16,6 +16,7 @@ import Geolocation from 'react-native-geolocation-service';
 import { useQuery } from '@tanstack/react-query';
 import { getSongInfo } from '../api/dropApi';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
+import { isPlaying } from 'react-native-track-player';
 
 function DropScreen() {
     const route = useRoute<RouteProp<DropStackParamList, 'DropDetail'>>();

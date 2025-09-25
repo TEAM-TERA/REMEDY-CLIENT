@@ -5,15 +5,14 @@ import { TEXT_COLORS, PRIMARY_COLORS } from "../../constants/colors";
 import Slider from "@react-native-community/slider";
 import formatTime from "../../modules/drop/utils/formatTime";
 import { PlayBarProps } from "../../modules/drop/types/PlayBar";
-import PlaySvg from "./PlaySvg";
+import Icon from "../icon/Icon";
 
 function PlayBar({ currentTime, musicTime, onSeek, onTogglePlay, isPlaying }: PlayBarProps) {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={onTogglePlay}>
-        <PlaySvg /> 
+        <Icon name={isPlaying ? "pause" : "play"} width={20} height={20} fill="white" />
       </TouchableOpacity>
-      
       <Text style={[TYPOGRAPHY.CAPTION_3, styles.timeText]}>
         {formatTime(currentTime)}
       </Text>
