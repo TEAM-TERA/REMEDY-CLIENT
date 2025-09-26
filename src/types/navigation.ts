@@ -6,6 +6,7 @@ export type RootStackParamList = {
 
   Music: {
     droppingId: string;
+    songId: string;
     title: string;
     artist: string;
     location: string;

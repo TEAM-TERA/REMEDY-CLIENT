@@ -5,67 +5,21 @@ import { useNavigation } from '@react-navigation/native';
 import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
 import { PRIMARY_COLORS } from '../../constants/colors';
 import { MAP_RADIUS, MAP_ZOOM, MAP_STYLE, MARKER_STYLES, GOOGLE_MAPS_API_KEY } from '../../constants/map';
-import { useDroppings } from '../../modules/drop/hooks/useDroppings';
-import { Linking } from 'react-native';
+import { Dropping } from '../../modules/home/types/musicList';
+import useLocation from '../../hooks/useLocation';
 
 
-export default function GoogleMapView() {
-  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+interface GoogleMapViewProps {
+  droppings: Dropping[];
+  currentLocation: { latitude: number, longitude: number };
+}
+
+export default function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
   const webviewRef = useRef<WebView>(null);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    async function requestLocation() {
-      try {
-        let enableHighAccuracy = true;
-  
-        if (Platform.OS === 'android') {
-          const res = await PermissionsAndroid.requestMultiple([
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION,
-          ]);
-          const fineGranted   = res[PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION] === PermissionsAndroid.RESULTS.GRANTED;
-          const coarseGranted = res[PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION] === PermissionsAndroid.RESULTS.GRANTED;
-          if (!fineGranted && !coarseGranted) {
-            Linking.openSettings();
-            return;
-          }
-          enableHighAccuracy = fineGranted;
-        } else {
-          const auth = await Geolocation.requestAuthorization('whenInUse'); 
-          if (auth !== 'granted') return;
-        }
-  
-        Geolocation.getCurrentPosition(
-          (pos) => {
-            setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
-            console.log(pos.coords.latitude, pos.coords.longitude);
-          },
-          (error) => {
-            console.warn('Location error', error);
-            setLocation(null);
-          },
-          {
-            enableHighAccuracy, 
-            timeout: 15000,
-            maximumAge: 10000,
-            forceRequestLocation: true,     
-            showLocationDialog: true,     
-          }
-        );
-      } catch (e) {
-        console.error('Permission error', e);
-      }
-    }
-    requestLocation();
-  }, []);
+  const safeLocation = currentLocation || { latitude: 37.5665, longitude: 126.9780 };
 
-  const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
-
-  const { data: droppings } = useDroppings(
-    currentLocation.longitude,
-    currentLocation.latitude
-  );
   useEffect(() => {
     console.log('Droppings data:', droppings);
     console.log('Droppings length:', droppings?.length);
@@ -95,7 +49,7 @@ export default function GoogleMapView() {
         <script>
           var map;
           function initMap() {
-            const center = { lat: ${currentLocation.latitude}, lng: ${currentLocation.longitude} };
+            const center = { lat: ${safeLocation.latitude}, lng: ${safeLocation.longitude} };
 
             map = new google.maps.Map(document.getElementById('map'), {
               center,
@@ -143,7 +97,7 @@ export default function GoogleMapView() {
             drops.forEach(function(drop) {
               console.log('Processing drop:', drop);
               const dropPosition = new google.maps.LatLng(drop.latitude, drop.longitude);
-              const centerPosition = new google.maps.LatLng(${currentLocation.latitude}, ${currentLocation.longitude});
+              const centerPosition = new google.maps.LatLng(${safeLocation.latitude}, ${safeLocation.longitude});
               const distance = google.maps.geometry.spherical.computeDistanceBetween(centerPosition, dropPosition);
 
               const radius = ${MAP_RADIUS};
@@ -235,7 +189,7 @@ export default function GoogleMapView() {
 
   return (
     <>
-      {!location && (
+      {!safeLocation && (
         <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
       )}
       <WebView
