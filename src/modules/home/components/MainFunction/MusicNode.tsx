@@ -5,10 +5,12 @@ import { styles } from '../../styles/MainFunction/MusicNode';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../../types/navigation';
-import { Dropping } from '../../types/musicList';
 
 interface MusicNodeProps {
-    data: Dropping;
+    data: {
+        dropping: any;
+        songInfo?: any;
+    };
     isMain: boolean;
     index: number;
 }
@@ -16,7 +18,6 @@ interface MusicNodeProps {
 function MusicNode({ data, isMain, index }: MusicNodeProps) {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-    // 각 노드의 반지름 설정. 클수록 원의 중심에서 멀어짐.
     const getRadius = () => {
         switch (index) {
             case 0:
@@ -33,14 +34,13 @@ function MusicNode({ data, isMain, index }: MusicNodeProps) {
     const radius = getRadius();
 
     const getAngle = () => {
-        // 화면에 보일 세가지 노드의 각 위치 설정
         switch (index) {
             case 0:
-                return -100; // 12시 방향
+                return -100;
             case 1:
-                return -145; // 11시 방향
+                return -145;
             case 2:
-                return 180; // 10시 방향
+                return 180;
             default:
                 return 0;
         }
@@ -48,7 +48,6 @@ function MusicNode({ data, isMain, index }: MusicNodeProps) {
 
     const angle = getAngle();
 
-    // 원형 좌표 계산
     const animatedStyle = useAnimatedStyle(() => {
         'worklet';
         const angleInRadians = (angle * Math.PI) / 180;
@@ -68,10 +67,11 @@ function MusicNode({ data, isMain, index }: MusicNodeProps) {
 
     const handlePress = () => {
         navigation.navigate('Music', {
-          droppingId: data.droppingId,
-          title: data.title,
-          artist: data.singer,
-          location: data.address,
+          droppingId: data.dropping.droppingId,
+          songId: data.dropping.songId,
+          title: data.songInfo?.title || '드랍핑 음악',
+          artist: data.songInfo?.artist || '알 수 없는 아티스트',
+          location: data.dropping.address,
         });
     };
 
@@ -82,14 +82,14 @@ function MusicNode({ data, isMain, index }: MusicNodeProps) {
                 style={isMain ? styles.container : styles.subContainer}
             >
                 <Image
-                    source={data.imageSource}
+                    source={require('../../../../assets/images/profileImage.png')}
                     style={isMain ? styles.musicImg : styles.subMusicImg}
                 />
                 <Text style={isMain ? styles.musicTitle : styles.subMusicTitle}>
-                    {data.title}
+                    {data.songInfo?.title || '드랍핑 음악'}
                 </Text>
                 <Text style={isMain ? styles.singerText : styles.subSingerText}>
-                    {data.singer}
+                    {data.songInfo?.artist || '알 수 없는 아티스트'}
                 </Text>
             </TouchableOpacity>
         </Animated.View>

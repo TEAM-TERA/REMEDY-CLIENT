@@ -95,7 +95,7 @@ function UserProfileScreen() {
                 />
                 <View style={styles.profileContainer}>
                     <Image
-                        source={me?.profileImageUrl ? {uri : me.profileImageUrl} : defaultProfileImg}
+                        source={me?.profileImageUrl && me.profileImageUrl.trim() !== '' ? {uri : me.profileImageUrl} : defaultProfileImg}
                         style={styles.profileImage}
                     />
                     <View style={styles.aliasContainer}>
