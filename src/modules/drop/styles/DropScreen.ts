@@ -9,7 +9,7 @@ export const styles = StyleSheet.create({
         padding : scale(16),
         flexDirection : "column",
         gap : scale(24),
-        backgroundColor : BACKGROUND_COLORS.BACKGROUND_RED
+        backgroundColor : BACKGROUND_COLORS.BACKGROUND
     },
     contentContainer: {
         alignItems: "center"
