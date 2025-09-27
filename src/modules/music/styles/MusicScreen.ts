@@ -12,7 +12,7 @@ export const styles = StyleSheet.create({
         flex: 1,
         paddingVertical: 16,
         paddingHorizontal: 16,
-        backgroundColor: BACKGROUND_COLORS.BACKGROUND_RED,
+        backgroundColor: BACKGROUND_COLORS.BACKGROUND,
     },
     innerContainer: {
         gap: 24,

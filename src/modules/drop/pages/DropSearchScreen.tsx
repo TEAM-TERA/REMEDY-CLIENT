@@ -1,7 +1,7 @@
 import { View, SafeAreaView, Text, ScrollView } from "react-native";
 import { styles, historyStyles } from "../styles/DropSearchScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BackSvg from "../../auth/components/BackSvg/BackSvg";
 import Input from "../../../components/input/Input";
 import History from "../components/History/History";
@@ -12,10 +12,38 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { DropStackParamList } from '../../../navigation/DropStack';
 import { useSongSearch, SongSearchItem } from "../hooks/useSongSearch";
+import useLocation from "../../../hooks/useLocation";
+import { GOOGLE_MAPS_API_KEY } from "../../../constants/map";
 
 function DropSearchScreen(){
     const [searchingText,setSearchingText] = useState("");
     const [searchHistory, setSearchHistory] = useState<string[]>([]);
+    const [currentAddress, setCurrentAddress] = useState("위치 정보를 가져오는 중...");
+
+    const { location } = useLocation();
+
+    useEffect(() => {
+        if (location) {
+            const getAddressFromCoordinates = async (lat: number, lng: number) => {
+                try {
+                    const response = await fetch(
+                        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&language=ko&key=${GOOGLE_MAPS_API_KEY}`
+                    );
+                    const data = await response.json();
+                    
+                    if (data.status === 'OK' && data.results.length > 0) {
+                        const address = data.results[0].formatted_address;
+                        setCurrentAddress(address);
+                    } else {
+                        setCurrentAddress("대한민국");
+                    }
+                } catch (error) {
+                    setCurrentAddress("대한민국");
+                }
+            };
+            getAddressFromCoordinates(location.latitude, location.longitude);
+        }
+    }, [location]);
 
     const onSearch = () => {
         if (searchingText && !searchHistory.includes(searchingText)) {
@@ -61,7 +89,7 @@ function DropSearchScreen(){
                                     songId: item.id,
                                     imgUrl: "",
                                     previewUrl: '', 
-                                    location: "부산광역시 강서구 가락대로 1393",
+                                    location: currentAddress,
                                 })
                             }
                         />
