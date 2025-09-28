@@ -1,4 +1,4 @@
-import { View, Text, TextInput, ScrollView, Alert } from 'react-native';
+import { View, Text, TextInput, ScrollView, Alert, Image } from 'react-native';
 import { useState, useEffect, useContext } from 'react';
 import { styles } from '../styles/DropScreen';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -30,8 +30,7 @@ function DropScreen() {
     const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
     const musicPlayer = useHLSPlayer(songId);
-    const serverImageUrl = 'https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/be9dcd92-96bb-4f75-b49b-80ff8b8758f5/image.png?table=block&id=2792845a-0c9f-80e5-9005-fa71e1c2f479&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758960000000&signature=6NXXJkuZXrhBdQ85Uc5kjVABlk9ERRLbJGE61atxds0&downloadName=image.png';
-
+    const serverImageUrl = Image.resolveAssetSource(require('../../../assets/images/normal_music.png')).uri;
     const { data: songInfo } = useQuery({
       queryKey: ['songInfo', songId],
       queryFn: () => getSongInfo(songId || ''),

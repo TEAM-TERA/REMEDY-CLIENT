@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, RefreshControl, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, RefreshControl, Alert, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '../styles/MusicScreen';
 import Icon from '../../../components/icon/Icon';
@@ -36,8 +36,7 @@ function MusicScreen({ route }: Props) {
   const toggleLike = useToggleLike(droppingId);
   const [comment, setComment] = useState('');
 
-  const serverImageUrl = 'https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/be9dcd92-96bb-4f75-b49b-80ff8b8758f5/image.png?table=block&id=2792845a-0c9f-80e5-9005-fa71e1c2f479&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758888000000&signature=443hqQ8mIF7Eh8HQ3EMdRTar7mUwB61DPdRkNxwJqyo&downloadName=image.png';
-  
+  const serverImageUrl = Image.resolveAssetSource(require('../../../assets/images/normal_music.png')).uri;
   const musicPlayer = useHLSPlayer(songId);
   const { hasPermission, requestBackgroundAudioPermission } = useBackgroundAudioPermission();
 
