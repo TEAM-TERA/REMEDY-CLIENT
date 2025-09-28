@@ -3,24 +3,6 @@ import Svg, { Defs, Filter, FeFlood, FeColorMatrix, FeMorphology, FeOffset, FeGa
 
 function DiscSvg({ imageUrl }: { imageUrl?: string }) {
   const [tilt, setTilt] = useState(0);
-  // const reqRef = useRef<number | null>(null);
-
-  // useEffect(() => {
-  //   let last = Date.now();
-
-  //   const animate = () => {
-  //     const now = Date.now();
-  //     const delta = now - last;
-  //     last = now;
-  //     setTilt(prev => prev + delta * 0.001);
-  //     reqRef.current = requestAnimationFrame(animate);
-  //   };
-
-  //   reqRef.current = requestAnimationFrame(animate);
-  //   return () => {
-  //     if (reqRef.current) cancelAnimationFrame(reqRef.current);
-  //   };
-  // }, []);
 
   return (
     <Svg width={407} height={231} viewBox="0 0 407 231" fill="none">
