@@ -5,4 +5,6 @@ export type InputProps = {
     width? : number | `${number}%`;
     onSubmitEditing? : ()=>void;
     secureTextEntry?: boolean;
+    keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
+    error?: string;
 };
