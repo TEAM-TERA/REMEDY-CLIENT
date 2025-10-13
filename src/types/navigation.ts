@@ -13,11 +13,17 @@ export type RootStackParamList = {
   };
 };
 
+export type AuthStackParamList = {
+  Login: undefined;
+  SignUp: undefined;
+};
+
 export type ProfileStackParamList = {
   UserProfile: undefined;
   NameEdit: undefined;
   Setting: undefined;
   InfoEdit: undefined;
+  Logout: undefined;
 };
 
 declare global {

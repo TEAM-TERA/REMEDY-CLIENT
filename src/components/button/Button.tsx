@@ -3,13 +3,13 @@ import { ButtonProps } from "../../types/Button";
 import { styles } from "./styles";
 import { TYPOGRAPHY } from "../../constants/typography";
 
-function Button({title, onPress, disabled} : ButtonProps){
+function Button({title, onPress, disabled, style, textStyle} : ButtonProps){
     return(
         <TouchableOpacity 
         onPress={onPress}
         disabled={disabled}
-        style = {styles.container}>
-            <Text style = {[styles.text, TYPOGRAPHY.BUTTON_TEXT]}>{title}</Text>
+        style = {[styles.container, style]}>
+            <Text style = {[styles.text, TYPOGRAPHY.BUTTON_TEXT, textStyle]}>{title}</Text>
         </TouchableOpacity>       
     )
 }
