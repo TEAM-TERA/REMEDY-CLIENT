@@ -20,6 +20,8 @@ function ChallengeCard({
     description,
 }: ChallengeCardProps) {
     const progressValue = parseFloat(progress.replace('%', ''));
+    const currentCount = Math.round((progressValue / 100) * 10);
+    const totalCount = 10;
 
     const handleToggle = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -45,17 +47,25 @@ function ChallengeCard({
                         </View>
                     </View>
 
-                    <View style={styles.challengeProgressWrapper}>
-                        <Text style={styles.challengeProgressText}>
-                            {progress}
-                        </Text>
-                        <View style={styles.progressBar}>
-                            <View
-                                style={[
-                                    styles.progressFill,
-                                    { width: `${progressValue}%` as any },
-                                ]}
-                            />
+                    <View style={styles.progressContainer}>
+                        <View style={styles.progressBarWrapper}>
+                            <View style={styles.progressBar}>
+                                <View
+                                    style={[
+                                        styles.progressFill,
+                                        { width: `${progressValue}%` as any },
+                                    ]}
+                                />
+                            </View>
+                        </View>
+
+                        <View style={styles.challengeProgressWrapper}>
+                            <Text style={styles.challengeProgressText}>
+                                {currentCount}회
+                            </Text>
+                            <Text style={[styles.challengeProgressText, { color: '#999' }]}>
+                                / {totalCount}회
+                            </Text>
                         </View>
                     </View>
 

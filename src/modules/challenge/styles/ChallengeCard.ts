@@ -50,17 +50,26 @@ export const styles = StyleSheet.create({
     },
     challengeProgressWrapper: {
         flexDirection: 'row',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        gap: 8,
     },
     challengeProgressText: {
         color: PRIMARY_COLORS.DEFAULT,
         ...TYPOGRAPHY.BODY_1,
     },
-    progressBar: {
+    progressContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+    },
+    progressBarWrapper: {
         flex: 1,
-        height: 4,
+    },
+    progressBar: {
+        height: 6,
         backgroundColor: TEXT_COLORS.CAPTION,
+        borderRadius: 3,
+        marginVertical: 8,
         overflow: 'hidden',
     },
     progressFill: {
