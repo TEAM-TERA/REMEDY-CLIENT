@@ -10,6 +10,6 @@ export type MyDrop = {
 };
 
 export const getMyDrops = async (): Promise<MyDrop[]> => {
-  const res = await axiosInstance.get<MyDrop[]>("/api/v1/users/my-drop");
+  const res = await axiosInstance.get<MyDrop[]>("/users/my-drop");
   return res.data;
 };
