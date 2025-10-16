@@ -10,6 +10,7 @@ export type RootStackParamList = {
     title: string;
     artist: string;
     location: string;
+    message?: string;
   };
 };
 

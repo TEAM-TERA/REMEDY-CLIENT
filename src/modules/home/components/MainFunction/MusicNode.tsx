@@ -81,6 +81,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
           title: data.songInfo?.title || '드랍핑 음악',
           artist: data.songInfo?.artist || '알 수 없는 아티스트',
           location: data.dropping.address,
+          message: data.dropping.content,
         });
     };
 

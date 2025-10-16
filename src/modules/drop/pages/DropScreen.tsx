@@ -7,7 +7,7 @@ import PlayBar from '../../../components/playBar/PlayBar';
 import CdPlayer from '../../../components/cdPlayer/CdPlayer';
 import LocationMarkerSvg from '../components/LocationMarker/LocationMarkerSvg';
 import GoogleMapView from '../../../components/map/GoogleMapView';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
 import type { DropStackParamList } from '../../../navigation/DropStack';
 import { useCreateDropping } from '../hooks/useCreateDropping';
 import { AuthContext } from '../../auth/auth-context';
@@ -21,6 +21,7 @@ import { isPlaying } from 'react-native-track-player';
 
 function DropScreen() {
     const route = useRoute<RouteProp<DropStackParamList, 'DropDetail'>>();
+    const navigation = useNavigation();
     const { musicTitle, singer, musicTime, location, imgUrl, previewUrl, songId } = route.params;
     const { location: userLocation } = useLocation();
     const { userToken } = useContext(AuthContext);
@@ -91,7 +92,16 @@ function DropScreen() {
         },
         {
           onSuccess: () => {
-            Alert.alert('성공', '드롭핑이 성공적으로 생성되었습니다!');
+            Alert.alert(
+              '성공', 
+              '드롭핑이 성공적으로 생성되었습니다!',
+              [
+                {
+                  text: '확인',
+                  onPress: () => navigation.navigate('Home' as any)
+                }
+              ]
+            );
           },
           onError: (err: any) => {
             console.error('드롭핑 생성 실패:', err);
