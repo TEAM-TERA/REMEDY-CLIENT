@@ -25,7 +25,6 @@ function SettingScreen() {
                         title="내 정보"
                         onPress={handleInfoEditPress}
                     />
-                    {/* 이하 버튼 핸들러는 차차 추가 예정*/}
                     <SettingItem title="비밀번호 변경" onPress={() => {}} />
                 </SettingSection>
 
@@ -40,10 +39,9 @@ function SettingScreen() {
                 <SettingSection title="앱 정보">
                     <SettingItem
                         title="버전"
-                        rightText="10.0"
+                        rightText="0.1.0"
                         showArrow={false}
-                    />{' '}
-                    {/* 버전 정보는 실제 앱에서 동적으로 가져와야 함 */}
+                    />
                     <SettingItem
                         title="회원 탈퇴"
                         onPress={() => {}}

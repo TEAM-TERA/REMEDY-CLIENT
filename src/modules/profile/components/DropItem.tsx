@@ -27,7 +27,6 @@ function DropItem({
                                 height={24}
                                 color="Orgba(255, 71, 87, 0.8)"
                             />{' '}
-                            {/* 투명도 위해 상수 사용 안함 */}
                         </View>
                     )}
                     <View style={userProfileScreen.albumDisk}>
