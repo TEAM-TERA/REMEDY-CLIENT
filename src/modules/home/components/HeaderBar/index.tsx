@@ -5,6 +5,7 @@ import { scale } from "../../../../utils/scalers";
 import { TYPOGRAPHY } from "../../../../constants/typography";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "../../../../components/icon/Icon";
+import { useMyProfile } from "../../../profile/hooks/useMyProfile";
 
 interface HeaderBarProps {
   onLayout?: (height: number) => void;
@@ -15,6 +16,7 @@ interface HeaderBarProps {
 function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
 
   const navigation = useNavigation();
+  const { data: userProfile } = useMyProfile();
   const pressHandlerProfile = ()=>{
     navigation.navigate("Profile");
   }
@@ -36,7 +38,7 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
           onPress={pressHandlerProfile}
           >
           <View style={{ marginLeft: scale(0.75) }}>
-            <Text style={[styles.userName, TYPOGRAPHY.HEADLINE_3]}>User_1</Text>
+            <Text style={[styles.userName, TYPOGRAPHY.HEADLINE_3]}>{userProfile?.username || '로그인'}</Text>
             <View style={styles.badge}>
               <Text style={[styles.badgeText, TYPOGRAPHY.CAPTION_2]}>모험가</Text>
             </View>

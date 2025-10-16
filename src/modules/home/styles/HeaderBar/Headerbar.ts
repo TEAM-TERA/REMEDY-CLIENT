@@ -15,7 +15,9 @@ export const styles = StyleSheet.create({
   },
   leftSection: {
     flexDirection: "row",
-    alignItems: "center"
+    gap: scale(8),
+    alignItems: "center",
+    marginLeft: scale(12)
   },
   userName: {
     color: TEXT_COLORS.DEFAULT,
