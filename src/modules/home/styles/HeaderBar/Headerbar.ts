@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { scale } from "../../../../utils/scalers";
-import { BACKGROUND_COLORS, TEXT_COLORS } from "../../../../constants/colors";
+import { BACKGROUND_COLORS, TEXT_COLORS, UI_COLORS } from "../../../../constants/colors";
 
 export const styles = StyleSheet.create({
   container: {
@@ -24,15 +24,20 @@ export const styles = StyleSheet.create({
     marginBottom: scale(0.2)
   },
   badge: {
-    backgroundColor: BACKGROUND_COLORS.BACKGROUND_RED,
-    borderRadius: scale(0.5),
-    paddingHorizontal: scale(0.5),
-    paddingVertical: scale(0.15),
+    borderRadius: scale(16),
+    height: scale(24),
+    paddingLeft: scale(6),
+    paddingRight: scale(6),
+    paddingTop: scale(2),
+    paddingBottom: scale(2),
     alignSelf: "flex-start",
-    marginTop: scale(0.1)
+    justifyContent: "center",
+    marginTop: scale(0.1),
+    borderColor: TEXT_COLORS.CAPTION_LIGHTER,
+    borderWidth: scale(0.5)
   },
   badgeText: {
-    color: TEXT_COLORS.CAPTION_RED
+    color: TEXT_COLORS.CAPTION_LIGHTER
   },
   rightSection: {
     flexDirection: "row",
