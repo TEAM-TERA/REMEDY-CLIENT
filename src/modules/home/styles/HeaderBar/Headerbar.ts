@@ -25,7 +25,7 @@ export const styles = StyleSheet.create({
   },
   badge: {
     borderRadius: scale(16),
-    height: scale(24),
+    height: scale(20),
     paddingLeft: scale(6),
     paddingRight: scale(6),
     paddingTop: scale(2),
