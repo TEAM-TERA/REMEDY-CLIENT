@@ -104,8 +104,58 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
 
               // 거리에 따라 다른 아이콘 사용
               const iconUrl = distance <= radius 
-                ? "https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/a6b92c55-063d-4be3-9e07-2863714d55f1/image.png?table=block&id=2752845a-0c9f-80c2-a2b9-ffceba8ca2ed&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758823200000&signature=V8FHMorfGi6UzxGFl4YPouDRArDvmc9khkNHftBKRNc&downloadName=image.png"
-                : "https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/3292e931-4479-40da-ab55-719824478764/image.png?table=block&id=2322845a-0c9f-8069-8720-e3a085f5acfa&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758823200000&signature=FiQeTx1MJ7ziAQFXS9phQTK1U5ExF1GZcFCoXPuhvCA&downloadName=image.png";
+                ? "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+                  '<svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                  '<g filter="url(#filter0_d_660_1355)">' +
+                  '<circle cx="36.8" cy="36.8003" r="17.5" fill="black"/>' +
+                  '</g>' +
+                  '<g filter="url(#filter1_d_660_1355)">' +
+                  '<path d="M43 28.2C43 27.8405 42.8657 27.4999 42.634 27.272C42.4023 27.0441 42.0977 26.9528 41.8039 27.0233L31.8039 29.4233C31.3365 29.5355 31 30.028 31 30.6V41.5366C30.6872 41.4481 30.3506 41.4 30 41.4C28.3431 41.4 27 42.4745 27 43.8C27 45.1255 28.3431 46.2 30 46.2C31.6568 46.2 33 45.1255 33 43.8V33.9838L41 32.0638V39.1366C40.6872 39.0481 40.3506 39 40 39C38.3431 39 37 40.0745 37 41.4C37 42.7255 38.3431 43.8 40 43.8C41.6569 43.8 43 42.7255 43 41.4V28.2Z" fill="#F3124E"/>' +
+                  '</g>' +
+                  '<defs>' +
+                  '<filter id="filter0_d_660_1355" x="-0.699951" y="-0.699707" width="75" height="75" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.937255 0 0 0 0 0.0627451 0 0 0 0 0.298039 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1355"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1355" result="shape"/>' +
+                  '</filter>' +
+                  '<filter id="filter1_d_660_1355" x="7" y="7" width="56" height="59.2002" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.937255 0 0 0 0 0.0627451 0 0 0 0 0.298039 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1355"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1355" result="shape"/>' +
+                  '</filter>' +
+                  '</defs>' +
+                  '</svg>'
+                )
+                : "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+                  '<svg width="75" height="75" viewBox="0 0 76 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                  '<g filter="url(#filter0_d_660_1369)">' +
+                  '<circle cx="37.8" cy="36.8003" r="17.5" fill="#14151C"/>' +
+                  '</g>' +
+                  '<path d="M44 28.2C44 27.8405 43.8657 27.4999 43.634 27.272C43.4023 27.0441 43.0977 26.9528 42.8039 27.0233L32.8039 29.4233C32.3365 29.5355 32 30.028 32 30.6V41.5366C31.6872 41.4481 31.3506 41.4 31 41.4C29.3431 41.4 28 42.4745 28 43.8C28 45.1255 29.3431 46.2 31 46.2C32.6568 46.2 34 45.1255 34 43.8V33.9838L42 32.0638V39.1366C41.6872 39.0481 41.3506 39 41 39C39.3431 39 38 40.0745 38 41.4C38 42.7255 39.3431 43.8 41 43.8C42.6569 43.8 44 42.7255 44 41.4V28.2Z" fill="#656581"/>' +
+                  '<defs>' +
+                  '<filter id="filter0_d_660_1369" x="0.300049" y="-0.699707" width="75" height="75" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.396078 0 0 0 0 0.396078 0 0 0 0 0.505882 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1369"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1369" result="shape"/>' +
+                  '</filter>' +
+                  '</defs>' +
+                  '</svg>'
+                );
 
               const marker = new google.maps.Marker({
                 position: { lat: drop.latitude, lng: drop.longitude },

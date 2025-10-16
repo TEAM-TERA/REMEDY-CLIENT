@@ -14,8 +14,8 @@ import { Dropping } from '../../types/musicList';
 const SWIPE_THRESHOLD = 80;
 const INVERT_DIRECTION = false;
 const sign = INVERT_DIRECTION ? -1 : 1;
-const ANGLE_PER_ITEM = 45; // 각 아이템 간 각도 (6개 노드 기준)
-const TOTAL_NODES = 7; // 원형으로 배치할 총 노드 수 (3개 보임 + 4개 숨김)
+const ANGLE_PER_ITEM = 45;
+const TOTAL_NODES = 7;
 
 interface MusicWheelProps {
   droppings: any[];
@@ -27,9 +27,8 @@ function MusicWheel({ droppings }: MusicWheelProps) {
   const rotation = useSharedValue(0);
   const startRotation = useSharedValue(0);
 
-  // 컴포넌트 마운트 시 정확한 시작 위치 설정
   useEffect(() => {
-    rotation.value = 0; // 항상 0도에서 시작
+    rotation.value = 0;
   }, [rotation]);
 
   const song1Query = useQuery({
@@ -50,13 +49,36 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     enabled: !!(droppings?.[2]?.songId),
   });
 
-  const songQueries = [song1Query, song2Query, song3Query];
+  const song4Query = useQuery({
+    queryKey: ['songInfo', droppings?.[3]?.songId],
+    queryFn: () => getSongInfo(droppings[3].songId),
+    enabled: !!(droppings?.[3]?.songId),
+  });
+
+  const song5Query = useQuery({
+    queryKey: ['songInfo', droppings?.[4]?.songId],
+    queryFn: () => getSongInfo(droppings[4].songId),
+    enabled: !!(droppings?.[4]?.songId),
+  });
+
+  const song6Query = useQuery({
+    queryKey: ['songInfo', droppings?.[5]?.songId],
+    queryFn: () => getSongInfo(droppings[5].songId),
+    enabled: !!(droppings?.[5]?.songId),
+  });
+
+  const song7Query = useQuery({
+    queryKey: ['songInfo', droppings?.[6]?.songId],
+    queryFn: () => getSongInfo(droppings[6].songId),
+    enabled: !!(droppings?.[6]?.songId),
+  });
+
+  const songQueries = [song1Query, song2Query, song3Query, song4Query, song5Query, song6Query, song7Query];
 
   const handlerPressDrop = ()=>{
     navigate('Drop');
   }
 
-  // rotation 값에 따라 -120도에 가장 가까운 노드 인덱스 계산
   const mainNodeIndex = useDerivedValue(() => {
     'worklet';
     let closestIndex = 0;
@@ -83,22 +105,21 @@ function MusicWheel({ droppings }: MusicWheelProps) {
       return nodes;
     }
 
-    // 6개 노드를 원형으로 배치 (무한 스크롤 효과)
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
       // 현재 인덱스 기반으로 데이터 할당
       const dataIndex = (currentIndex + nodeIndex) % totalSongs;
 
       if (droppings[dataIndex]) {
         const dropping = droppings[dataIndex];
-        const songInfo = {
-          title: dropping.title,
-          artist: dropping.singer,
-        };
 
-        // 각 노드의 기본 각도 (원형 배치)
-        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 120; // -120도에서 시작
+        // 해당 드랍핑의 실제 songInfo 조회
+        let songInfo = null;
+        if (songQueries[dataIndex]?.data) {
+          songInfo = songQueries[dataIndex].data;
+        }
 
-        // 첫 번째 노드를 기본 메인으로 설정 (실제 동적 변경은 MusicNode에서)
+        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 120;
+
         const isMainNode = nodeIndex === 0;
 
         nodes.push({
