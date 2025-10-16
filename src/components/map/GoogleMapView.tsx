@@ -274,8 +274,9 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
                   (navigation as any).navigate('Music', { 
                     droppingId: data.payload.droppingId || data.payload.id,
                     songId: data.payload.songId || data.payload.song_id,
-                    title: data.payload.content || data.payload.title || '드랍핑 음악',
-                    message: data.payload.content || data.payload.message || '',
+                    title: data.payload.title || '드랍핑 음악',
+                    artist: data.payload.artist || '알 수 없는 아티스트',
+                    message: data.payload.content || '',
                     location: data.payload.address || data.payload.location || '위치 정보 없음'
                   });
                 } else if (data.action === 'showDetails') {
