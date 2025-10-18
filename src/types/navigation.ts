@@ -3,6 +3,7 @@ export type RootStackParamList = {
   Auth: undefined;
   Profile: undefined;
   Drop: undefined;
+  Challenge: undefined;
 
   Music: {
     droppingId: string;
