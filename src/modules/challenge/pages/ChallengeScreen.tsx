@@ -98,28 +98,33 @@ function ChallengeScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    {currentData.map(userAchievement => (
-                        <ChallengeCard
-                            key={userAchievement.userAchievementId}
-                            title={userAchievement.achievement.title}
-                            description={`${userAchievement.currentValue} / ${userAchievement.achievement.targetValue}`}
-                            coin={userAchievement.achievement.rewardAmount}
-                            progress={`${Math.round((userAchievement.currentValue / userAchievement.achievement.targetValue) * 100)}%`}
-                            sideBarColor={
-                                activeTab === 'daily'
-                                    ? PRIMARY_COLORS.DEFAULT
-                                    : TERTIARY_COLORS.DEFAULT
-                            }
-                            isOpen={openCardIds.includes(userAchievement.userAchievementId)}
-                            onToggle={() =>
-                                setOpenCardIds(prev =>
-                                    prev.includes(userAchievement.userAchievementId)
-                                        ? prev.filter(id => id !== userAchievement.userAchievementId)
-                                        : [...prev, userAchievement.userAchievementId],
-                                )
-                            }
-                        />
-                    ))}
+                    {currentData.map(userAchievement => {
+                        const { currentValue, achievement: { targetValue } } = userAchievement;
+                        const percent = targetValue > 0 ? Math.round((currentValue / targetValue) * 100) : 0;
+
+                        return (
+                            <ChallengeCard
+                                key={userAchievement.userAchievementId}
+                                title={userAchievement.achievement.title}
+                                description={`${userAchievement.currentValue} / ${userAchievement.achievement.targetValue}`}
+                                coin={userAchievement.achievement.rewardAmount}
+                                progress={`${percent}%`}
+                                sideBarColor={
+                                    activeTab === 'daily'
+                                        ? PRIMARY_COLORS.DEFAULT
+                                        : TERTIARY_COLORS.DEFAULT
+                                }
+                                isOpen={openCardIds.includes(userAchievement.userAchievementId)}
+                                onToggle={() =>
+                                    setOpenCardIds(prev =>
+                                        prev.includes(userAchievement.userAchievementId)
+                                            ? prev.filter(id => id !== userAchievement.userAchievementId)
+                                            : [...prev, userAchievement.userAchievementId],
+                                    )
+                                }
+                            />
+                        );
+                    })}
                 </View>
             </ScrollView>
         </SafeAreaView>
