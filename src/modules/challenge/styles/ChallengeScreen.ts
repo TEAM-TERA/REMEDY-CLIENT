@@ -30,4 +30,18 @@ export const styles = StyleSheet.create({
         color: TEXT_COLORS.DEFAULT,
         ...TYPOGRAPHY.SUBTITLE,
     },
+    emptyStateContainer: {
+        paddingVertical: 40,
+        alignItems: 'center',
+    },
+    emptyStateText: {
+        color: TEXT_COLORS.CAPTION,
+    },
+    centeredContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorText: {
+        color: TEXT_COLORS.CAPTION,
+    },
 });

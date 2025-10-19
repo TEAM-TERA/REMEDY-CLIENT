@@ -8,7 +8,7 @@ import Header from '../../profile/components/Header';
 import { styles } from '../styles/ChallengeScreen';
 import { useMyAchievements } from '../hooks/useMyAchievements';
 import ChallengeCard from '../components/ChallengeCard';
-import { PRIMARY_COLORS, TERTIARY_COLORS, TEXT_COLORS } from '../../../constants/colors';
+import { PRIMARY_COLORS, TERTIARY_COLORS } from '../../../constants/colors';
 
 function ChallengeScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Challenge'>>();
@@ -26,7 +26,7 @@ function ChallengeScreen() {
                     title="도전 과제"
                     onBackPress={() => navigation.goBack()}
                 />
-                <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <View style={[styles.container, styles.centeredContainer]}>
                     <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
                 </View>
             </SafeAreaView>
@@ -41,8 +41,8 @@ function ChallengeScreen() {
                     title="도전 과제"
                     onBackPress={() => navigation.goBack()}
                 />
-                <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-                    <Text style={{ color: TEXT_COLORS.CAPTION_LIGHTER }}>도전과제를 불러오는데 실패했습니다.</Text>
+                <View style={[styles.container, styles.centeredContainer]}>
+                    <Text style={styles.errorText}>도전과제를 불러오는데 실패했습니다.</Text>
                 </View>
             </SafeAreaView>
         );
@@ -94,33 +94,43 @@ function ChallengeScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    {currentData.map(userAchievement => {
-                        const { currentValue, achievement: { targetValue } } = userAchievement;
-                        const percent = targetValue > 0 ? Math.round((currentValue / targetValue) * 100) : 0;
+                    {currentData.length === 0 ? (
+                        <View style={styles.emptyStateContainer}>
+                            <Text style={styles.emptyStateText}>
+                                {activeTab === 'daily'
+                                    ? '진행 중인 일일 도전과제가 없습니다.'
+                                    : '진행 중인 상시 도전과제가 없습니다.'}
+                            </Text>
+                        </View>
+                    ) : (
+                        currentData.map(userAchievement => {
+                            const { currentValue, achievement: { targetValue } } = userAchievement;
+                            const percent = targetValue > 0 ? Math.round((currentValue / targetValue) * 100) : 0;
 
-                        return (
-                            <ChallengeCard
-                                key={userAchievement.userAchievementId}
-                                title={userAchievement.achievement.title}
-                                description={`${userAchievement.currentValue} / ${userAchievement.achievement.targetValue}`}
-                                coin={userAchievement.achievement.rewardAmount}
-                                progress={`${percent}%`}
-                                sideBarColor={
-                                    activeTab === 'daily'
-                                        ? PRIMARY_COLORS.DEFAULT
-                                        : TERTIARY_COLORS.DEFAULT
-                                }
-                                isOpen={openCardIds.includes(userAchievement.userAchievementId)}
-                                onToggle={() =>
-                                    setOpenCardIds(prev =>
-                                        prev.includes(userAchievement.userAchievementId)
-                                            ? prev.filter(id => id !== userAchievement.userAchievementId)
-                                            : [...prev, userAchievement.userAchievementId],
-                                    )
-                                }
-                            />
-                        );
-                    })}
+                            return (
+                                <ChallengeCard
+                                    key={userAchievement.userAchievementId}
+                                    title={userAchievement.achievement.title}
+                                    description={`${userAchievement.currentValue} / ${userAchievement.achievement.targetValue}`}
+                                    coin={userAchievement.achievement.rewardAmount}
+                                    progress={`${percent}%`}
+                                    sideBarColor={
+                                        activeTab === 'daily'
+                                            ? PRIMARY_COLORS.DEFAULT
+                                            : TERTIARY_COLORS.DEFAULT
+                                    }
+                                    isOpen={openCardIds.includes(userAchievement.userAchievementId)}
+                                    onToggle={() =>
+                                        setOpenCardIds(prev =>
+                                            prev.includes(userAchievement.userAchievementId)
+                                                ? prev.filter(id => id !== userAchievement.userAchievementId)
+                                                : [...prev, userAchievement.userAchievementId],
+                                        )
+                                    }
+                                />
+                            );
+                        })
+                    )}
                 </View>
             </ScrollView>
         </SafeAreaView>
