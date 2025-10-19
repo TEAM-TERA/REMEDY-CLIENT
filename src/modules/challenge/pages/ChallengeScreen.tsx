@@ -8,7 +8,7 @@ import Header from '../../profile/components/Header';
 import { styles } from '../styles/ChallengeScreen';
 import { useMyAchievements } from '../hooks/useMyAchievements';
 import ChallengeCard from '../components/ChallengeCard';
-import { PRIMARY_COLORS, TERTIARY_COLORS } from '../../../constants/colors';
+import { PRIMARY_COLORS, TERTIARY_COLORS, TEXT_COLORS } from '../../../constants/colors';
 
 function ChallengeScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Challenge'>>();
@@ -42,7 +42,7 @@ function ChallengeScreen() {
                     onBackPress={() => navigation.goBack()}
                 />
                 <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-                    <Text style={{ color: '#999' }}>도전과제를 불러오는데 실패했습니다.</Text>
+                    <Text style={{ color: TEXT_COLORS.CAPTION_LIGHTER }}>도전과제를 불러오는데 실패했습니다.</Text>
                 </View>
             </SafeAreaView>
         );
