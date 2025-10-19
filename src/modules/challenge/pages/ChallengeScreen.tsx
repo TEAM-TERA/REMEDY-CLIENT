@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ScrollView, View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import Header from '../../profile/components/Header';
 import { styles } from '../styles/ChallengeScreen';
@@ -11,7 +11,7 @@ import ChallengeCard from '../components/ChallengeCard';
 import { PRIMARY_COLORS, TERTIARY_COLORS } from '../../../constants/colors';
 
 function ChallengeScreen() {
-    const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Challenge'>>();
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Challenge'>>();
     const [activeTab, setActiveTab] = useState<'daily' | 'always'>('daily');
     const [openCardIds, setOpenCardIds] = useState<number[]>([]);
 
