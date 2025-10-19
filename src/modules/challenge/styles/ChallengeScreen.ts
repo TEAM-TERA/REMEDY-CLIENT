@@ -37,4 +37,11 @@ export const styles = StyleSheet.create({
     emptyStateText: {
         color: TEXT_COLORS.CAPTION,
     },
+    centeredContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorText: {
+        color: TEXT_COLORS.CAPTION,
+    },
 });

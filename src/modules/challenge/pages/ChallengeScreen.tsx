@@ -8,7 +8,7 @@ import Header from '../../profile/components/Header';
 import { styles } from '../styles/ChallengeScreen';
 import { useMyAchievements } from '../hooks/useMyAchievements';
 import ChallengeCard from '../components/ChallengeCard';
-import { PRIMARY_COLORS, TERTIARY_COLORS, TEXT_COLORS } from '../../../constants/colors';
+import { PRIMARY_COLORS, TERTIARY_COLORS } from '../../../constants/colors';
 
 function ChallengeScreen() {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Challenge'>>();
@@ -26,7 +26,7 @@ function ChallengeScreen() {
                     title="도전 과제"
                     onBackPress={() => navigation.goBack()}
                 />
-                <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+                <View style={[styles.container, styles.centeredContainer]}>
                     <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
                 </View>
             </SafeAreaView>
@@ -41,8 +41,8 @@ function ChallengeScreen() {
                     title="도전 과제"
                     onBackPress={() => navigation.goBack()}
                 />
-                <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-                    <Text style={{ color: TEXT_COLORS.CAPTION_LIGHTER }}>도전과제를 불러오는데 실패했습니다.</Text>
+                <View style={[styles.container, styles.centeredContainer]}>
+                    <Text style={styles.errorText}>도전과제를 불러오는데 실패했습니다.</Text>
                 </View>
             </SafeAreaView>
         );
