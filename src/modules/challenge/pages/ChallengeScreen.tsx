@@ -94,33 +94,43 @@ function ChallengeScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    {currentData.map(userAchievement => {
-                        const { currentValue, achievement: { targetValue } } = userAchievement;
-                        const percent = targetValue > 0 ? Math.round((currentValue / targetValue) * 100) : 0;
+                    {currentData.length === 0 ? (
+                        <View style={styles.emptyStateContainer}>
+                            <Text style={styles.emptyStateText}>
+                                {activeTab === 'daily'
+                                    ? '진행 중인 일일 도전과제가 없습니다.'
+                                    : '진행 중인 상시 도전과제가 없습니다.'}
+                            </Text>
+                        </View>
+                    ) : (
+                        currentData.map(userAchievement => {
+                            const { currentValue, achievement: { targetValue } } = userAchievement;
+                            const percent = targetValue > 0 ? Math.round((currentValue / targetValue) * 100) : 0;
 
-                        return (
-                            <ChallengeCard
-                                key={userAchievement.userAchievementId}
-                                title={userAchievement.achievement.title}
-                                description={`${userAchievement.currentValue} / ${userAchievement.achievement.targetValue}`}
-                                coin={userAchievement.achievement.rewardAmount}
-                                progress={`${percent}%`}
-                                sideBarColor={
-                                    activeTab === 'daily'
-                                        ? PRIMARY_COLORS.DEFAULT
-                                        : TERTIARY_COLORS.DEFAULT
-                                }
-                                isOpen={openCardIds.includes(userAchievement.userAchievementId)}
-                                onToggle={() =>
-                                    setOpenCardIds(prev =>
-                                        prev.includes(userAchievement.userAchievementId)
-                                            ? prev.filter(id => id !== userAchievement.userAchievementId)
-                                            : [...prev, userAchievement.userAchievementId],
-                                    )
-                                }
-                            />
-                        );
-                    })}
+                            return (
+                                <ChallengeCard
+                                    key={userAchievement.userAchievementId}
+                                    title={userAchievement.achievement.title}
+                                    description={`${userAchievement.currentValue} / ${userAchievement.achievement.targetValue}`}
+                                    coin={userAchievement.achievement.rewardAmount}
+                                    progress={`${percent}%`}
+                                    sideBarColor={
+                                        activeTab === 'daily'
+                                            ? PRIMARY_COLORS.DEFAULT
+                                            : TERTIARY_COLORS.DEFAULT
+                                    }
+                                    isOpen={openCardIds.includes(userAchievement.userAchievementId)}
+                                    onToggle={() =>
+                                        setOpenCardIds(prev =>
+                                            prev.includes(userAchievement.userAchievementId)
+                                                ? prev.filter(id => id !== userAchievement.userAchievementId)
+                                                : [...prev, userAchievement.userAchievementId],
+                                        )
+                                    }
+                                />
+                            );
+                        })
+                    )}
                 </View>
             </ScrollView>
         </SafeAreaView>
