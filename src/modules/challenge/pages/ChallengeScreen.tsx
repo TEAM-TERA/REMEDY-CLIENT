@@ -50,8 +50,7 @@ function ChallengeScreen() {
 
     // 탭에 따라 데이터 필터링
     const currentData = achievements?.filter(userAchievement => {
-        // achievement 객체가 있는지 확인
-        const period = (userAchievement as any).achievement?.period || (userAchievement as any).period;
+        const period = userAchievement.achievement.period;
         console.log('Filtering achievement:', userAchievement, 'period:', period);
 
         return activeTab === 'daily'
