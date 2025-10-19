@@ -51,14 +51,11 @@ function ChallengeScreen() {
     // 탭에 따라 데이터 필터링
     const currentData = achievements?.filter(userAchievement => {
         const period = userAchievement.achievement.period;
-        console.log('Filtering achievement:', userAchievement, 'period:', period);
 
         return activeTab === 'daily'
             ? period === 'DAILY'
             : period === 'PERMANENT';
     }) || [];
-
-    console.log('Filtered currentData:', currentData);
 
     return (
         <SafeAreaView style={styles.safeAreaView}>
