@@ -114,6 +114,8 @@ function ChallengeScreen() {
                                     description={`${userAchievement.currentValue} / ${userAchievement.achievement.targetValue}`}
                                     coin={userAchievement.achievement.rewardAmount}
                                     progress={`${percent}%`}
+                                    currentValue={currentValue}
+                                    targetValue={targetValue}
                                     sideBarColor={
                                         activeTab === 'daily'
                                             ? PRIMARY_COLORS.DEFAULT

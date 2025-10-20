@@ -11,5 +11,7 @@ export type ChallengeProps = {
     description: string;
     coin: number;
     progress: string;
+    currentValue: number;
+    targetValue: number;
     sideBarColor: string;
 };
