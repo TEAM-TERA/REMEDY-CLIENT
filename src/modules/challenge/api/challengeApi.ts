@@ -10,8 +10,13 @@ export async function getAllAchievements() {
 }
 
 // 활성화된 도전과제 가져오기
+export interface ActiveAchievementsResponse {
+    achievements: Achievement[];
+    totalCount: number;
+}
+
 export async function getActiveAchievements() {
-    const { data } = await axiosInstance.get<Achievement[]>(`${BASE}/active`);
+    const { data } = await axiosInstance.get<ActiveAchievementsResponse>(`${BASE}/active`);
     return data;
 }
 

@@ -66,7 +66,8 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
               icon: {
                 url: "${MARKER_STYLES.MY_LOCATION}",
                 scaledSize: new google.maps.Size(40, 40)
-              }
+              },
+              zIndex: 0
             });
 
             new google.maps.Circle({
@@ -77,7 +78,8 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
               fillOpacity: 0.2,
               map,
               center,
-              radius: ${MAP_RADIUS}
+              radius: ${MAP_RADIUS},
+              zIndex: 0
             });
 
             window.ReactNativeWebView?.postMessage("initMap called");
@@ -165,7 +167,9 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
                   url: iconUrl,
                   scaledSize: new google.maps.Size(60, 60)
                 },
-                animation: google.maps.Animation.DROP
+                animation: google.maps.Animation.DROP,
+                // 드랍 핀은 내 위치 핀 위로 보이도록 zIndex를 높게 설정
+                zIndex: 10
               });
               
               existingMarkers.push(marker);

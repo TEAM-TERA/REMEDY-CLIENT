@@ -4,20 +4,20 @@ import Icon from '../../../../components/icon/Icon';
 import { TYPOGRAPHY } from '../../../../constants/typography';
 import { styles } from '../../styles/Running/RunningStats';
 import Timer from './Timer';
-import useRunningTracker from '../../hooks/useRunningTracker';
 
 interface RunningStatsProps {
-  distance?: number;
-  time?: number;
   isRunning?: boolean;
   headerHeight?: number;
+  currentDistance: number;
+  timeComponents: { hours: string; minutes: string; seconds: string };
 }
 
 const RunningStats: React.FC<RunningStatsProps> = ({
   isRunning = false,
-  headerHeight = 68
+  headerHeight = 68,
+  currentDistance,
+  timeComponents,
 }) => {
-  const { currentDistance, currentTime, timeComponents } = useRunningTracker(isRunning);
 
   const dynamicStyles = {
     ...styles.container,
@@ -32,9 +32,7 @@ const RunningStats: React.FC<RunningStatsProps> = ({
             <Icon name="turnRunning" />
           </View>
           <View style={styles.textContainer}>
-            <Text style={[styles.statText, TYPOGRAPHY.BODY_1]}>
-              {currentDistance.toFixed(2)}
-            </Text>
+            <Text style={[styles.statText, TYPOGRAPHY.BODY_1]}>{currentDistance.toFixed(2)}</Text>
             <Text style={[styles.statTextGray, TYPOGRAPHY.BODY_1]}>
               Km
             </Text>
