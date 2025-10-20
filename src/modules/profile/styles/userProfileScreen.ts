@@ -111,7 +111,6 @@ const userProfileScreen = StyleSheet.create({
         borderRadius: 40,
         zIndex: 1,
         backgroundColor: PRIMARY_COLORS.DEFAULT,
-        // iOS shadow
         shadowColor: PRIMARY_COLORS.MINUS_TEN,
         shadowOffset: { width: 0, height: 0 },
         shadowOpacity: 1,
