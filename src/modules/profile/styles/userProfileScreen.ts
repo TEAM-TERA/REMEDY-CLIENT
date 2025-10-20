@@ -82,16 +82,20 @@ const userProfileScreen = StyleSheet.create({
         alignItems: 'center',
         position: 'relative',
     },
-    tabContainer: {
-        gap: 12,
-    },
+  tabContainer: {
+    flex: 1,
+    gap: 12,
+  },
+  listContent: {
+    gap: 12,
+    paddingBottom: 24,
+  },
     albumImage: {
         width: 100,
         height: 100,
         borderRadius: 8,
         zIndex: 2,
         backgroundColor: PRIMARY_COLORS.MINUS_TWENTY,
-        // iOS shadow
         shadowColor: '#000',
         shadowOffset: { width: 3, height: 0 },
         shadowOpacity: 0.25,
@@ -149,5 +153,8 @@ const userProfileScreen = StyleSheet.create({
         zIndex: 10,
         elevation: 10,
     },
+  scrollView: {
+    flex: 1,
+  },
 });
 export default userProfileScreen;

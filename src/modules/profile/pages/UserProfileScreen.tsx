@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ActivityIndicator, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
@@ -147,16 +147,23 @@ function UserProfileScreen() {
                             </Text>
                         </TouchableOpacity>
                     </View>
-
-                    {currentData.map((item) => (
-                        <DropItem
-                            key={item.droppingId}
-                            memo={item.memo}
-                            location={item.location}
-                            imageSource={item.imageSource}
-                            hasHeart={item.hasHeart}
-                        />
-                    ))}
+                    <ScrollView
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.listContent}
+                        showsVerticalScrollIndicator={false}
+                        keyboardShouldPersistTaps="handled"
+                        nestedScrollEnabled
+                    >
+                        {currentData.map((item) => (
+                            <DropItem
+                                key={item.droppingId}
+                                memo={item.memo}
+                                location={item.location}
+                                imageSource={item.imageSource}
+                                hasHeart={item.hasHeart}
+                            />
+                        ))}
+                    </ScrollView>
                 </View>
             </View>
         </SafeAreaView>
