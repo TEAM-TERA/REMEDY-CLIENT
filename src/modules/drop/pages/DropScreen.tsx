@@ -104,8 +104,8 @@ function DropScreen() {
             );
           },
           onError: (err: any) => {
-            console.error('드롭핑 생성 실패:', err);
-            Alert.alert('실패', '드롭핑 생성에 실패했습니다.');
+            console.log('드롭핑 생성 실패:', err);
+            Alert.alert('경고', '근처에 드롭핑이 있습니다. 다른 위치에 드롭핑을 생성해주세요.');
           },
         }
       );
