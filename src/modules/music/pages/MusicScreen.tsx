@@ -123,16 +123,14 @@ function MusicScreen({ route }: Props) {
               </View>
 
               <View style={styles.likeCommentRow}>
-                {typeof likeCount === 'number' ? (
-                  <TouchableOpacity 
-                    style={styles.smallLikeCommentRow}
-                    onPress={() => toggleLike.mutate()}
-                    disabled={toggleLike.isPending}
-                  >
-                    <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
-                    <Text style={styles.likeCommentText}>{musicLikeCount.data?.likeCount}</Text>
-                  </TouchableOpacity>
-                ) : null}
+                <TouchableOpacity 
+                  style={styles.smallLikeCommentRow}
+                  onPress={() => toggleLike.mutate()}
+                  disabled={toggleLike.isPending}
+                >
+                  <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
+                  <Text style={styles.likeCommentText}>{musicLikeCount.data?.likeCount ?? 0}</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity style={styles.smallLikeCommentRow}>
                   <Icon name="chat" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
