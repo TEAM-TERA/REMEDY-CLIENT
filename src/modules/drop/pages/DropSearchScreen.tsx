@@ -2,7 +2,7 @@ import { View, SafeAreaView, Text, ScrollView } from "react-native";
 import { styles, historyStyles } from "../styles/DropSearchScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import { useState, useEffect } from "react";
-import BackSvg from "../../auth/components/BackSvg/BackSvg";
+import Icon from "../../../components/icon/Icon";
 import Input from "../../../components/input/Input";
 import History from "../components/History/History";
 import Music from "../components/Music/Music";
@@ -57,7 +57,7 @@ function DropSearchScreen(){
     return(
         <SafeAreaView style = {styles.container}>
             <View style = {styles.inputContainer}>
-                <BackSvg></BackSvg>
+                <Icon name="left" width={24} height={24} fill="#FFFFFF" />
                 <Input 
                 placeholder="드랍할 음악 검색" 
                 width={scale(287)}

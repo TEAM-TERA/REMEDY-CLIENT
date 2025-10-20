@@ -46,3 +46,8 @@ export async function getSongInfo(songId: string) {
   const res = await axiosInstance.get(`/songs/${songId}`);
   return res.data;
 }
+
+export async function getDroppingById(droppingId: string) {
+  const res = await axiosInstance.get(`/droppings/${droppingId}`);
+  return res.data;
+}

@@ -13,7 +13,7 @@ import { useToggleLike } from '../hooks/useLike';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
 import { useBackgroundAudioPermission } from '../../../hooks/useBackgroundAudioPermission';
 import { useQuery } from '@tanstack/react-query';
-import { getSongInfo } from '../../drop/api/dropApi';
+import { getSongInfo, getDroppingById } from '../../drop/api/dropApi';
 import type { Comment } from '../types/comment';
 
 type Props = {
@@ -32,6 +32,7 @@ type Props = {
 
 function MusicScreen({ route }: Props) {
   const { droppingId, songId, title, artist, message, location, likeCount } = route.params;
+  
   const musicLikeCount = useDropLikeCount(droppingId);
   const toggleLike = useToggleLike(droppingId);
   const [comment, setComment] = useState('');
@@ -44,6 +45,12 @@ function MusicScreen({ route }: Props) {
     queryKey: ['songInfo', songId],
     queryFn: () => getSongInfo(songId || ''),
     enabled: !!songId,
+  });
+
+  const { data: droppingInfo } = useQuery({
+    queryKey: ['droppingInfo', droppingId],
+    queryFn: () => getDroppingById(droppingId || ''),
+    enabled: !!droppingId,
   });
 
   const { data: comments, isLoading, isError, refetch, isFetching } =
@@ -116,16 +123,14 @@ function MusicScreen({ route }: Props) {
               </View>
 
               <View style={styles.likeCommentRow}>
-                {typeof likeCount === 'number' ? (
-                  <TouchableOpacity 
-                    style={styles.smallLikeCommentRow}
-                    onPress={() => toggleLike.mutate()}
-                    disabled={toggleLike.isPending}
-                  >
-                    <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
-                    <Text style={styles.likeCommentText}>{musicLikeCount.data?.likeCount}</Text>
-                  </TouchableOpacity>
-                ) : null}
+                <TouchableOpacity 
+                  style={styles.smallLikeCommentRow}
+                  onPress={() => toggleLike.mutate()}
+                  disabled={toggleLike.isPending}
+                >
+                  <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
+                  <Text style={styles.likeCommentText}>{musicLikeCount.data?.likeCount ?? 0}</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity style={styles.smallLikeCommentRow}>
                   <Icon name="chat" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
@@ -143,10 +148,12 @@ function MusicScreen({ route }: Props) {
             />
           </View>
 
-          {(message || location) && (
+          {((message || droppingInfo?.content) || location) && (
             <View style={styles.inner}>
               <View style={styles.messageBox}>
-                {message ? <Text style={styles.messageText}>{message}</Text> : null}
+                {(message || droppingInfo?.content) ? (
+                  <Text style={styles.messageText}>{message || droppingInfo?.content}</Text>
+                ) : null}
                 {location ? (
                   <View style={styles.messageLocationRow}>
                     <Icon name="location" width={14} height={14} color={PRIMARY_COLORS.DEFAULT} />

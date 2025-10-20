@@ -28,6 +28,7 @@ target 'Remedy' do
       :mac_catalyst_enabled => false,
     )
 
+    # Track Player 설정
     installer.pods_project.targets.each do |target|
       if target.name == 'react-native-track-player'
         target.build_configurations.each do |config|
@@ -36,13 +37,27 @@ target 'Remedy' do
       end
     end
 
+    # 시뮬레이터 arm64 제외
     installer.pods_project.build_configurations.each do |config|
       config.build_settings["EXCLUDED_ARCHS[sdk=iphonesimulator*]"] = "arm64"
-
-      if config.name == 'RCT-Folly'
-        config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
-      end
     end
 
+    # Folly만 c++17로, 나머지는 c++20 유지
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        if target.name == 'RCT-Folly'
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++17'
+        elsif target.name.start_with?('React') || target.name.start_with?('Yoga')
+          config.build_settings['CLANG_CXX_LANGUAGE_STANDARD'] = 'c++20'
+          config.build_settings['CLANG_CXX_LIBRARY'] = 'libc++'
+        end
+
+        # SwiftUICore 제거
+        flags = config.build_settings['OTHER_LDFLAGS']
+        if flags.is_a?(Array)
+          config.build_settings['OTHER_LDFLAGS'] = flags.reject { |flag| flag.include?('SwiftUICore') }
+        end
+      end
+    end
   end
 end
