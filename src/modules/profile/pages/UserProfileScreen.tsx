@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ActivityIndicator, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -15,6 +15,7 @@ import Button from '../../../components/button/Button';
 import { useMyProfile } from '../hooks/useMyProfile';
 import { useMyDrop } from '../hooks/useMyDrop';
 import { useMyLikes } from '../hooks/useMyLike';
+import { getSongInfo } from '../../drop/api/dropApi';
 
 function UserProfileScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
@@ -26,11 +27,36 @@ function UserProfileScreen() {
 
     const {data : me, isLoading, isError, refetch, isFetching } = useMyProfile();
 
+    const [songTitles, setSongTitles] = useState<Record<string, string>>({});
+
+    useEffect(() => {
+        const loadTitles = async () => {
+            if (!myDrops || myDrops.length === 0) return;
+            const uniqueIds = Array.from(new Set(myDrops.map(d => d.songId).filter(Boolean)));
+            try {
+                const results = await Promise.all(uniqueIds.map(async (id) => {
+                    try {
+                        const info = await getSongInfo(id);
+                        return [id, info?.title as string];
+                    } catch {
+                        return [id, id];
+                    }
+                }));
+                const map: Record<string, string> = {};
+                results.forEach(([id, title]) => { map[id as string] = (title as string) || String(id); });
+                setSongTitles(map);
+            } catch {
+                console.log('songTitles 로드 실패');
+            }
+        };
+        loadTitles();
+    }, [myDrops]);
+
     const currentData: DropItemData[] =
     activeTab === "drop"
         ? (myDrops ?? []).map((d) => ({
             droppingId: d.droppingId,
-            memo: d.songId,
+            memo: songTitles[d.songId] || d.songId,
             location: d.address,
             imageSource: undefined,
             hasHeart: false, 
