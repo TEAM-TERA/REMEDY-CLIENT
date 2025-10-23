@@ -18,10 +18,10 @@ function ChallengeCard({
     isOpen,
     onToggle,
     description,
+    totalCount = 10,
 }: ChallengeCardProps) {
     const progressValue = parseFloat(progress.replace('%', ''));
-    const currentCount = Math.round((progressValue / 100) * 10);
-    const totalCount = 10;
+    const currentCount = Math.round((progressValue / 100) * totalCount);
 
     const handleToggle = () => {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);

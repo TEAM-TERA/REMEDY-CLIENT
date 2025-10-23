@@ -1,5 +1,5 @@
-import { View, Text, TextInput, ScrollView, Alert, Image } from 'react-native';
-import { useState, useEffect, useContext } from 'react';
+import { View, Text, TextInput, ScrollView, Image } from 'react-native';
+import { useState, useEffect, useContext, useRef } from 'react';
 import { styles } from '../styles/DropScreen';
 import { TYPOGRAPHY } from '../../../constants/typography';
 import { TEXT_COLORS } from '../../../constants/colors';
@@ -18,6 +18,7 @@ import { getSongInfo } from '../api/dropApi';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
 import useLocation from '../../../hooks/useLocation';
 import { isPlaying } from 'react-native-track-player';
+import { ConfirmModal } from '../../../components';
 
 function DropScreen() {
     const route = useRoute<RouteProp<DropStackParamList, 'DropDetail'>>();
@@ -28,6 +29,10 @@ function DropScreen() {
     const createDroppingMutation = useCreateDropping();
   
     const [content, setContent] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalTitle, setModalTitle] = useState('');
+    const [modalMessage, setModalMessage] = useState('');
+    const confirmActionRef = useRef<(() => void) | null>(null);
     const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
     const musicPlayer = useHLSPlayer(songId);
@@ -68,17 +73,26 @@ function DropScreen() {
   
     const handleCreateDropping = () => {
       if (!userToken) {
-        Alert.alert('로그인 필요', '드롭핑을 생성하려면 로그인이 필요합니다.');
+        setModalTitle('로그인 필요');
+        setModalMessage('드롭핑을 생성하려면 로그인이 필요합니다.');
+        confirmActionRef.current = null;
+        setModalVisible(true);
         return;
       }
 
       if (!currentLocation) {
-        Alert.alert('위치 오류', '위치 정보를 가져올 수 없습니다. 다시 시도해주세요.');
+        setModalTitle('위치 오류');
+        setModalMessage('위치 정보를 가져올 수 없습니다. 다시 시도해주세요.');
+        confirmActionRef.current = null;
+        setModalVisible(true);
         return;
       }
 
       if (!songId) {
-        Alert.alert('음악 오류', '음악 정보를 찾을 수 없습니다.');
+        setModalTitle('음악 오류');
+        setModalMessage('음악 정보를 찾을 수 없습니다.');
+        confirmActionRef.current = null;
+        setModalVisible(true);
         return;
       }
 
@@ -92,26 +106,24 @@ function DropScreen() {
         },
         {
           onSuccess: () => {
-            Alert.alert(
-              '성공', 
-              '드롭핑이 성공적으로 생성되었습니다!',
-              [
-                {
-                  text: '확인',
-                  onPress: () => navigation.navigate('Home' as any)
-                }
-              ]
-            );
+            setModalTitle('성공');
+            setModalMessage('드롭핑이 성공적으로 생성되었습니다!');
+            confirmActionRef.current = () => navigation.navigate('Home' as any);
+            setModalVisible(true);
           },
           onError: (err: any) => {
             console.log('드롭핑 생성 실패:', err);
-            Alert.alert('경고', '근처에 드롭핑이 있습니다. 다른 위치에 드롭핑을 생성해주세요.');
+            setModalTitle('경고');
+            setModalMessage('근처에 드롭핑이 있습니다. 다른 위치에 드롭핑을 생성해주세요.');
+            confirmActionRef.current = null;
+            setModalVisible(true);
           },
         }
       );
     };
   
     return (
+      <>
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
         <CdPlayer imageUrl={imgUrl || serverImageUrl} />
         <View style={styles.playerContainer}>
@@ -162,6 +174,22 @@ function DropScreen() {
           />
         </View>
       </ScrollView>
+      <ConfirmModal
+        visible={modalVisible}
+        title={modalTitle}
+        message={modalMessage}
+        cancelText="취소"
+        confirmText="확인"
+        onCancel={() => setModalVisible(false)}
+        onConfirm={() => {
+          setModalVisible(false);
+          if (confirmActionRef.current) {
+            confirmActionRef.current();
+            confirmActionRef.current = null;
+          }
+        }}
+      />
+      </>
     );
   }
   

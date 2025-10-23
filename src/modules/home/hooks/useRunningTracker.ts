@@ -16,7 +16,6 @@ interface UseRunningTrackerReturn {
 }
 
 
-
 const useRunningTracker = (isRunning: boolean): UseRunningTrackerReturn => {
     const [currentTime, setCurrentTime] = useState(0);
     const [currentDistance, setCurrentDistance] = useState(0);

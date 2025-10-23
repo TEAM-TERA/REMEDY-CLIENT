@@ -1,4 +1,4 @@
-import { View, Text, Image, TouchableOpacity,SafeAreaView, Pressable } from "react-native";
+import { View, Text, Image, TouchableOpacity,SafeAreaView, Pressable, Alert } from "react-native";
 import { styles } from "../../styles/HeaderBar/Headerbar";
 import Profile from "./Profile";
 import { scale } from "../../../../utils/scalers";
@@ -21,7 +21,11 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
     navigation.navigate("Profile");
   }
   const pressHandlerRunning = ()=>{
-    setIsRunning?.(!isRunning);
+    const next = !isRunning;
+    if (!next) {
+      // 러닝 종료 시점: HomeScreen에서 계산된 거리/시간을 전달받지 못하므로, 종료 알럿은 HomeScreen에서 처리
+    }
+    setIsRunning?.(next);
   }
   return (
     <SafeAreaView>
@@ -47,7 +51,7 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
       </View>
       <View style = {styles.iconsContainer}>
         <Icon name="music"/>
-        <Icon name="target"/>
+        <Icon name="target" onPress={() => navigation.navigate('Challenge' as never)} />
         <Icon name="paint"/>
         <Icon name="running" onPress={pressHandlerRunning} isPress={isRunning} pressname="turnRunning"/>
       </View>

@@ -6,7 +6,9 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import Header from '../../profile/components/Header';
 import { styles } from '../styles/ChallengeScreen';
+import { useActiveAchievements } from '../hooks/useAchievements';
 import { useMyAchievements } from '../hooks/useMyAchievements';
+import { useMyDrop } from '../../profile/hooks/useMyDrop';
 import ChallengeCard from '../components/ChallengeCard';
 import { PRIMARY_COLORS, TERTIARY_COLORS } from '../../../constants/colors';
 
@@ -15,10 +17,10 @@ function ChallengeScreen() {
     const [activeTab, setActiveTab] = useState<'daily' | 'always'>('daily');
     const [openCardIds, setOpenCardIds] = useState<number[]>([]);
 
-    // API에서 데이터 가져오기
-    const { data: achievements, isLoading, error } = useMyAchievements();
-
-    // 로딩 상태
+    const { data: achievements, isLoading, error } = useActiveAchievements();
+    const { data: myAchievements } = useMyAchievements();
+    const { data: myDrops } = useMyDrop();
+    console.log(achievements);
     if (isLoading) {
         return (
             <SafeAreaView style={styles.safeAreaView}>
@@ -33,7 +35,6 @@ function ChallengeScreen() {
         );
     }
 
-    // 에러 상태
     if (error) {
         return (
             <SafeAreaView style={styles.safeAreaView}>
@@ -48,14 +49,11 @@ function ChallengeScreen() {
         );
     }
 
-    // 탭에 따라 데이터 필터링
-    const currentData = achievements?.filter(userAchievement => {
-        const period = userAchievement.achievement.period;
-
-        return activeTab === 'daily'
-            ? period === 'DAILY'
-            : period === 'PERMANENT';
-    }) || [];
+    const achievementList = Array.isArray(achievements) ? achievements : [];
+    const currentData = achievementList.filter(achievement => {
+        const period = achievement.period;
+        return activeTab === 'daily' ? period === 'DAILY' : period === 'PERMANENT';
+    });
 
     return (
         <SafeAreaView style={styles.safeAreaView}>
@@ -103,28 +101,31 @@ function ChallengeScreen() {
                             </Text>
                         </View>
                     ) : (
-                        currentData.map(userAchievement => {
-                            const { currentValue, achievement: { targetValue } } = userAchievement;
-                            const percent = targetValue > 0 ? Math.round((currentValue / targetValue) * 100) : 0;
+                        currentData.map(achievement => {
+                            const current = (myDrops || []).length;
+                            const target = achievement.targetValue;
+                            console.log(current, target,myDrops);
+                            const percent = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
 
                             return (
                                 <ChallengeCard
-                                    key={userAchievement.userAchievementId}
-                                    title={userAchievement.achievement.title}
-                                    description={`${userAchievement.currentValue} / ${userAchievement.achievement.targetValue}`}
-                                    coin={userAchievement.achievement.rewardAmount}
+                                    key={achievement.achievementId}
+                                    title={achievement.title}
+                                    description={`${current} / ${target}`}
+                                    coin={achievement.rewardAmount}
                                     progress={`${percent}%`}
+                                    totalCount={target}
                                     sideBarColor={
                                         activeTab === 'daily'
                                             ? PRIMARY_COLORS.DEFAULT
                                             : TERTIARY_COLORS.DEFAULT
                                     }
-                                    isOpen={openCardIds.includes(userAchievement.userAchievementId)}
+                                    isOpen={openCardIds.includes(achievement.achievementId)}
                                     onToggle={() =>
                                         setOpenCardIds(prev =>
-                                            prev.includes(userAchievement.userAchievementId)
-                                                ? prev.filter(id => id !== userAchievement.userAchievementId)
-                                                : [...prev, userAchievement.userAchievementId],
+                                            prev.includes(achievement.achievementId)
+                                                ? prev.filter(id => id !== achievement.achievementId)
+                                                : [...prev, achievement.achievementId],
                                         )
                                     }
                                 />

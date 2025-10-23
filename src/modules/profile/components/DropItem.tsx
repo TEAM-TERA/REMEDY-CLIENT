@@ -25,8 +25,8 @@ function DropItem({
                                 name="heart"
                                 width={24}
                                 height={24}
-                                color="Orgba(255, 71, 87, 0.8)"
-                            />{' '}
+                                color="rgba(255, 71, 87, 0.8)"
+                            />
                         </View>
                     )}
                     <View style={userProfileScreen.albumDisk}>
