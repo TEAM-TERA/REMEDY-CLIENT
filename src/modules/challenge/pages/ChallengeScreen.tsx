@@ -102,7 +102,6 @@ function ChallengeScreen() {
                         </View>
                     ) : (
                         currentData.map(achievement => {
-                            // 전체 드랍 횟수 기준
                             const current = (myDrops || []).length;
                             const target = achievement.targetValue;
                             console.log(current, target,myDrops);
