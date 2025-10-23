@@ -17,6 +17,8 @@ interface UseRunningTrackerReturn {
 
 
 
+const ENABLE_SAVE_RUNNING = false; // 임시 비활성화 플래그
+
 const useRunningTracker = (isRunning: boolean): UseRunningTrackerReturn => {
     const [currentTime, setCurrentTime] = useState(0);
     const [currentDistance, setCurrentDistance] = useState(0);
@@ -28,6 +30,10 @@ const useRunningTracker = (isRunning: boolean): UseRunningTrackerReturn => {
 
     const saveRecord = async () => {
         if (!startTime) return;
+        if (!ENABLE_SAVE_RUNNING) {
+            console.log('러닝 기록 저장 비활성화 중');
+            return;
+        }
         try {
           await saveRunningRecord({
             distanceKm: currentDistance,

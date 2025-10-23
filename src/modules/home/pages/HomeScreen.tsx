@@ -10,6 +10,7 @@ import useRunningTracker from "../hooks/useRunningTracker";
 import { ConfirmModal } from "../../../components";
 import useLocation from "../../../hooks/useLocation";
 import { useDroppings } from "../../drop/hooks/useDroppings";
+import { ensureSetup, loadAndPlayPreview, pause } from "../../../utils/spotifyPreviewPlayer";
 
 function HomeScreen() {
   const [headerHeight, setHeaderHeight] = useState(68);
@@ -28,13 +29,35 @@ function HomeScreen() {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }} edges={['top']}>
         <View style={{ flex: 1, position: 'relative' }}>
-            <HeaderBar setIsRunning={(next:boolean)=>{
+            <HeaderBar setIsRunning={async (next:boolean)=>{
                 if (isRunning && !next) {
                   const hours = timeComponents.hours;
                   const minutes = timeComponents.minutes;
                   const seconds = timeComponents.seconds;
                   setRunModalMessage(`달린 시간: ${hours}:${minutes}:${seconds}\n달린 거리: ${currentDistance.toFixed(2)} km`);
                   setRunModalVisible(true);
+                  try { await pause(); } catch {}
+                }
+                // 러닝 시작 시 근처 음악 미리듣기 랜덤 재생
+                if (!isRunning && next) {
+                  const list = droppings ?? [];
+                  if (list.length > 0) {
+                    const near = list[0]; // 이미 훅에서 거리 필터링된 목록이라고 가정, 간단히 첫 곡 사용(또는 랜덤)
+                    const idx = Math.floor(Math.random() * list.length);
+                    const pick = list[idx];
+                    try {
+                      await ensureSetup();
+                      await loadAndPlayPreview({
+                        id: String(pick.songId || pick.droppingId),
+                        title: pick.title || '드랍핑 음악',
+                        artist: pick.artist || '알 수 없는 아티스트',
+                        artwork: undefined,
+                        previewUrl: pick.previewUrl || pick.preview_url || ''
+                      });
+                    } catch (e) {
+                      // 미리듣기 URL 없으면 무시
+                    }
+                  }
                 }
                 setIsRunning(next);
               }} onLayout={setHeaderHeight} isRunning={isRunning}/>

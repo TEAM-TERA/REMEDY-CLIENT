@@ -6,7 +6,6 @@ import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../types/navigation';
 import type { DropItemData } from '../types/DropItemData';
 import { TEXT_COLORS } from '../../../constants/colors';
-import { dropMockData, likeMockData } from '../datas/mockData';
 import styles from '../styles/userProfileScreen';
 import Header from '../components/Header';
 import DropItem from '../components/DropItem';

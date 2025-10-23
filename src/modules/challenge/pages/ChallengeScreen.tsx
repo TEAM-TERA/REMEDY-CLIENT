@@ -102,16 +102,8 @@ function ChallengeScreen() {
                         </View>
                     ) : (
                         currentData.map(achievement => {
-                            const today = new Date();
-                            today.setHours(0,0,0,0);
-                            const current = (myDrops || []).filter(d => {
-                                const anyDrop: any = d as any;
-                                const createdAt = anyDrop.createdAt ? new Date(anyDrop.createdAt) : null;
-                                if (!createdAt) return false;
-                                const createdDay = new Date(createdAt);
-                                createdDay.setHours(0,0,0,0);
-                                return createdDay.getTime() === today.getTime();
-                            }).length;
+                            // 전체 드랍 횟수 기준
+                            const current = (myDrops || []).length;
                             const target = achievement.targetValue;
                             console.log(current, target,myDrops);
                             const percent = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
