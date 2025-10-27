@@ -6,6 +6,7 @@ export interface SongSearchItem {
     title: string;
     artist: string;
     duration: number;
+    albumImageUrl: string;
 }
 
 export function useSongSearch(query : string) {

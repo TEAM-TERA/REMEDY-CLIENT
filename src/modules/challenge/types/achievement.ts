@@ -49,3 +49,37 @@ export interface CreateAchievementPayload {
   targetValue: number;
   rewardAmount: number;
 }
+
+// 새로운 활성 도전과제 응답 (플랫 구조)
+export interface ActiveAchievement {
+  userAchievementId: number;
+  achievementId: number;
+  title: string;
+  targetValue: number;
+  currentProgress: number;
+  progressPercentage: number;
+  rewardAmount: number;
+  isCompleted: boolean;
+  isRewardClaimed: boolean;
+  completedAt: string | null;
+  rewardClaimedAt: string | null;
+}
+
+export interface ActiveAchievementsPage {
+  achievements: ActiveAchievement[];
+  totalCount: number;
+  completedCount: number;
+  unclaimedRewardCount: number;
+  currentPage: number;
+  pageSize: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
+export interface UserCurrency {
+  userCurrencyId: number;
+  userId: number;
+  amount: number;
+  updatedAt: string;
+}

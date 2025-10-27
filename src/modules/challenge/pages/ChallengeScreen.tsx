@@ -7,8 +7,6 @@ import type { RootStackParamList } from '../../../types/navigation';
 import Header from '../../profile/components/Header';
 import { styles } from '../styles/ChallengeScreen';
 import { useActiveAchievements } from '../hooks/useAchievements';
-import { useMyAchievements } from '../hooks/useMyAchievements';
-import { useMyDrop } from '../../profile/hooks/useMyDrop';
 import ChallengeCard from '../components/ChallengeCard';
 import { PRIMARY_COLORS, TERTIARY_COLORS } from '../../../constants/colors';
 
@@ -17,10 +15,10 @@ function ChallengeScreen() {
     const [activeTab, setActiveTab] = useState<'daily' | 'always'>('daily');
     const [openCardIds, setOpenCardIds] = useState<number[]>([]);
 
-    const { data: achievements, isLoading, error } = useActiveAchievements();
-    const { data: myAchievements } = useMyAchievements();
-    const { data: myDrops } = useMyDrop();
-    console.log(achievements);
+    const { data: achievements, isLoading, error } = useActiveAchievements({
+        period: activeTab === 'daily' ? 'DAILY' : 'PERMANENT'
+    });
+    
     if (isLoading) {
         return (
             <SafeAreaView style={styles.safeAreaView}>
@@ -50,10 +48,7 @@ function ChallengeScreen() {
     }
 
     const achievementList = Array.isArray(achievements) ? achievements : [];
-    const currentData = achievementList.filter(achievement => {
-        const period = achievement.period;
-        return activeTab === 'daily' ? period === 'DAILY' : period === 'PERMANENT';
-    });
+    const currentData = achievementList;
 
     return (
         <SafeAreaView style={styles.safeAreaView}>
@@ -102,10 +97,9 @@ function ChallengeScreen() {
                         </View>
                     ) : (
                         currentData.map(achievement => {
-                            const current = (myDrops || []).length;
+                            const current = achievement.currentProgress ?? 0;
                             const target = achievement.targetValue;
-                            console.log(current, target,myDrops);
-                            const percent = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+                            const percent = Math.max(0, Math.min(100, Math.round(achievement.progressPercentage ?? (target > 0 ? (current / target) * 100 : 0))));
 
                             return (
                                 <ChallengeCard
