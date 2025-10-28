@@ -6,7 +6,7 @@ import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../types/navigation';
 import type { DropItemData } from '../types/DropItemData';
 import { TEXT_COLORS } from '../../../constants/colors';
-import styles from '../styles/userProfileScreen';
+import { styles } from '../styles/userProfileScreen';
 import Header from '../components/Header';
 import DropItem from '../components/DropItem';
 import Icon from '../../../components/icon/Icon';
@@ -15,6 +15,7 @@ import { useMyProfile } from '../hooks/useMyProfile';
 import { useMyDrop } from '../hooks/useMyDrop';
 import { useMyLikes } from '../hooks/useMyLike';
 import { getSongInfo } from '../../drop/api/dropApi';
+import { scale, verticalScale } from '../../../utils/scalers';
 
 function UserProfileScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
@@ -85,7 +86,7 @@ function UserProfileScreen() {
             <SafeAreaView style={styles.safeAreaView}>
               <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
                 <ActivityIndicator />
-                <Text style={{ marginTop: 8 }}>프로필 정보를 불러오고 있습니다!</Text>
+                <Text style={{ marginTop: verticalScale(8) }}>프로필 정보를 불러오고 있습니다!</Text>
               </View>
             </SafeAreaView>
         );
@@ -111,8 +112,8 @@ function UserProfileScreen() {
                         <TouchableOpacity onPress={handleSettingPress}>
                             <Icon
                                 name="setting"
-                                width={20}
-                                height={20}
+                                width={scale(20)}
+                                height={scale(20)}
                                 color={TEXT_COLORS.DEFAULT}
                             />
                         </TouchableOpacity>
@@ -133,8 +134,8 @@ function UserProfileScreen() {
                         <TouchableOpacity onPress={handleEditPress}>
                             <Icon
                                 name="edit"
-                                width={20}
-                                height={20}
+                                width={scale(20)}
+                                height={scale(20)}
                                 color={TEXT_COLORS.CAPTION}
                             />
                         </TouchableOpacity>

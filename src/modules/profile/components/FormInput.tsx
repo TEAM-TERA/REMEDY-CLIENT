@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TextInput } from 'react-native';
-import infoEditScreen from '../styles/infoEditScreen';
+import { styles } from '../styles/infoEditScreen';
 import { FormInputProps } from '../types/InfoEdit';
 import { TEXT_COLORS } from '../../../constants/colors';
 
@@ -11,10 +11,10 @@ function FormInput({
     placeholder,
 }: FormInputProps) {
     return (
-        <View style={infoEditScreen.inputContainer}>
-            <Text style={infoEditScreen.label}>{label}</Text>
+        <View style={styles.inputContainer}>
+            <Text style={styles.label}>{label}</Text>
             <TextInput
-                style={infoEditScreen.textInput}
+                style={styles.textInput}
                 value={value}
                 onChangeText={onChangeText}
                 placeholder={placeholder}
