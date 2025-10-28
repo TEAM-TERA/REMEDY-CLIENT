@@ -99,7 +99,7 @@ function SignUpScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderNav />
+      <HeaderNav title="회원가입" />
       <View style={styles.formContainer}>
         <Input
           placeholder="이름"

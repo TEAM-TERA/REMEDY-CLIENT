@@ -49,7 +49,7 @@ function LogoutScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderNav />
+      <HeaderNav title="로그아웃" />
       <View style={styles.contentContainer}>
         <View style={styles.userInfoContainer}>
           <Text style={[styles.userName, TYPOGRAPHY.HEADLINE_3]}>
