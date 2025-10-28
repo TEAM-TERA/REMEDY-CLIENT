@@ -17,8 +17,6 @@ export const styles = StyleSheet.create({
   },
   genderLabel: {
     color: '#FFFFFF',
-    fontSize: scale(16),
-    fontWeight: '400',
     marginBottom: scale(12),
   },
   genderButtons: {
@@ -40,13 +38,9 @@ export const styles = StyleSheet.create({
   },
   genderButtonTextActive: {
     color: '#FFFFFF',
-    fontSize: scale(16),
-    fontWeight: '500',
   },
   genderButtonTextInactive: {
     color: '#FFFFFF',
-    fontSize: scale(16),
-    fontWeight: '400',
   },
   signUpButton: {
     marginTop: scale(32),
