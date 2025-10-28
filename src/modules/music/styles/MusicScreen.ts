@@ -6,22 +6,24 @@ import {
     TEXT_COLORS,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
+import { scale } from '../../../utils/scalers';
+import { verticalScale } from '../../../utils/scalers';
 
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingVertical: 16,
-        paddingHorizontal: 16,
+        paddingVertical: verticalScale(16),
+        paddingHorizontal: scale(16),
         backgroundColor: BACKGROUND_COLORS.BACKGROUND,
     },
     innerContainer: {
-        gap: 24,
+        gap: scale(24),
     },
     content: {
         flex: 1,
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        gap: 12,
+        paddingVertical: verticalScale(12),
+        paddingHorizontal: scale(12),
+        gap: scale(12),
     },
     infoRow: {
         flexDirection: 'row',
@@ -29,7 +31,7 @@ export const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     infoTextWrapper: {
-        gap: 4,
+        gap: scale(4),
     },
     title: {
         fontWeight: 'bold',
@@ -43,37 +45,37 @@ export const styles = StyleSheet.create({
     likeCommentRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: scale(12),
     },
     smallLikeCommentRow: {
         flexDirection: 'row',
-        gap: 4,
+        gap: scale(4),
     },
     likeCommentText: {
         color: TEXT_COLORS.DEFAULT,
         ...TYPOGRAPHY.BODY_1,
     },
     inner: {
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        gap: 12,
+        paddingVertical: verticalScale(12),
+        paddingHorizontal: scale(12),
+        gap: scale(12),
     },
     userRow: {
         flexDirection: 'row',
         width: '100%',
         alignItems: 'center',
-        gap: 8,
+        gap: scale(8),
     },
     userDot: {
-        width: 20,
-        height: 20,
-        borderRadius: 10,
-        backgroundColor: '#FF1744',
+        width: scale(20),
+        height: scale(20),
+        borderRadius: verticalScale(10),
+        backgroundColor: PRIMARY_COLORS.DEFAULT,
     },
     userInfo: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: scale(4),
     },
     userName: {
         color: TEXT_COLORS.DEFAULT,
@@ -81,11 +83,11 @@ export const styles = StyleSheet.create({
     },
     userBadge: {
         alignItems: 'center',
-        borderRadius: 16,
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderWidth: 1,
-        backgroundColor: '#232025',
+        borderRadius: verticalScale(16),
+        paddingHorizontal: scale(8),
+        paddingVertical: scale(4),
+        borderWidth: scale(1),
+        backgroundColor: BACKGROUND_COLORS.BACKGROUND,
         borderColor: TEXT_COLORS.CAPTION_LIGHTER,
     },
     userBadgeText: {
@@ -95,14 +97,14 @@ export const styles = StyleSheet.create({
     messageLocationRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 4,
+        gap: scale(4),
     },
     messageBox: {
         backgroundColor: UI_COLORS.BACKGROUND_RED,
-        borderRadius: 12,
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        gap: 8,
+        borderRadius: verticalScale(12),
+        paddingVertical: verticalScale(16),
+        paddingHorizontal: scale(16),
+        gap: scale(8),
     },
 
     messageText: {
@@ -114,9 +116,9 @@ export const styles = StyleSheet.create({
         ...TYPOGRAPHY.CAPTION_1,
     },
     commentSection: {
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        gap: 12,
+        paddingVertical: verticalScale(12),
+        paddingHorizontal: scale(12),
+        gap: scale(12),
     },
     commentTitle: {
         color: TEXT_COLORS.DEFAULT,
@@ -125,26 +127,26 @@ export const styles = StyleSheet.create({
     },
     commentInputRow: {
         flexDirection: 'row',
-        gap: 8,
+        gap: scale(8),
     },
     commentItemInfo: {
         flexDirection: 'row',
-        gap: 8,
+        gap: scale(8),
     },
     commentInput: {
         flex: 1,
         backgroundColor: UI_COLORS.BACKGROUND_RED,
-        borderRadius: 8,
-        paddingHorizontal: 12,
+        borderRadius: verticalScale(8),
+        paddingHorizontal: scale(12),
         color: TEXT_COLORS.DEFAULT,
-        height: 40,
+        height: verticalScale(40),
     },
     commentButton: {
         backgroundColor: PRIMARY_COLORS.DEFAULT,
-        borderRadius: 8,
+        borderRadius: verticalScale(8),
         justifyContent: 'center',
         alignItems: 'center',
-        paddingHorizontal: 18,
+        paddingHorizontal: scale(18),
     },
 
     commentButtonText: {
@@ -153,24 +155,24 @@ export const styles = StyleSheet.create({
     },
     commentItemWrapper: {
         backgroundColor: UI_COLORS.BACKGROUND_RED,
-        borderRadius: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        gap: 8,
-        marginBottom: 12,
+        borderRadius: verticalScale(12),
+        paddingVertical: verticalScale(12),
+        paddingHorizontal: scale(12),
+        gap: scale(8),
+        marginBottom: verticalScale(12),
     },
     commentItemDot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+        width: scale(10),
+        height: scale(10),
+        borderRadius: verticalScale(5),
     },
     commentItemUser: {
         fontWeight: 'bold',
     },
     commentItemBox: {
-        borderRadius: 8,
-        paddingHorizontal: 8,
-        paddingVertical: 6,
+        borderRadius: verticalScale(8),
+        paddingHorizontal: scale(8),
+        paddingVertical: verticalScale(6),
         flex: 1,
     },
     commentItemText: {
