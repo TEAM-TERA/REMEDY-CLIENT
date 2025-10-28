@@ -46,5 +46,5 @@ export async function deactivateAchievement(achievementId: number) {
 // 보상 수령
 export async function claimAchievementReward(achievementId: number) {
     const { data } = await axiosInstance.post(`${BASE}/${achievementId}/claim`);
-    return data; // 갱신된 유저-도전과제 상태
+    return data;
 }

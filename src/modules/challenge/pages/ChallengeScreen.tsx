@@ -7,6 +7,7 @@ import type { RootStackParamList } from '../../../types/navigation';
 import Header from '../../profile/components/Header';
 import { styles } from '../styles/ChallengeScreen';
 import { useActiveAchievements } from '../hooks/useAchievements';
+import { useMyDrop } from '../../profile/hooks/useMyDrop';
 import ChallengeCard from '../components/ChallengeCard';
 import { PRIMARY_COLORS, TERTIARY_COLORS } from '../../../constants/colors';
 
@@ -18,6 +19,7 @@ function ChallengeScreen() {
     const { data: achievements, isLoading, error } = useActiveAchievements({
         period: activeTab === 'daily' ? 'DAILY' : 'PERMANENT'
     });
+    const { data: myDrops } = useMyDrop();
     
     if (isLoading) {
         return (
@@ -97,9 +99,9 @@ function ChallengeScreen() {
                         </View>
                     ) : (
                         currentData.map(achievement => {
-                            const current = achievement.currentProgress ?? 0;
+                            const current = (myDrops || []).length;
                             const target = achievement.targetValue;
-                            const percent = Math.max(0, Math.min(100, Math.round(achievement.progressPercentage ?? (target > 0 ? (current / target) * 100 : 0))));
+                            const percent = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
 
                             return (
                                 <ChallengeCard
