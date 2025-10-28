@@ -54,7 +54,7 @@ function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderNav />
+      <HeaderNav title="로그인" />
       <View style={styles.inputContainer}>
         <Input
           placeholder="이메일을 입력해주세요"

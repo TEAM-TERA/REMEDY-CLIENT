@@ -38,11 +38,10 @@ function HomeScreen() {
                   setRunModalVisible(true);
                   try { await pause(); } catch {}
                 }
-                // 러닝 시작 시 근처 음악 미리듣기 랜덤 재생
                 if (!isRunning && next) {
                   const list = droppings ?? [];
                   if (list.length > 0) {
-                    const near = list[0]; // 이미 훅에서 거리 필터링된 목록이라고 가정, 간단히 첫 곡 사용(또는 랜덤)
+                    const near = list[0];
                     const idx = Math.floor(Math.random() * list.length);
                     const pick = list[idx];
                     try {
@@ -55,7 +54,6 @@ function HomeScreen() {
                         previewUrl: pick.previewUrl || pick.preview_url || ''
                       });
                     } catch (e) {
-                      // 미리듣기 URL 없으면 무시
                     }
                   }
                 }

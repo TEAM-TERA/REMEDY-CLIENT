@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../types/navigation';
-import settingScreen from '../styles/settingScreen';
+import { styles } from '../styles/settingScreen';
 import Header from '../components/Header';
 import SettingSection from '../components/SettingSection';
 import SettingItem from '../components/SettingItem';
@@ -16,8 +16,8 @@ function SettingScreen() {
         navigation.navigate('InfoEdit');
     };
     return (
-        <SafeAreaView style={settingScreen.safeAreaView}>
-            <View style={settingScreen.container}>
+        <SafeAreaView style={styles.safeAreaView}>
+            <View style={styles.container}>
                 <Header title="설정" />
 
                 <SettingSection title="내 계정">

@@ -11,7 +11,6 @@ function SignUpScreen() {
   const navigation = useAuthNavigation();
   const [isLoading, setIsLoading] = useState(false);
   
-  // 폼 상태
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,12 +20,10 @@ function SignUpScreen() {
     gender: "male" as "male" | "female"
   });
   
-  // 에러 상태
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // 입력 시 해당 필드 에러 제거
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
@@ -102,7 +99,7 @@ function SignUpScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderNav />
+      <HeaderNav title="회원가입" />
       <View style={styles.formContainer}>
         <Input
           placeholder="이름"
@@ -150,6 +147,7 @@ function SignUpScreen() {
               onPress={() => handleGenderSelect("male")}
               style={[
                 styles.genderButton,
+                TYPOGRAPHY.BUTTON_TEXT,
                 formData.gender === "male" ? styles.genderButtonActive : styles.genderButtonInactive
               ]}
               textStyle={formData.gender === "male" ? styles.genderButtonTextActive : styles.genderButtonTextInactive}
@@ -159,6 +157,7 @@ function SignUpScreen() {
               onPress={() => handleGenderSelect("female")}
               style={[
                 styles.genderButton,
+                TYPOGRAPHY.BUTTON_TEXT,
                 formData.gender === "female" ? styles.genderButtonActive : styles.genderButtonInactive
               ]}
               textStyle={formData.gender === "female" ? styles.genderButtonTextActive : styles.genderButtonTextInactive}
@@ -170,7 +169,7 @@ function SignUpScreen() {
           title="회원가입"
           onPress={handleSignUp}
           disabled={isLoading}
-          style={styles.signUpButton}
+          style={[styles.signUpButton, TYPOGRAPHY.BUTTON_TEXT]}
         />
       </View>
     </SafeAreaView>

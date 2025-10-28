@@ -1,5 +1,5 @@
 import axiosInstance from "../../auth/api/axiosInstance";
-import type { Achievement, CreateAchievementPayload, UserAchievementListResponse } from "../types/achievement";
+import type { Achievement, CreateAchievementPayload, ActiveAchievementsPage, UserCurrency } from "../types/achievement";
 
 const BASE = '/achievements';
 
@@ -9,21 +9,16 @@ export async function getAllAchievements() {
     return data;
 }
 
-// 활성화된 도전과제 가져오기
-export interface ActiveAchievementsResponse {
-    achievements: Achievement[];
-    totalCount: number;
+// 활성 도전과제 조회 (페이지)
+export async function getActiveAchievements(params?: { period?: 'DAILY' | 'PERMANENT'; page?: number; size?: number; }) {
+    const { data } = await axiosInstance.get<ActiveAchievementsPage>(`${BASE}`, { params });
+    return data; // { achievements: [...], paging ... }
 }
 
-export async function getActiveAchievements() {
-    const { data } = await axiosInstance.get<ActiveAchievementsResponse>(`${BASE}/active`);
+// 내 통화 정보 조회
+export async function getMyCurrency() {
+    const { data } = await axiosInstance.get<UserCurrency>(`/currency`);
     return data;
-}
-
-// 내 도전과제 조회
-export async function getMyAchievements() {
-    const { data } = await axiosInstance.get<UserAchievementListResponse>(`${BASE}/my`);
-    return data.achievements;
 }
 
 // 도전과제 생성 (관리자 전용)
@@ -34,18 +29,22 @@ export async function createAchievement(payload: CreateAchievementPayload) {
 
 // 도전과제 수정 (관리자 전용)
 export async function updateAchievement(achievementId: number, payload: Partial<CreateAchievementPayload>) {
-    const { data } = await axiosInstance.put<Achievement>(`${BASE}/${achievementId}`, payload);
+    const { data } = await axiosInstance.patch<Achievement>(`${BASE}/${achievementId}`, payload);
     return data;
 }
 
 // 도전과제 활성화 (관리자 전용)
 export async function activateAchievement(achievementId: number) {
-    const { data } = await axiosInstance.post<Achievement>(`${BASE}/${achievementId}/activate`);
-    return data;
+    await axiosInstance.post(`${BASE}/${achievementId}/activate`);
 }
 
 // 도전과제 비활성화 (관리자 전용)
 export async function deactivateAchievement(achievementId: number) {
-    const { data } = await axiosInstance.post<Achievement>(`${BASE}/${achievementId}/deactivate`);
+    await axiosInstance.post(`${BASE}/${achievementId}/deactivate`);
+}
+
+// 보상 수령
+export async function claimAchievementReward(achievementId: number) {
+    const { data } = await axiosInstance.post(`${BASE}/${achievementId}/claim`);
     return data;
 }

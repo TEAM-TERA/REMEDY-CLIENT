@@ -30,7 +30,7 @@ function LogoutScreen() {
               await logout();
               navigation.reset({
                 index: 0,
-                routes: [{ name: 'Login' }],
+                routes: [{ name: 'Auth' }],
               });
             } catch (error) {
               console.error('Logout error:', error);
@@ -49,10 +49,10 @@ function LogoutScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderNav />
+      <HeaderNav title="로그아웃" />
       <View style={styles.contentContainer}>
         <View style={styles.userInfoContainer}>
-          <Text style={[styles.userName, TYPOGRAPHY.HEADING_3]}>
+          <Text style={[styles.userName, TYPOGRAPHY.HEADLINE_3]}>
             {user?.name || "사용자"}
           </Text>
           <Text style={[styles.userEmail, TYPOGRAPHY.BODY_1]}>

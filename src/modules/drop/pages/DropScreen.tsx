@@ -50,7 +50,7 @@ function DropScreen() {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           });
-        },
+        }, 
         (error) => {
           setCurrentLocation({
             latitude: 37.5665,
@@ -125,7 +125,7 @@ function DropScreen() {
     return (
       <>
       <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        <CdPlayer imageUrl={imgUrl || serverImageUrl} />
+        <CdPlayer imageUrl={songInfo?.albumImagePath} />
         <View style={styles.playerContainer}>
           <View style={styles.textContainer}>
             <Text style={[TYPOGRAPHY.HEADLINE_1, styles.titleText]}>{musicTitle}</Text>

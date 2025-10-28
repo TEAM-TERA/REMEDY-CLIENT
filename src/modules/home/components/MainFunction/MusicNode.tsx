@@ -93,7 +93,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
                 style={styles.container}
             >
                 <Image
-                    source={data.dropping.imageSource || require('../../../../assets/images/profileImage.png')}
+                    source={data.dropping.albumImageUrl || require('../../../../assets/images/profileImage.png')}
                     style={styles.musicImg}
                 />
                 <Text style={styles.musicTitle}>

@@ -5,7 +5,7 @@ import {
     UI_COLORS,
     TEXT_COLORS,
 } from '../../../constants/colors';
-
+import { scale, verticalScale } from '../../../utils/scalers';
 import { TYPOGRAPHY } from '../../../constants/typography';
 
 export const styles= StyleSheet.create({
@@ -15,8 +15,8 @@ export const styles= StyleSheet.create({
     },
     container: {
         flex: 1,
-        paddingHorizontal: 16,
-        paddingVertical: 16,
+        paddingHorizontal: scale(16),
+        paddingVertical: verticalScale(16),
         gap: 24,
     },
     headerContainer: {
@@ -24,7 +24,7 @@ export const styles= StyleSheet.create({
         justifyContent: 'space-between',
     },
     rightComponent: {
-        width: 24,
+        width: scale(24),
     },
     title: {
         color: TEXT_COLORS.DEFAULT,
@@ -35,22 +35,22 @@ export const styles= StyleSheet.create({
         ...TYPOGRAPHY.SUBTITLE,
     },
     nameEditContainer: {
-        padding: 12,
+        padding: scale(12),
         gap: 12,
     },
     nameEditInput: {
-        padding: 12,
-        borderRadius: 8,
+        padding: scale(12),
+        borderRadius: verticalScale(8),
         backgroundColor: UI_COLORS.BACKGROUND,
         color: TEXT_COLORS.DEFAULT,
         ...TYPOGRAPHY.INPUT_TEXT,
     },
     button: {
-        margin: 12,
-        padding: 12,
+        margin: verticalScale(12),
+        padding: scale(12),
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 8,
+        borderRadius: verticalScale(8),
         backgroundColor: PRIMARY_COLORS.MINUS_TEN,
     },
     buttonText: {

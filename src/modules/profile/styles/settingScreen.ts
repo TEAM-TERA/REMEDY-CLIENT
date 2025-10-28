@@ -5,19 +5,20 @@ import {
   PRIMARY_COLORS,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
+import { scale } from '../../../utils/scalers';
 
-const settingScreen = StyleSheet.create({
+export const styles = StyleSheet.create({
   safeAreaView: {
     flex: 1,
     backgroundColor: BACKGROUND_COLORS.BACKGROUND,
   },
   container: {
     flex: 1,
-    padding: 16,
+    padding: scale(16),
     gap: 24,
   },
   section: {
-    padding: 12,
+    padding: scale(12),
     gap: 8,
   },
   sectionTitle: {
@@ -28,7 +29,7 @@ const settingScreen = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 12,
+    padding: scale(12),
   },
   settingItemText: {
     color: TEXT_COLORS.DEFAULT,
@@ -43,5 +44,3 @@ const settingScreen = StyleSheet.create({
     ...TYPOGRAPHY.BODY_2,
   },
 });
-
-export default settingScreen;

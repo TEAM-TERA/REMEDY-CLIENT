@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../types/navigation';
-import infoEditScreen from '../styles/infoEditScreen';
+import { styles } from '../styles/infoEditScreen';
 import Header from '../components/Header';
 import FormInput from '../components/FormInput';
 import DateInput from '../components/DateInput';
@@ -18,11 +18,6 @@ function InfoEditScreen() {
         birthDate: '',
         gender: 'male',
     });
-
-    // TODO: 실제 사용자 데이터 로드
-    useEffect(() => {
-        // loadUserData();
-    }, []);
 
     const handleNameChange = (text: string) => {
         setFormData(prev => ({ ...prev, name: text }));
@@ -46,11 +41,11 @@ function InfoEditScreen() {
     };
 
     return (
-        <SafeAreaView style={infoEditScreen.safeAreaView}>
-            <View style={infoEditScreen.container}>
+        <SafeAreaView style={styles.safeAreaView}>
+            <View style={styles.container}>
                 <Header title="정보 수정" />
 
-                <View style={infoEditScreen.content}>
+                <View style={styles.content}>
                     <FormInput
                         label="이름"
                         value={formData.name}
@@ -66,9 +61,9 @@ function InfoEditScreen() {
                         label="생년월일"
                     />
 
-                    <View style={infoEditScreen.genderContainer}>
-                        <Text style={infoEditScreen.label}>성별</Text>
-                        <View style={infoEditScreen.genderButtons}>
+                    <View style={styles.genderContainer}>
+                        <Text style={styles.label}>성별</Text>
+                        <View style={styles.genderButtons}>
                             <GenderButton
                                 label="남성"
                                 isSelected={formData.gender === 'male'}
@@ -83,10 +78,10 @@ function InfoEditScreen() {
                     </View>
 
                     <TouchableOpacity
-                        style={infoEditScreen.submitButton}
+                        style={styles.submitButton}
                         onPress={handleSubmit}
                     >
-                        <Text style={infoEditScreen.submitButtonText}>
+                        <Text style={styles.submitButtonText}>
                             수정하기
                         </Text>
                     </TouchableOpacity>
