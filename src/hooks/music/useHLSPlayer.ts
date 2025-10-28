@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Image } from 'react-native';
-import TrackPlayer, { Event, State, useTrackPlayerEvents } from 'react-native-track-player';
+import { Image, Platform } from 'react-native';
+import TrackPlayer, { Event, State, useTrackPlayerEvents, TrackType } from 'react-native-track-player';
 import axiosInstance from '../../modules/auth/api/axiosInstance';
 
 interface MusicPlayerState {
@@ -27,7 +27,7 @@ export function useHLSPlayer(songId?: string) {
 
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackTrackChanged, Event.PlaybackError], (event) => {
+  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackActiveTrackChanged, Event.PlaybackError], (event) => {
     if (event.type === Event.PlaybackState) {
       setState(prev => ({
         ...prev,
@@ -36,12 +36,15 @@ export function useHLSPlayer(songId?: string) {
       }));
       
       if (event.state === State.Error) {
+        console.error('Playback state error detected');
         setState(prev => ({ ...prev, error: '재생 중 오류가 발생했습니다' }));
       }
     }
     
     if (event.type === Event.PlaybackError) {
-      setState(prev => ({ ...prev, error: '재생 에러가 발생했습니다' }));
+      console.error('PlaybackError event:', event);
+      console.error('PlaybackError details - message:', event.message, 'code:', event.code);
+      setState(prev => ({ ...prev, error: `재생 에러: ${event.message}` }));
     }
   });
 
@@ -154,6 +157,10 @@ export function useHLSPlayer(songId?: string) {
         album: trackTitle,
         genre: 'Music',
         date: new Date().toISOString(),
+        type: TrackType.HLS, // HLS 타입 명시
+        headers: {
+          'User-Agent': 'Remedy/1.0.0 (Android; react-native-track-player)',
+        },
       };
       await TrackPlayer.add(track);
 
@@ -184,12 +191,12 @@ export function useHLSPlayer(songId?: string) {
 
   const togglePlay = async () => {
     try {
-      const playerState = await TrackPlayer.getState();
-      
-      if (playerState === State.Playing) {
+      const playbackState = await TrackPlayer.getPlaybackState();
+
+      if (playbackState.state === State.Playing) {
         await TrackPlayer.pause();
       } else {
-        if (playerState === State.Buffering || playerState === State.Loading) {
+        if (playbackState.state === State.Buffering || playbackState.state === State.Loading) {
           await TrackPlayer.stop();
           await TrackPlayer.play();
         } else {
