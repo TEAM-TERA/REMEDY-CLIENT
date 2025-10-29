@@ -57,7 +57,7 @@ function DropSearchScreen(){
     return(
         <SafeAreaView style = {styles.container}>
             <View style = {styles.inputContainer}>
-                <Icon name="left" width={24} height={24} fill="#FFFFFF" />
+                <Icon name="left" width={24} height={24} fill="#FFFFFF" onPress={() => navigation.goBack()} />
                 <Input 
                     placeholder="드랍할 음악 검색" 
                     containerWidth={scale(287)}
