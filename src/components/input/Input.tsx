@@ -1,4 +1,4 @@
-import { View, TextInput } from "react-native";
+import { View, TextInput, Platform } from "react-native";
 import { InputProps } from "../../types/Input";
 import { styles } from "./styles";
 import { TYPOGRAPHY } from "../../constants/typography";
@@ -11,13 +11,14 @@ function Input({placeholder, value, onChangeText, width, keyboardType, error, se
             value = {value}
             onChangeText = {onChangeText}
             style = {[
-                TYPOGRAPHY.INPUT_TEXT, 
                 styles.text,
-                width !== undefined ? { width } : null
+                Platform.OS === 'android' ? { paddingVertical: 0, textAlignVertical: 'center' as const } : null
             ]}
             placeholder = {placeholder}
-            placeholderTextColor={TEXT_COLORS.CAPTION}
+            placeholderTextColor={Platform.OS === 'android' ? '#9CA3AF' : TEXT_COLORS.CAPTION}
             keyboardType={keyboardType}
+            autoCapitalize="none"
+            autoCorrect={false}
             secureTextEntry={secureTextEntry}/>
         </View>
     )
