@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Remedy</string>
+    
+    <!-- react-native-track-player notification channel -->
+    <string name="rntp_temporary_channel_id">music_playback</string>
+    <string name="rntp_temporary_channel_name">Music Playback</string>
+    <string name="playback_channel_name">Music Player</string>
 </resources>
