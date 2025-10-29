@@ -4,14 +4,15 @@ import { styles } from "./styles";
 import { TYPOGRAPHY } from "../../constants/typography";
 import { TEXT_COLORS } from "../../constants/colors";
 
-function Input({placeholder, value, onChangeText, width, keyboardType, error, secureTextEntry} : InputProps){
+function Input({placeholder, value, onChangeText, width, containerWidth, keyboardType, error, secureTextEntry} : InputProps){
     return(
-        <View style = {styles.container}>
+        <View style = {[styles.container, containerWidth !== undefined ? { width: containerWidth, alignSelf: 'center', borderRadius: 8 } : null]}>
             <TextInput
             value = {value}
             onChangeText = {onChangeText}
             style = {[
                 styles.text,
+                width !== undefined ? { width } : { flex: 1 },
                 Platform.OS === 'android' ? { paddingVertical: 0, textAlignVertical: 'center' as const } : null
             ]}
             placeholder = {placeholder}

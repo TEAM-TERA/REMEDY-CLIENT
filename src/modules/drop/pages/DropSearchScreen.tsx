@@ -59,12 +59,12 @@ function DropSearchScreen(){
             <View style = {styles.inputContainer}>
                 <Icon name="left" width={24} height={24} fill="#FFFFFF" />
                 <Input 
-                placeholder="드랍할 음악 검색" 
-                width={scale(287)}
-                value = {searchingText}
-                onChangeText = {setSearchingText}
-                onSubmitEditing = {onSearch}
-                ></Input>
+                    placeholder="드랍할 음악 검색" 
+                    containerWidth={scale(287)}
+                    value = {searchingText}
+                    onChangeText = {setSearchingText}
+                    onSubmitEditing = {onSearch}
+                />
             </View>
             <ScrollView
                 style={styles.searchMusicContainer}
