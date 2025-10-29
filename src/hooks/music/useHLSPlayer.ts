@@ -30,9 +30,9 @@ export function useHLSPlayer(songId?: string) {
   type TrackEvent =
     | { type: 'playback-state'; state: number }
     | { type: 'playback-error'; code?: string; message?: string }
-    | { type: 'playback-track-changed'; track?: number | string; nextTrack?: number | string };
-
-  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackTrackChanged, Event.PlaybackError], (event: TrackEvent) => {
+    | { type: 'playback-active-track-changed'; index?: number; track?: string | number };
+    
+  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackActiveTrackChanged, Event.PlaybackError], (event: TrackEvent) => {
     if (event.type === 'playback-state') {
       setState(prev => ({
         ...prev,
