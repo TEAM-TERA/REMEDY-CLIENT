@@ -27,8 +27,13 @@ export function useHLSPlayer(songId?: string) {
 
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackTrackChanged, Event.PlaybackError], (event) => {
-    if (event.type === Event.PlaybackState) {
+  type TrackEvent =
+    | { type: 'playback-state'; state: number }
+    | { type: 'playback-error'; code?: string; message?: string }
+    | { type: 'playback-track-changed'; track?: number | string; nextTrack?: number | string };
+
+  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackTrackChanged, Event.PlaybackError], (event: TrackEvent) => {
+    if (event.type === 'playback-state') {
       setState(prev => ({
         ...prev,
         isPlaying: event.state === State.Playing,
@@ -40,7 +45,7 @@ export function useHLSPlayer(songId?: string) {
       }
     }
     
-    if (event.type === Event.PlaybackError) {
+    if (event.type === 'playback-error') {
       setState(prev => ({ ...prev, error: '재생 에러가 발생했습니다' }));
     }
   });
