@@ -29,7 +29,7 @@
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.14.1",
     "react-native-svg": "^15.12.0",
-    "react-native-track-player": "github:DoubleSymmetry/react-native-track-player#main",
+    "react-native-track-player": "^5.0.0-alpha0-nightly-359af5a12d712d3b685530aed9b9625865a25d74",
     "react-native-vector-icons": "^10.2.0",
     "react-native-webview": "^13.15.0",
     "react-native-worklets": "^0.5.0",

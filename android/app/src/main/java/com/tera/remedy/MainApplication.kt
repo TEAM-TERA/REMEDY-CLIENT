@@ -1,6 +1,7 @@
-package com.remedy
+package com.tera.remedy
 
 import android.app.Application
+import com.tera.remedy.BuildConfig
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
