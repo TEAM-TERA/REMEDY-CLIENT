@@ -6,6 +6,7 @@ import Input from "../../../components/input/Input";
 import Button from "../../../components/button/Button";
 import HeaderNav from "../components/HeaderNav/HeaderNav";
 import { useAuthNavigation } from "../../../hooks/navigation/useAuthNavigation";
+import { signUpApi } from "../api/authApi";
 
 function SignUpScreen() {
   const navigation = useAuthNavigation();
@@ -74,7 +75,14 @@ function SignUpScreen() {
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const payload = {
+        username: formData.name.trim(),
+        password: formData.password,
+        email: formData.email.trim(),
+        birthDate: formData.birthDate.trim(),
+        gender: formData.gender === "male",
+      };
+      await signUpApi(payload);
       
       Alert.alert(
         "회원가입 완료",
