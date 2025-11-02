@@ -6,10 +6,11 @@ import { Linking } from 'react-native';
 const useLocation = () => {
     const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
     useEffect(() => {
-        async function requestLocation() {
+        let watchId: number | null = null;
+        async function start() {
           try {
             let enableHighAccuracy = true;
-      
+
             if (Platform.OS === 'android') {
               const res = await PermissionsAndroid.requestMultiple([
                 PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -23,10 +24,10 @@ const useLocation = () => {
               }
               enableHighAccuracy = fineGranted;
             } else {
-              const auth = await Geolocation.requestAuthorization('whenInUse'); 
+              const auth = await Geolocation.requestAuthorization('whenInUse');
               if (auth !== 'granted') return;
             }
-      
+
             Geolocation.getCurrentPosition(
               (pos) => {
                 setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
@@ -37,18 +38,38 @@ const useLocation = () => {
                 setLocation(null);
               },
               {
-                enableHighAccuracy, 
+                enableHighAccuracy,
                 timeout: 15000,
                 maximumAge: 10000,
-                forceRequestLocation: true,     
-                showLocationDialog: true,     
+                forceRequestLocation: true,
+                showLocationDialog: true,
+              }
+            );
+
+            watchId = Geolocation.watchPosition(
+              (pos) => {
+                setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
+              },
+              (err) => console.warn('Watch error', err),
+              {
+                enableHighAccuracy,
+                distanceFilter: 10,
+                interval: 5000,
+                fastestInterval: 2000,
+                showLocationDialog: true,
+                useSignificantChanges: false,
               }
             );
           } catch (e) {
             console.error('Permission error', e);
           }
         }
-        requestLocation();
+
+        start();
+        return () => {
+          if (watchId != null) Geolocation.clearWatch(watchId);
+          Geolocation.stopObserving();
+        };
     }, []);
     return { location, setLocation };
 }

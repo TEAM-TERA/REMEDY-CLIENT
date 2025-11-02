@@ -23,14 +23,11 @@ export async function createDropping({
   return res.data;
 }
 
-export async function searchSongs() {
-  console.log('searchSongs API 호출 시작');
+export async function listSongs() {
   try {
     const res = await axiosInstance.get("/songs");
-    console.log('searchSongs API 응답:', res.data);
-    return res.data.songResponses;
+    return res.data?.songs ?? res.data?.songResponses ?? [];
   } catch (error) {
-    console.error('searchSongs API 에러:', error);
     throw error;
   }
 }

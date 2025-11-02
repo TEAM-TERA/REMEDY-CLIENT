@@ -25,16 +25,17 @@ function UserProfileScreen() {
     const { data: myDrops, isLoading: dropLoading } = useMyDrop();
     const { data: myLikes, isLoading: likeLoading } = useMyLikes();
 
-    const {data : me, isLoading, isError, refetch, isFetching } = useMyProfile();
+    const { data: me, isLoading, isError, refetch, isFetching } = useMyProfile();
 
     const [songTitles, setSongTitles] = useState<Record<string, string>>({});
 
     useEffect(() => {
         const loadTitles = async () => {
-            if (!myDrops || myDrops.length === 0) return;
-            const uniqueIds = Array.from(new Set(myDrops.map(d => d.songId).filter(Boolean)));
+            const drops = Array.isArray(myDrops) ? myDrops : [];
+            if (!drops || drops.length === 0) return;
+            const uniqueIds = Array.from(new Set(drops.map((d: any) => d.songId).filter(Boolean)));
             try {
-                const results = await Promise.all(uniqueIds.map(async (id) => {
+                const results = await Promise.all(uniqueIds.map(async (id: string) => {
                     try {
                         const info = await getSongInfo(id);
                         return [id, info?.title as string];
@@ -54,14 +55,14 @@ function UserProfileScreen() {
 
     const currentData: DropItemData[] =
     activeTab === "drop"
-        ? (myDrops ?? []).map((d) => ({
+        ? (Array.isArray(myDrops) ? myDrops : []).map((d: any) => ({
             droppingId: d.droppingId,
             memo: songTitles[d.songId] || d.songId,
             location: d.address,
             imageSource: undefined,
             hasHeart: false, 
     }))
-        : (myLikes ?? []).map((id) => ({
+        : (Array.isArray(myLikes) ? myLikes : []).map((id: any) => ({
             droppingId: id,
             memo: "좋아요한 곡",
             location: "",
@@ -121,7 +122,7 @@ function UserProfileScreen() {
                 />
                 <View style={styles.profileContainer}>
                     <Image
-                        source={me?.profileImageUrl && me.profileImageUrl.trim() !== '' ? {uri : me.profileImageUrl} : defaultProfileImg}
+                        source={(me as any)?.profileImageUrl && (me as any).profileImageUrl.trim() !== '' ? {uri : (me as any).profileImageUrl} : defaultProfileImg}
                         style={styles.profileImage}
                     />
                     <View style={styles.aliasContainer}>
@@ -129,7 +130,7 @@ function UserProfileScreen() {
                     </View>
                     <View style={styles.profileNameContainer}>
                         <Text style={styles.userNameText}>
-                            {me?.username ?? '테스트'}
+                            {(me as any)?.username ?? '테스트'}
                         </Text>
                         <TouchableOpacity onPress={handleEditPress}>
                             <Icon
@@ -196,3 +197,4 @@ function UserProfileScreen() {
     );
 }
 export default UserProfileScreen;
+

@@ -50,10 +50,18 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
         </Pressable>
       </View>
       <View style = {styles.iconsContainer}>
-        <Icon name="music"/>
-        <Icon name="target" onPress={() => navigation.navigate('Challenge' as never)} />
-        <Icon name="paint"/>
-        <Icon name="running" onPress={pressHandlerRunning} isPress={isRunning} pressname="turnRunning"/>
+        <View>
+          <Icon name="music" width={24} height={24} />
+        </View>
+        <View style={styles.iconWrap}>
+          <Icon name="target" width={24} height={24} onPress={() => navigation.navigate('Challenge' as never)} />
+        </View>
+        <View style={styles.iconWrap}>
+          <Icon name="paint" width={24} height={24} />
+        </View>
+        <View style={styles.iconWrap}>
+          <Icon name="running" width={24} height={24} onPress={pressHandlerRunning} isPress={isRunning} pressname="turnRunning"/>
+        </View>
       </View>
     </View>
     </SafeAreaView>

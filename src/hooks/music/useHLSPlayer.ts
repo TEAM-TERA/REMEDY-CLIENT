@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Image } from 'react-native';
-import TrackPlayer, { Event, State, useTrackPlayerEvents } from 'react-native-track-player';
+import TrackPlayer, { Event, State, useTrackPlayerEvents, TrackType} from 'react-native-track-player';
 import axiosInstance from '../../modules/auth/api/axiosInstance';
 
 interface MusicPlayerState {
@@ -27,8 +27,13 @@ export function useHLSPlayer(songId?: string) {
 
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackTrackChanged, Event.PlaybackError], (event) => {
-    if (event.type === Event.PlaybackState) {
+  type TrackEvent =
+    | { type: 'playback-state'; state: number }
+    | { type: 'playback-error'; code?: string; message?: string }
+    | { type: 'playback-active-track-changed'; index?: number; track?: string | number };
+    
+  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackActiveTrackChanged, Event.PlaybackError], (event: TrackEvent) => {
+    if (event.type === 'playback-state') {
       setState(prev => ({
         ...prev,
         isPlaying: event.state === State.Playing,
@@ -40,7 +45,7 @@ export function useHLSPlayer(songId?: string) {
       }
     }
     
-    if (event.type === Event.PlaybackError) {
+    if (event.type === 'playback-error') {
       setState(prev => ({ ...prev, error: '재생 에러가 발생했습니다' }));
     }
   });
@@ -153,6 +158,7 @@ export function useHLSPlayer(songId?: string) {
         artwork: imgUrl || serverImageUrl,
         album: trackTitle,
         genre: 'Music',
+        type: TrackType.HLS,
         date: new Date().toISOString(),
       };
       await TrackPlayer.add(track);
@@ -184,19 +190,14 @@ export function useHLSPlayer(songId?: string) {
 
   const togglePlay = async () => {
     try {
-      const playerState = await TrackPlayer.getState();
-      
-      if (playerState === State.Playing) {
+      // 내부 state를 기준으로 toggle
+      if (state.isPlaying) {
         await TrackPlayer.pause();
       } else {
-        if (playerState === State.Buffering || playerState === State.Loading) {
-          await TrackPlayer.stop();
-          await TrackPlayer.play();
-        } else {
-          await TrackPlayer.play();
-        }
+        await TrackPlayer.play();
       }
     } catch (error) {
+      console.error('Toggle play error:', error);
       setState(prev => ({ ...prev, error: '재생에 실패했습니다' }));
     }
   };
