@@ -9,7 +9,6 @@ import { navigate } from '../../../../navigation';
 import DropButton from './DropButton';
 import { useQuery } from '@tanstack/react-query';
 import { getSongInfo } from '../../../drop/api/dropApi';
-import { Dropping } from '../../types/musicList';
 
 const SWIPE_THRESHOLD = 80;
 const INVERT_DIRECTION = false;

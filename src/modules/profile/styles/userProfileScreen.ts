@@ -47,10 +47,9 @@ export const styles = StyleSheet.create({
     profileNameContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        alignSelf: 'flex-start',
+        alignSelf: 'center',
         gap: 4,
         paddingLeft: scale(24),
-        margin: 'auto',
     },
     userNameText: {
         color: TEXT_COLORS.DEFAULT,

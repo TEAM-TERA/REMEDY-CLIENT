@@ -43,9 +43,11 @@ export default function DropButton({ onPress }: Props) {
           </Filter>
         </Defs>
       </Svg>
-      <View style={styles.badge} pointerEvents="none">
-        <Text style={[styles.badgeText, TYPOGRAPHY.BUTTON_TEXT]}>DROP</Text>
-      </View>
+      {Platform.OS === 'android' && (
+        <View style={styles.badge} pointerEvents="none">
+          <Text style={[styles.badgeText, TYPOGRAPHY.BUTTON_TEXT]}>DROP</Text>
+        </View>
+      )}
     </Pressable>
   );
 }
