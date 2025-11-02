@@ -12,6 +12,7 @@ import AuthStack from './AuthStack';
 import HomeScreen from '../modules/home/pages/HomeScreen';
 import MusicScreen from '../modules/music/pages/MusicScreen';
 import ChallengeScreen from '../modules/challenge/pages/ChallengeScreen';
+import { CustomShopScreen } from '../modules/customize';
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 export function navigate<Screen extends keyof RootStackParamList>(
@@ -47,6 +48,7 @@ export default function RootNavigation() {
         <Stack.Screen name="Drop" component={DropStack} options={{ headerShown: false }} />
         <Stack.Screen name="Music" component={MusicScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Challenge" component={ChallengeScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Customize" component={CustomShopScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
