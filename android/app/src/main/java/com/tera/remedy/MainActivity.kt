@@ -1,4 +1,4 @@
-package com.remedy
+package com.tera.remedy
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

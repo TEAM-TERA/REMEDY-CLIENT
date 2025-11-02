@@ -7,6 +7,7 @@ export const styles = StyleSheet.create({
         display : "flex",
         height : scale(46),
         padding : scale(12),
+        justifyContent : "center",
         gap : scale(8),
         alignSelf : "stretch",
         backgroundColor : UI_COLORS.BACKGROUND

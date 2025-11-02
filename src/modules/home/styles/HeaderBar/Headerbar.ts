@@ -45,10 +45,11 @@ export const styles = StyleSheet.create({
   },
   iconsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    display: "flex",
+    justifyContent: "flex-end",
     alignItems: "center",
-    gap: scale(20),
     marginRight: scale(16)
+  },
+  iconWrap: {
+    marginLeft: scale(20)
   }
 });
