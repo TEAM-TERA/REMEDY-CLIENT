@@ -57,7 +57,7 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
           <Icon name="target" width={24} height={24} onPress={() => navigation.navigate('Challenge' as never)} />
         </View>
         <View style={styles.iconWrap}>
-          <Icon name="paint" width={24} height={24} />
+          <Icon name="paint" width={24} height={24} onPress={() => navigation.navigate('Customize' as never)}/>
         </View>
         <View style={styles.iconWrap}>
           <Icon name="running" width={24} height={24} onPress={pressHandlerRunning} isPress={isRunning} pressname="turnRunning"/>
