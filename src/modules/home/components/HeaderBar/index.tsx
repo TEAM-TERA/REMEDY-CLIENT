@@ -52,7 +52,7 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
       <View style = {styles.iconsContainer}>
         <Icon name="music"/>
         <Icon name="target" onPress={() => navigation.navigate('Challenge' as never)} />
-        <Icon name="paint"/>
+        <Icon name="paint" onPress={() => navigation.navigate('Customize' as never)}/>
         <Icon name="running" onPress={pressHandlerRunning} isPress={isRunning} pressname="turnRunning"/>
       </View>
     </View>
