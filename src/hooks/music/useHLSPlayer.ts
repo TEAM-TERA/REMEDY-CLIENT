@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Image } from 'react-native';
-import TrackPlayer, { Event, State, useTrackPlayerEvents } from 'react-native-track-player';
+import TrackPlayer, { Event, State, useTrackPlayerEvents, TrackType} from 'react-native-track-player';
 import axiosInstance from '../../modules/auth/api/axiosInstance';
 
 interface MusicPlayerState {
@@ -158,6 +158,7 @@ export function useHLSPlayer(songId?: string) {
         artwork: imgUrl || serverImageUrl,
         album: trackTitle,
         genre: 'Music',
+        type: TrackType.HLS,
         date: new Date().toISOString(),
       };
       await TrackPlayer.add(track);
@@ -189,19 +190,14 @@ export function useHLSPlayer(songId?: string) {
 
   const togglePlay = async () => {
     try {
-      const playerState = await TrackPlayer.getState();
-      
-      if (playerState === State.Playing) {
+      // 내부 state를 기준으로 toggle
+      if (state.isPlaying) {
         await TrackPlayer.pause();
       } else {
-        if (playerState === State.Buffering || playerState === State.Loading) {
-          await TrackPlayer.stop();
-          await TrackPlayer.play();
-        } else {
-          await TrackPlayer.play();
-        }
+        await TrackPlayer.play();
       }
     } catch (error) {
+      console.error('Toggle play error:', error);
       setState(prev => ({ ...prev, error: '재생에 실패했습니다' }));
     }
   };
