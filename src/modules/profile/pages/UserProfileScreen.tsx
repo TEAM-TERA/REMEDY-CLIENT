@@ -122,7 +122,7 @@ function UserProfileScreen() {
                 />
                 <View style={styles.profileContainer}>
                     <Image
-                        source={(me as any)?.profileImageUrl && (me as any).profileImageUrl.trim() !== '' ? {uri : (me as any).profileImageUrl} : defaultProfileImg}
+                        source={me?.profileImageUrl && me.profileImageUrl.trim() !== '' ? {uri : me.profileImageUrl} : defaultProfileImg}
                         style={styles.profileImage}
                     />
                     <View style={styles.aliasContainer}>
@@ -130,7 +130,7 @@ function UserProfileScreen() {
                     </View>
                     <View style={styles.profileNameContainer}>
                         <Text style={styles.userNameText}>
-                            {(me as any)?.username ?? '테스트'}
+                            {me?.username ?? '테스트'}
                         </Text>
                         <TouchableOpacity onPress={handleEditPress}>
                             <Icon

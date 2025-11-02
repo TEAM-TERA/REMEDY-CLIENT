@@ -190,7 +190,6 @@ export function useHLSPlayer(songId?: string) {
 
   const togglePlay = async () => {
     try {
-      // 내부 state를 기준으로 toggle
       if (state.isPlaying) {
         await TrackPlayer.pause();
       } else {
