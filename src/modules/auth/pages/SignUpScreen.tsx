@@ -23,8 +23,34 @@ function SignUpScreen() {
   
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const normalizeBirthDateInput = (raw: string) => {
+    const digits = raw.replace(/\D/g, "").slice(0, 8);
+    if (digits.length <= 4) return digits;
+    if (digits.length <= 6) return `${digits.slice(0, 4)}-${digits.slice(4)}`;
+    return `${digits.slice(0, 4)}-${digits.slice(4, 6)}-${digits.slice(6, 8)}`;
+  };
+
+  const isValidBirthDate = (yyyyMmDd: string) => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(yyyyMmDd)) return false;
+    const [yStr, mStr, dStr] = yyyyMmDd.split("-");
+    const y = Number(yStr);
+    const m = Number(mStr);
+    const d = Number(dStr);
+    if (m < 1 || m > 12) return false;
+    if (d < 1 || d > 31) return false;
+    const date = new Date(y, m - 1, d);
+    return (
+      date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d
+    );
+  };
+
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === "birthDate") {
+      const formatted = normalizeBirthDateInput(value);
+      setFormData(prev => ({ ...prev, birthDate: formatted }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: "" }));
     }
@@ -61,6 +87,8 @@ function SignUpScreen() {
 
     if (!formData.birthDate) {
       newErrors.birthDate = "생년월일을 입력해주세요";
+    } else if (!isValidBirthDate(formData.birthDate)) {
+      newErrors.birthDate = "올바른 형식(YYYY-MM-DD)의 유효한 날짜를 입력해주세요";
     }
 
     setErrors(newErrors);
@@ -82,6 +110,7 @@ function SignUpScreen() {
         birthDate: formData.birthDate.trim(),
         gender: formData.gender === "male",
       };
+      console.log("[SignUp] payload:", payload);
       await signUpApi(payload);
       
       Alert.alert(
@@ -94,8 +123,19 @@ function SignUpScreen() {
           }
         ]
       );
-    } catch (error) {
-      Alert.alert("오류", "회원가입에 실패했습니다. 다시 시도해주세요.");
+    } catch (error: any) {
+      const serverMessage =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        error?.response?.data?.detail ||
+        error?.message;
+      console.log("[SignUp] failed:", error?.response?.data || error);
+      Alert.alert(
+        "오류",
+        serverMessage && typeof serverMessage === "string"
+          ? `회원가입 실패: ${serverMessage}`
+          : "회원가입에 실패했습니다. 다시 시도해주세요."
+      );
     } finally {
       setIsLoading(false);
     }
@@ -144,6 +184,7 @@ function SignUpScreen() {
           placeholder="생년월일"
           value={formData.birthDate}
           onChangeText={(value) => handleInputChange("birthDate", value)}
+          keyboardType="numeric"
           error={errors.birthDate}
         />
 

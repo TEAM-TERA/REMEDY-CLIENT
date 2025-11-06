@@ -27,6 +27,6 @@ type SignUpRequest = {
 };
 
 export async function signUpApi(payload: SignUpRequest) {
-  const res = await axiosInstance.post('/auth/signup', payload);
+  const res = await axiosInstance.post('/auth/register', payload);
   return res.data;
 }
