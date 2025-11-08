@@ -3,14 +3,14 @@ import { ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../../types/navigation';
+import type { CustomStackParamList } from '../../../navigation/CustomStack';
 import { styles } from '../styles/CustomShopScreen';
 import Header from '../../profile/components/Header';
 import Icon from '../../../components/icon/Icon';
 import { sections } from '../datas/shopItems';
 import ShopSection from '../components/ShopSection';
 
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+type NavigationProp = NativeStackNavigationProp<CustomStackParamList>;
 
 function CustomShopScreen() {
     const navigation = useNavigation<NavigationProp>();
@@ -34,7 +34,7 @@ function CustomShopScreen() {
                 rightComponent={
                     <TouchableOpacity
                         onPress={() => {
-                            navigation.navigate('Custom');
+                            navigation.navigate('CustomDetail');
                         }}
                     >
                         <Icon name={'customBox'} />
