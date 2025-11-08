@@ -1,2 +1,2 @@
 export { default as CustomShopScreen } from './pages/CustomShopScreen';
-export * from './types';
+export { default as CustomScreen } from './pages/CustomScreen';
