@@ -1,15 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-// import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../../types/navigation';
 import { styles } from '../styles/CustomShopScreen';
 import Header from '../../profile/components/Header';
 import Icon from '../../../components/icon/Icon';
 import { sections } from '../datas/shopItems';
 import ShopSection from '../components/ShopSection';
 
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
 function CustomShopScreen() {
-    // const navigation = useNavigation();
+    const navigation = useNavigation<NavigationProp>();
+
+    const [userInventory] = useState({
+        ownedItems: ['0', '1', '10'],
+    });
+
+    const shopSections = sections.map(section => ({
+        ...section,
+        items: section.items.filter(
+            item => !userInventory.ownedItems.includes(item.id),
+        ),
+    }));
 
     return (
         <SafeAreaView style={styles.container}>
@@ -19,7 +34,7 @@ function CustomShopScreen() {
                 rightComponent={
                     <TouchableOpacity
                         onPress={() => {
-                            /* TODO: 커스텀 인벤토리 화면으로 이동 */
+                            navigation.navigate('Custom');
                         }}
                     >
                         <Icon name={'customBox'} />
@@ -27,7 +42,7 @@ function CustomShopScreen() {
                 }
             />
             <ScrollView style={styles.scrollContainer}>
-                {sections.map(section => (
+                {shopSections.map(section => (
                     <ShopSection
                         key={section.title}
                         icon={section.icon}
