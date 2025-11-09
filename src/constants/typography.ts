@@ -2,7 +2,7 @@ import { FONTS } from './fonts';
 import { fontScale } from '../utils/scalers';
 
 export const TYPOGRAPHY = {
-    Title: {
+    TITLE: {
         fontSize: fontScale(48),
         lineHeight: 62,
         fontFamily: FONTS.BOLD,
@@ -62,4 +62,4 @@ export const TYPOGRAPHY = {
         lineHeight: 22,
         fontFamily: FONTS.MEDIUM,
     },
-}
+};
