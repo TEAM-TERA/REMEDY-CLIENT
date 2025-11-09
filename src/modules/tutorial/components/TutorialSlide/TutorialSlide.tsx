@@ -52,7 +52,7 @@ function TutorialSlide({ item, onNext }: TutorialSlideProps) {
     if (item.id === 1) {
         // 1번 화면: 이미지 | (텍스트+버튼)
         return (
-            <View style={styles.firstScreenSlide}>
+            <View style={styles.slide}>
                 {item.image && (
                     <Image
                         source={item.image}
@@ -87,7 +87,7 @@ function TutorialSlide({ item, onNext }: TutorialSlideProps) {
     if (item.id === 6) {
         // 6번 화면: 이미지 | (텍스트+버튼)
         return (
-            <View style={styles.lastScreenSlide}>
+            <View style={styles.slide}>
                 {item.image && (
                     <Image
                         source={item.image}
