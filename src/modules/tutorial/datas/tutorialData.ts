@@ -1,3 +1,5 @@
+import type { ImageSourcePropType } from 'react-native';
+
 export interface TextPart {
     text: string;
     highlight: boolean;
@@ -8,7 +10,7 @@ export interface TutorialScreen {
     titleParts: TextPart[];
     subtitleParts?: TextPart[];
     descriptionParts?: TextPart[];
-    image: any; // require() type
+    image: ImageSourcePropType;
     buttonText: string;
 }
 
