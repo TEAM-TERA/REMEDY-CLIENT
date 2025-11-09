@@ -5,6 +5,7 @@ export type RootStackParamList = {
   Drop: undefined;
   Challenge: undefined;
   Customize: undefined;
+  Tutorial: undefined;
 
   Music: {
     droppingId: string;
