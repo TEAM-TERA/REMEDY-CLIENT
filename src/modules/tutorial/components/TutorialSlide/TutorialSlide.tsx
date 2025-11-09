@@ -49,43 +49,8 @@ function TutorialSlide({ item, onNext }: TutorialSlideProps) {
         return styles.image;
     };
 
-    if (item.id === 1) {
-        // 1번 화면: 이미지 | (텍스트+버튼)
-        return (
-            <View style={styles.slide}>
-                {item.image && (
-                    <Image
-                        source={item.image}
-                        style={getImageStyle()}
-                        resizeMode="contain"
-                    />
-                )}
-                <View style={styles.firstScreenTextWrapper}>
-                    <View style={styles.firstScreenInnerTextContainer}>
-                        {renderTextParts(item.titleParts, styles.title)}
-                        {item.subtitleParts &&
-                            renderTextParts(
-                                item.subtitleParts,
-                                styles.subtitle,
-                            )}
-                        {item.descriptionParts &&
-                            renderTextParts(
-                                item.descriptionParts,
-                                styles.description,
-                            )}
-                    </View>
-                    <Button
-                        title={item.buttonText}
-                        onPress={onNext}
-                        style={styles.button}
-                    />
-                </View>
-            </View>
-        );
-    }
-
-    if (item.id === 6) {
-        // 6번 화면: 이미지 | (텍스트+버튼)
+    if (item.id === 1 || item.id === 6) {
+        // 1번, 6번 화면: 이미지 | (텍스트+버튼)
         return (
             <View style={styles.slide}>
                 {item.image && (
