@@ -8,7 +8,7 @@ import TutorialSlide from '../components/TutorialSlide/TutorialSlide';
 
 const { width } = Dimensions.get('window');
 
-function TutorialScreen() {
+function TutorialScreenPage() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const flatListRef = useRef<FlatList>(null);
 
@@ -68,4 +68,4 @@ function TutorialScreen() {
     );
 }
 
-export default TutorialScreen;
+export default TutorialScreenPage;
