@@ -18,10 +18,11 @@ function TutorialScreen() {
                     index: nextIndex,
                     animated: true,
                 });
-                setCurrentIndex(nextIndex);
             } catch (error) {
                 console.error('Failed to scroll to index:', error);
+                return;
             }
+            setCurrentIndex(nextIndex);
         } else {
             // TODO: Navigate to login or home screen
             console.log('Tutorial completed');
