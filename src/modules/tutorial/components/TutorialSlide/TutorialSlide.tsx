@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, type TextStyle } from 'react-native';
 import { styles } from '../../styles/TutorialSlide/styles';
 import { TYPOGRAPHY } from '../../../../constants/typography';
 import type { TutorialScreen, TextPart } from '../../datas/tutorialData';
@@ -11,7 +11,7 @@ interface TutorialSlideProps {
 }
 
 function TutorialSlide({ item, onNext }: TutorialSlideProps) {
-    const renderTextParts = (parts: TextPart[], baseStyle: any) => {
+    const renderTextParts = (parts: TextPart[], baseStyle: TextStyle) => {
         const getTextStyle = (highlight: boolean) => {
             if (item.id === 1) {
                 return highlight
