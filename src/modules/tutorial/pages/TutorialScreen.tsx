@@ -3,6 +3,7 @@ import { FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '../styles/TutorialScreen';
 import { tutorialScreens } from '../datas/tutorialData';
+import type { TutorialScreen } from '../datas/tutorialData';
 import TutorialSlide from '../components/TutorialSlide/TutorialSlide';
 
 function TutorialScreen() {
@@ -27,7 +28,7 @@ function TutorialScreen() {
         }
     };
 
-    const renderItem = ({ item }: { item: (typeof tutorialScreens)[0] }) => (
+    const renderItem = ({ item }: { item: TutorialScreen }) => (
         <TutorialSlide item={item} onNext={handleNext} />
     );
 
