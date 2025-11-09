@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { FlatList } from 'react-native';
+import { FlatList, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from '../styles/TutorialScreen';
 import { tutorialScreens } from '../datas/tutorialData';
 import type { TutorialScreen } from '../datas/tutorialData';
 import TutorialSlide from '../components/TutorialSlide/TutorialSlide';
+
+const { width } = Dimensions.get('window');
 
 function TutorialScreen() {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -45,6 +47,22 @@ function TutorialScreen() {
                 showsHorizontalScrollIndicator={false}
                 scrollEnabled={false}
                 bounces={false}
+                getItemLayout={(data, index) => ({
+                    length: width,
+                    offset: width * index,
+                    index,
+                })}
+                onScrollToIndexFailed={info => {
+                    const wait = new Promise(resolve =>
+                        setTimeout(resolve, 500),
+                    );
+                    wait.then(() => {
+                        flatListRef.current?.scrollToIndex({
+                            index: info.index,
+                            animated: true,
+                        });
+                    });
+                }}
             />
         </SafeAreaView>
     );
