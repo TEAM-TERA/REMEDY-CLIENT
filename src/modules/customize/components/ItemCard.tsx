@@ -25,14 +25,6 @@ function ItemCard({
     isEquipped,
     onButtonPress,
 }: ItemCardProps) {
-    console.log(
-        'ItemCard item:',
-        item.name,
-        'color:',
-        item.color,
-        'type:',
-        item.type,
-    );
 
     const renderItemPreview = () => {
         if (item.type === 'player') {
