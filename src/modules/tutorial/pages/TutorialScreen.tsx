@@ -12,8 +12,12 @@ function TutorialScreen() {
   const handleNext = () => {
     if (currentIndex < tutorialScreens.length - 1) {
       const nextIndex = currentIndex + 1;
-      flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
-      setCurrentIndex(nextIndex);
+      try {
+        flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
+        setCurrentIndex(nextIndex);
+      } catch (error) {
+        console.error('Failed to scroll to index:', error);
+      }
     } else {
       // TODO: Navigate to login or home screen
       console.log('Tutorial completed');
