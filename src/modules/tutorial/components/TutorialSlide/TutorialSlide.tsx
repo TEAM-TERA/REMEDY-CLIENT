@@ -15,7 +15,7 @@ function TutorialSlide({ item, onNext }: TutorialSlideProps) {
         const getTextStyle = (highlight: boolean) => {
             if (item.id === 1) {
                 return highlight
-                    ? [styles.highlight, TYPOGRAPHY.Title, styles.leftAlign]
+                    ? [styles.highlight, TYPOGRAPHY.TITLE, styles.leftAlign]
                     : [TYPOGRAPHY.HEADLINE_1, styles.leftAlign];
             }
             if (item.id === 6) {
