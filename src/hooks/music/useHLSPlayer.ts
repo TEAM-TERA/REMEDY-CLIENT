@@ -169,15 +169,12 @@ export function useHLSPlayer(songId?: string) {
       progressIntervalRef.current = setInterval(updateProgress, 1000);
 
       setState(prev => ({ ...prev, isLoading: false }));
-
-      setTimeout(async () => {
-        try {
-          await TrackPlayer.play();
-          setState(prev => ({ ...prev, isPlaying: true }));
-        } catch (error) {
-          console.error('자동 재생 실패:', error);
-        }
-      }, 1000);
+      try {
+        await TrackPlayer.play();
+        setState(prev => ({ ...prev, isPlaying: true }));
+      } catch (error) {
+        console.error('자동 재생 실패:', error);
+      }
 
     } catch (error) {
       setState(prev => ({ 
