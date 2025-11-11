@@ -1812,7 +1812,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-track-player (5.0.0-alpha0):
+  - react-native-track-player (5.0.0-alpha0-nightly-359af5a12d712d3b685530aed9b9625865a25d74):
     - boost
     - DoubleConversion
     - fast_float
@@ -3055,7 +3055,7 @@ SPEC CHECKSUMS:
   react-native-geolocation-service: 32b2c2a3b91e70ce2a8d0c684801aaeb0a07e0ec
   react-native-safe-area-context: 8ed800930eb7d0b6651218f69656e823d37b6ef7
   react-native-slider: c434f7094c9500dfa1176931f48e5957872818f8
-  react-native-track-player: 293b007093d0aca7145613d5e7ac9eaac8d80fad
+  react-native-track-player: 70ab282b5a20acc4dc7dd4182bcc7a6939c58281
   react-native-webview: 38b7d49cbe748b6fa02381be0a097d3922caf94a
   React-NativeModulesApple: e16d5c133019987285f001fbf1461a861e40426f
   React-oscompat: 7c0a341cc31e350da71ddf2e46de0a845d1d1626

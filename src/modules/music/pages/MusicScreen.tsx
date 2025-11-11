@@ -10,6 +10,7 @@ import { useMusicComments } from '../hooks/useMusicComments';
 import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import { useDropLikeCount } from '../hooks/useLike';
 import { useToggleLike } from '../hooks/useLike';
+import { useMyLikes } from '../hooks/useLike';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
 import { useBackgroundAudioPermission } from '../../../hooks/useBackgroundAudioPermission';
 import { useQuery } from '@tanstack/react-query';
@@ -35,6 +36,8 @@ function MusicScreen({ route }: Props) {
   
   const musicLikeCount = useDropLikeCount(droppingId);
   const toggleLike = useToggleLike(droppingId);
+  const myLikes = useMyLikes();
+  const isLiked = !!myLikes.data?.includes(droppingId);
   const [comment, setComment] = useState('');
 
   const serverImageUrl = Image.resolveAssetSource(require('../../../assets/images/normal_music.png')).uri;
@@ -128,7 +131,11 @@ function MusicScreen({ route }: Props) {
                   onPress={() => toggleLike.mutate()}
                   disabled={toggleLike.isPending}
                 >
-                  <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
+                  {isLiked ? (
+                    <Icon name="heart" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
+                  ) : (
+                    <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
+                  )}
                   <Text style={styles.likeCommentText}>{musicLikeCount.data?.likeCount ?? 0}</Text>
                 </TouchableOpacity>
 
