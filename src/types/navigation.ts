@@ -17,7 +17,13 @@ export type RootStackParamList = {
 
 export type AuthStackParamList = {
   Login: undefined;
-  SignUp: undefined;
+  Terms: undefined;
+  SignUp: {
+    requiredServiceTerms: boolean;
+    requiredPrivacyTerms: boolean;
+    locationConsent?: boolean;
+    marketingConsent?: boolean;
+  } | undefined;
 };
 
 export type ProfileStackParamList = {

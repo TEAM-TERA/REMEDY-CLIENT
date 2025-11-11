@@ -49,7 +49,7 @@ function LoginScreen() {
   };
 
   const handleSignUp = () => {
-    authNavigation.navigate('SignUp');
+    authNavigation.navigate('Terms');
   };
 
   return (
