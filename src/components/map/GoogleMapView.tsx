@@ -18,8 +18,6 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
   const webviewRef = useRef<WebView>(null);
   const navigation = useNavigation();
 
-  const safeLocation = currentLocation || { latitude: 37.5665, longitude: 126.9780 };
-
   useEffect(() => {
     console.log('Droppings data:', droppings);
     console.log('Droppings length:', droppings?.length);
@@ -36,6 +34,14 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
     }
   }, [droppings]);
 
+  useEffect(() => {
+    if (!webviewRef.current || !currentLocation) return;
+    const message = JSON.stringify({
+      type: 'recenter',
+      payload: { latitude: currentLocation.latitude, longitude: currentLocation.longitude },
+    });
+    webviewRef.current.postMessage(message);
+  }, [currentLocation]);
 
   const html = `
     <!DOCTYPE html>
@@ -48,8 +54,10 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
         <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=geometry"></script>
         <script>
           var map;
+          var myLocationMarker;
+          var userCircle;
           function initMap() {
-            const center = { lat: ${safeLocation.latitude}, lng: ${safeLocation.longitude} };
+            const center = { lat: 0, lng: 0 };
 
             map = new google.maps.Map(document.getElementById('map'), {
               center,
@@ -59,19 +67,15 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
               gestureHandling: 'none'
             });
 
-            new google.maps.Marker({
+            myLocationMarker = new google.maps.Marker({
               position: center,
-              map,
+              map: map,
               title: '내 위치',
-              icon: {
-                url: "${MARKER_STYLES.MY_LOCATION}",
-                scaledSize: new google.maps.Size(40, 40),
-                anchor: new google.maps.Point(20, 20)
-              },
+              icon: { url: "${MARKER_STYLES.MY_LOCATION}", scaledSize: new google.maps.Size(40, 40), anchor: new google.maps.Point(20, 20) },
               zIndex: 0
             });
 
-            new google.maps.Circle({
+            userCircle = new google.maps.Circle({
               strokeColor: "#FFFFFF",
               strokeOpacity: 0,
               strokeWeight: 0,
@@ -100,8 +104,8 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
             drops.forEach(function(drop) {
               console.log('Processing drop:', drop);
               const dropPosition = new google.maps.LatLng(drop.latitude, drop.longitude);
-              const centerPosition = new google.maps.LatLng(${safeLocation.latitude}, ${safeLocation.longitude});
-              const distance = google.maps.geometry.spherical.computeDistanceBetween(centerPosition, dropPosition);
+              const centerPositionDynamic = map.getCenter();
+              const distance = google.maps.geometry.spherical.computeDistanceBetween(centerPositionDynamic, dropPosition);
 
               const radius = ${MAP_RADIUS};
 
@@ -222,6 +226,19 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
                 } else {
                   console.log('Map not ready or no droppings data');
                 }
+              } else if (data.type === 'recenter') {
+                try {
+                  const lat = Number(data.payload?.latitude);
+                  const lng = Number(data.payload?.longitude);
+                  if (!isNaN(lat) && !isNaN(lng)) {
+                    const newCenter = new google.maps.LatLng(lat, lng);
+                    map.panTo(newCenter);
+                    if (myLocationMarker) myLocationMarker.setPosition(newCenter);
+                    if (userCircle) userCircle.setCenter(newCenter);
+                  }
+                } catch (e) {
+                  console.error('recenter error', e);
+                }
               }
             } catch (e) {
               console.error("Message parsing error:", e.message);
@@ -244,7 +261,7 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
 
   return (
     <>
-      {!safeLocation && (
+      {!currentLocation && (
         <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
       )}
       <WebView
@@ -266,6 +283,16 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
               console.log('Sending to WebView on load end:', message);
               webviewRef.current?.postMessage(message);
             }, 500);
+          }
+          // 초기 중심 설정
+          if (currentLocation) {
+            setTimeout(() => {
+              const msg = JSON.stringify({
+                type: 'recenter',
+                payload: { latitude: currentLocation.latitude, longitude: currentLocation.longitude },
+              });
+              webviewRef.current?.postMessage(msg);
+            }, 300);
           }
         }}
         onMessage={(event) => {
