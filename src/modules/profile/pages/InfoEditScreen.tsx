@@ -10,6 +10,7 @@ import FormInput from '../components/FormInput';
 import DateInput from '../components/DateInput';
 import GenderButton from '../components/GenderButton';
 import { InfoEditFormData, GenderType } from '../types/InfoEdit';
+import { useMyProfile } from '../hooks/useMyProfile';
 
 function InfoEditScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
@@ -18,6 +19,17 @@ function InfoEditScreen() {
         birthDate: '',
         gender: 'male',
     });
+    const { data: me } = useMyProfile();
+
+    useEffect(() => {
+        if (!me) return;
+        const name = me.username || '';
+        const birthDate = (me.birthDate || '').replaceAll('-', '.');
+        const gender: GenderType = me.gender === undefined || me.gender === null
+            ? 'male'
+            : (me.gender ? 'male' : 'female');
+        setFormData({ name, birthDate, gender });
+    }, [me]);
 
     const handleNameChange = (text: string) => {
         setFormData(prev => ({ ...prev, name: text }));
