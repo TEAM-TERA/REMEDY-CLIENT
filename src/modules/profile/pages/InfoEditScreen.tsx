@@ -25,10 +25,7 @@ function InfoEditScreen() {
         if (!me) return;
         const name = me.username || '';
         const birthDate = (me.birthDate || '').replaceAll('-', '.');
-        const gender: GenderType = me.gender === undefined || me.gender === null
-            ? 'male'
-            : (me.gender ? 'male' : 'female');
-        setFormData({ name, birthDate, gender });
+        setFormData({ name, birthDate, gender: 'male' });
     }, [me]);
 
     const handleNameChange = (text: string) => {
