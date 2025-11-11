@@ -65,7 +65,8 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
               title: '내 위치',
               icon: {
                 url: "${MARKER_STYLES.MY_LOCATION}",
-                scaledSize: new google.maps.Size(40, 40)
+                scaledSize: new google.maps.Size(40, 40),
+                anchor: new google.maps.Point(20, 20)
               },
               zIndex: 0
             });
