@@ -6,6 +6,7 @@ import { TYPOGRAPHY } from "../../../../constants/typography";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "../../../../components/icon/Icon";
 import { useMyProfile } from "../../../profile/hooks/useMyProfile";
+import MarqueeText from "../../../../components/marquee/MarqueeText";
 
 interface HeaderBarProps {
   onLayout?: (height: number) => void;
@@ -23,7 +24,7 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
   const pressHandlerRunning = ()=>{
     const next = !isRunning;
     if (!next) {
-      // 러닝 종료 시점: HomeScreen에서 계산된 거리/시간을 전달받지 못하므로, 종료 알럿은 HomeScreen에서 처리
+      // 러닝 종료 시점
     }
     setIsRunning?.(next);
   }
@@ -42,7 +43,13 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
           onPress={pressHandlerProfile}
           >
           <View style={{ marginLeft: scale(0.75) }}>
-            <Text style={[styles.userName, TYPOGRAPHY.HEADLINE_3]}>{userProfile?.username || '로그인'}</Text>
+            <MarqueeText
+              text={userProfile?.username || '로그인'}
+              textStyle={styles.userName}
+              thresholdChars={10}
+              spacing={100}
+              speed={0.35}
+            />
             <View style={styles.badge}>
               <Text style={[styles.badgeText, TYPOGRAPHY.CAPTION_2]}>모험가</Text>
             </View>
