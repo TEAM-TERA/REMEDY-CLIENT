@@ -16,6 +16,7 @@ import { useBackgroundAudioPermission } from '../../../hooks/useBackgroundAudioP
 import { useQuery } from '@tanstack/react-query';
 import { getSongInfo, getDroppingById } from '../../drop/api/dropApi';
 import type { Comment } from '../types/comment';
+import MarqueeText from '../../../components/marquee/MarqueeText';
 
 type Props = {
   route: {
@@ -117,9 +118,13 @@ function MusicScreen({ route }: Props) {
           <View style={styles.content}>
             <View style={styles.infoRow}>
               <View style={styles.infoTextWrapper}>
-                <Text style={styles.title}>
-                  {songInfo?.title || title || '드랍핑 음악'}
-                </Text>
+                <MarqueeText
+                  text={songInfo?.title || title || '드랍핑 음악'}
+                  textStyle={styles.title}
+                  thresholdChars={18}
+                  spacing={100}
+                  speed={0.35}
+                />
                 <Text style={styles.artist}>
                   by {songInfo?.artist || artist || '알 수 없는 아티스트'}
                 </Text>

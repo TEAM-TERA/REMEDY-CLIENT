@@ -16,8 +16,8 @@ import Geolocation from 'react-native-geolocation-service';
 import { useQuery } from '@tanstack/react-query';
 import { getSongInfo } from '../api/dropApi';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
+import MarqueeText from '../../../components/marquee/MarqueeText';
 import useLocation from '../../../hooks/useLocation';
-import { isPlaying } from 'react-native-track-player';
 import { ConfirmModal } from '../../../components';
 
 function DropScreen() {
@@ -128,7 +128,13 @@ function DropScreen() {
         <CdPlayer imageUrl={songInfo?.albumImagePath} />
         <View style={styles.playerContainer}>
           <View style={styles.textContainer}>
-            <Text style={[TYPOGRAPHY.HEADLINE_1, styles.titleText]}>{musicTitle}</Text>
+            <MarqueeText
+              text={musicTitle}
+              textStyle={styles.titleText}
+              thresholdChars={18}
+              spacing={100}
+              speed={0.35}
+            />
             <Text style={[TYPOGRAPHY.SUBTITLE, styles.singerText]}>{singer}</Text>
           </View>
           <PlayBar

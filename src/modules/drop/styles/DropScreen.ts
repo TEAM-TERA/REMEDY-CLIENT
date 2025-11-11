@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import { PRIMARY_COLORS, BACKGROUND_COLORS, TEXT_COLORS, UI_COLORS } from "../../../constants/colors";
 import { scale } from "../../../utils/scalers";
+import { TYPOGRAPHY } from "../../../constants/typography";
 
 export const styles = StyleSheet.create({
     container : {
@@ -39,7 +40,7 @@ export const styles = StyleSheet.create({
     },
     titleText : {
         color : PRIMARY_COLORS.DEFAULT,
-        textAlign : "center"
+        ...TYPOGRAPHY.HEADLINE_1
     },
     singerText : {
         color : PRIMARY_COLORS.PLUS_TWENTY,
