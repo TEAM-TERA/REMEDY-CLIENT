@@ -23,6 +23,18 @@ const useLocation = () => {
                 return;
               }
               enableHighAccuracy = fineGranted;
+              if (Platform.Version >= 29) {
+                try {
+                  const bg = await PermissionsAndroid.request(
+                    PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION
+                  );
+                  const bgGranted = bg === PermissionsAndroid.RESULTS.GRANTED;
+                  if (!bgGranted) {
+                    Linking.openSettings();
+                  }
+                } catch (e) {
+                }
+              }
             } else {
               const auth = await Geolocation.requestAuthorization('whenInUse');
               if (auth !== 'granted') return;
