@@ -39,7 +39,7 @@ function SettingScreen() {
                 <SettingSection title="앱 정보">
                     <SettingItem
                         title="버전"
-                        rightText="0.1.0"
+                        rightText="0.1.1"
                         showArrow={false}
                     />
                     <SettingItem
