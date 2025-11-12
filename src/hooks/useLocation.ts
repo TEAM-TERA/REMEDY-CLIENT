@@ -23,18 +23,6 @@ const useLocation = () => {
                 return;
               }
               enableHighAccuracy = fineGranted;
-              if (Platform.Version >= 29) {
-                try {
-                  const bg = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.ACCESS_BACKGROUND_LOCATION
-                  );
-                  const bgGranted = bg === PermissionsAndroid.RESULTS.GRANTED;
-                  if (!bgGranted) {
-                    Linking.openSettings();
-                  }
-                } catch (e) {
-                }
-              }
             } else {
               const auth = await Geolocation.requestAuthorization('whenInUse');
               if (auth !== 'granted') return;
@@ -52,7 +40,7 @@ const useLocation = () => {
               {
                 enableHighAccuracy,
                 timeout: 15000,
-                maximumAge: 10000,
+                maximumAge: 0,
                 forceRequestLocation: true,
                 showLocationDialog: true,
               }
@@ -65,9 +53,9 @@ const useLocation = () => {
               (err) => console.warn('Watch error', err),
               {
                 enableHighAccuracy,
-                distanceFilter: 10,
-                interval: 5000,
-                fastestInterval: 2000,
+                distanceFilter: 3,
+                interval: 2000,
+                fastestInterval: 1000,
                 showLocationDialog: true,
                 useSignificantChanges: false,
               }

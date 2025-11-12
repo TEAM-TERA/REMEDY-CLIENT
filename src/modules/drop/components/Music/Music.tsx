@@ -8,9 +8,7 @@ function Music({ musicTitle, singer, onPress, imgUrl }: MusicProps) {
     <TouchableOpacity style={styles.container}
     onPress={onPress}>
       <Image
-        source={{
-          uri: imgUrl,
-        }}
+        source={imgUrl && imgUrl.trim() !== "" ? { uri: imgUrl } : require('../../../../assets/images/normal_music.png')}
         style={styles.imgContainer}
       />
       <View style={styles.textContainer}>
