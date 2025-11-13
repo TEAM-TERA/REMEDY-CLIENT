@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Image } from 'react-native';
 import TrackPlayer, { Event, State, useTrackPlayerEvents, TrackType} from 'react-native-track-player';
 import axiosInstance from '../../modules/auth/api/axiosInstance';
+import Config from 'react-native-config';
 
 interface MusicPlayerState {
   isPlaying: boolean;
@@ -110,7 +111,8 @@ export function useHLSPlayer(songId?: string) {
     try {
       await TrackPlayer.reset();
 
-      const hlsStreamUrl = `${axiosInstance.defaults.baseURL}/songs/${songId}/stream`;
+      const hlsBase = Config.MUSIC_API_BASE_URL || axiosInstance.defaults.baseURL;
+      const hlsStreamUrl = `${hlsBase}/songs/${songId}/stream`;
       const serverImageUrl = Image.resolveAssetSource(require('../../assets/images/normal_music.png')).uri;
       
       let processedHlsUrl = hlsStreamUrl;
@@ -127,7 +129,7 @@ export function useHLSPlayer(songId?: string) {
             .split('\n')
             .map(line => {
               if (line && !line.startsWith('#') && !line.startsWith('http')) {
-                const absoluteUrl = `${axiosInstance.defaults.baseURL}/songs/${songId}/segments/${line}`;
+                const absoluteUrl = `${hlsBase}/songs/${songId}/segments/${line}`;
                 return absoluteUrl;
               }
               return line;

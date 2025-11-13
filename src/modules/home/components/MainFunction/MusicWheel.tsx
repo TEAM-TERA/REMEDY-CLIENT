@@ -9,6 +9,8 @@ import { navigate } from '../../../../navigation';
 import DropButton from './DropButton';
 import { useQuery } from '@tanstack/react-query';
 import { getSongInfo } from '../../../drop/api/dropApi';
+import { usePlayerStore } from '../../../../stores/playerStore';
+import TrackPlayer, { Event } from 'react-native-track-player';
 
 const SWIPE_THRESHOLD = 80;
 const INVERT_DIRECTION = false;
@@ -25,6 +27,9 @@ function MusicWheel({ droppings }: MusicWheelProps) {
   const totalSongs = droppings?.length || 0;
   const rotation = useSharedValue(0);
   const startRotation = useSharedValue(0);
+  const setQueue = usePlayerStore(s => s.setQueue);
+  const playIfDifferent = usePlayerStore(s => s.playIfDifferent);
+  const playNext = usePlayerStore(s => s.playNext);
 
   useEffect(() => {
     rotation.value = 0;
@@ -146,6 +151,35 @@ function MusicWheel({ droppings }: MusicWheelProps) {
       setCurrentIndex((prev: number) => (prev + 1) % totalSongs);
     }
   };
+
+  // Keep queue synced with droppings
+  useEffect(() => {
+    if (droppings && droppings.length > 0) {
+      setQueue(droppings.map(d => d.songId).filter(Boolean));
+    }
+  }, [droppings, setQueue]);
+
+  // Auto play when wheel selects a new main item
+  useEffect(() => {
+    if (!droppings || droppings.length === 0) return;
+    const current = droppings[currentIndex % droppings.length];
+    if (!current?.songId) return;
+    // Try to pass minimal meta if loaded
+    const q = songQueries.find(q => q?.data?.id === current.songId);
+    playIfDifferent(current.songId, {
+      title: q?.data?.title || current.title,
+      artist: q?.data?.artist || current.singer,
+      artwork: current.albumImageUrl,
+    });
+  }, [currentIndex, droppings]);
+
+  // Auto play next when current finishes
+  useEffect(() => {
+    const sub = TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async () => {
+      await playNext();
+    });
+    return () => { try { sub.remove(); } catch {} };
+  }, [playNext]);
 
   const pan = Gesture.Pan()
     .onBegin(() => {
