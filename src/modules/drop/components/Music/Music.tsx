@@ -1,6 +1,7 @@
 import { Image, Text, View, TouchableOpacity } from "react-native";
 import { styles } from "./styles";
 import { MusicProps } from "../../types/Music";
+import MarqueeText from "../../../../components/marquee/MarqueeText";
 import { TYPOGRAPHY } from "../../../../constants/typography";
 
 function Music({ musicTitle, singer, onPress, imgUrl }: MusicProps) {
@@ -12,7 +13,13 @@ function Music({ musicTitle, singer, onPress, imgUrl }: MusicProps) {
         style={styles.imgContainer}
       />
       <View style={styles.textContainer}>
-        <Text style={[TYPOGRAPHY.SUBTITLE, styles.musicTitleText]}>{musicTitle}</Text>
+        <MarqueeText
+          text={musicTitle}
+          textStyle={styles.musicTitleText}
+          thresholdChars={18}
+          spacing={100}
+          speed={0.35}
+        />
         <Text style={[TYPOGRAPHY.CAPTION_1, styles.singerText]}>{singer}</Text>
       </View>
     </TouchableOpacity>
