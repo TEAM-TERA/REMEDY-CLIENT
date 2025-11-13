@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Text, View, SafeAreaView, Alert } from "react-native";
+import { Text, View, Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/SignUpScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import Input from "../../../components/input/Input";

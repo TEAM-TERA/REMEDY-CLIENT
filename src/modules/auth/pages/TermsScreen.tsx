@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { SafeAreaView, View, ScrollView } from 'react-native';
+import { View, ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderNav from '../components/HeaderNav/HeaderNav';
 import Button from '../../../components/button/Button';
 import { useAuthNavigation } from '../../../hooks/navigation/useAuthNavigation';

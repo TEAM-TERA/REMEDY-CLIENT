@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
-import { Text, View, SafeAreaView, TouchableOpacity } from "react-native";
+import { Text, View, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/LoginScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import Input from "../../../components/input/Input";
