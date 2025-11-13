@@ -113,7 +113,7 @@ function MusicScreen({ route }: Props) {
         }
       >
         <View style={styles.innerContainer}>
-          <CdPlayer imageUrl={songInfo?.albumImageUrl} />
+          <CdPlayer imageUrl={songInfo?.albumImagePath} />
 
           <View style={styles.content}>
             <View style={styles.infoRow}>
