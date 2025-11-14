@@ -14,8 +14,8 @@ import { Dropping } from '../../types/musicList';
 const SWIPE_THRESHOLD = 80;
 const INVERT_DIRECTION = false;
 const sign = INVERT_DIRECTION ? -1 : 1;
-const ANGLE_PER_ITEM = 45; // 각 아이템 간 각도 (6개 노드 기준)
-const TOTAL_NODES = 7; // 원형으로 배치할 총 노드 수 (3개 보임 + 4개 숨김)
+const ANGLE_PER_ITEM = 45;
+const TOTAL_NODES = 8;
 
 interface MusicWheelProps {
   droppings: any[];
@@ -63,10 +63,10 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     let minDistance = Infinity;
 
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
-      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 120;
+      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 60;
       const currentAngle = baseAngle + rotation.value;
       const normalizedAngle = ((currentAngle + 180) % 360) - 180;
-      const distanceFromMain = Math.abs(normalizedAngle - (-120));
+      const distanceFromMain = Math.abs(normalizedAngle - (-60));
 
       if (distanceFromMain < minDistance) {
         minDistance = distanceFromMain;
@@ -95,11 +95,10 @@ function MusicWheel({ droppings }: MusicWheelProps) {
           artist: dropping.singer,
         };
 
-        // 각 노드의 기본 각도 (원형 배치)
-        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 120; // -120도에서 시작
+      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 100;
 
-        // 첫 번째 노드를 기본 메인으로 설정 (실제 동적 변경은 MusicNode에서)
-        const isMainNode = nodeIndex === 0;
+      // 첫 번째 노드를 기본 메인으로 설정 (실제 동적 변경은 MusicNode에서)
+      const isMainNode = nodeIndex === 0;
 
         nodes.push({
           position: {
