@@ -5,6 +5,7 @@ import { styles } from '../../styles/MainFunction/MusicNode';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../../types/navigation';
+import { scale } from '../../../../utils/scalers';
 
 interface MusicNodeProps {
     data: {
@@ -23,7 +24,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     // 모든 노드가 같은 반지름의 원 위에 배치
-    const radius = 120;
+    const radius = scale(120);
 
     const animatedStyle = useAnimatedStyle(() => {
         'worklet';
@@ -35,8 +36,8 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
         // 현재 각도를 -180 ~ 180 범위로 정규화
         const normalizedAngle = ((currentAngle + 180) % 360) - 180;
 
-        // 메인 위치(-120°) 기준으로 투명도와 스케일 계산 (더 정확한 범위)
-        const distanceFromMain = Math.abs(normalizedAngle - (-120));
+        // 메인 위치(-60°) 기준으로 투명도와 스케일 계산 (더 정확한 범위)
+        const distanceFromMain = Math.abs(normalizedAngle - (-60));
 
         // 현재 이 노드가 메인 노드인지 동적으로 확인
         const isCurrentlyMain = mainNodeIndex.value === nodeIndex;
@@ -51,12 +52,8 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
             ? interpolate(distanceFromMain, [0, 60], [0.8, 0.2], 'clamp')
             : 0.1;
 
-        // 스케일: 메인 노드는 크게, 나머지는 작게
-        const scale = isCurrentlyMain
-            ? 1.0
-            : isVisible
-            ? interpolate(distanceFromMain, [0, 60], [0.85, 0.6], 'clamp')
-            : 0.5;
+        // 스케일: 메인 노드는 64px(1.0), 서브 노드는 48px(0.75)로 통일
+        const scale = isCurrentlyMain ? 1.0 : 0.75;
 
         return {
             transform: [
