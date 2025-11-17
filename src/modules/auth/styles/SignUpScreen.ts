@@ -1,22 +1,23 @@
 import { StyleSheet } from 'react-native';
 import { scale } from '../../../utils/scalers';
+import { PRIMARY_COLORS, TEXT_COLORS, UI_COLORS, BACKGROUND_COLORS } from '../../../constants/colors';
 
 export const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000000',
+    backgroundColor: BACKGROUND_COLORS.BACKGROUND,
   },
   formContainer: {
-    flex: 1,
     paddingHorizontal: scale(24),
     paddingTop: scale(40),
+    paddingBottom: scale(40),
     gap: scale(20),
   },
   genderContainer: {
     marginTop: scale(8),
   },
   genderLabel: {
-    color: '#FFFFFF',
+    color: TEXT_COLORS.DEFAULT,
     marginBottom: scale(12),
   },
   genderButtons: {
@@ -29,22 +30,22 @@ export const styles = StyleSheet.create({
     borderRadius: scale(8),
   },
   genderButtonActive: {
-    backgroundColor: '#FF4444',
-    borderColor: '#FF4444',
+    backgroundColor: PRIMARY_COLORS.DEFAULT,
+    borderColor: PRIMARY_COLORS.DEFAULT,
   },
   genderButtonInactive: {
-    backgroundColor: '#333333',
-    borderColor: '#333333',
+    backgroundColor: UI_COLORS.BACKGROUND,
+    borderColor: UI_COLORS.BACKGROUND,
   },
   genderButtonTextActive: {
-    color: '#FFFFFF',
+    color: TEXT_COLORS.DEFAULT,
   },
   genderButtonTextInactive: {
-    color: '#FFFFFF',
+    color: TEXT_COLORS.DEFAULT,
   },
   signUpButton: {
     marginTop: scale(32),
-    backgroundColor: '#FF4444',
-    borderColor: '#FF4444',
+    backgroundColor: PRIMARY_COLORS.DEFAULT,
+    borderColor: PRIMARY_COLORS.DEFAULT,
   },
 });
