@@ -60,7 +60,7 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
               zoom: ${MAP_ZOOM},
               styles: ${JSON.stringify(MAP_STYLE)},
               disableDefaultUI: true,
-              gestureHandling: 'none'
+              gestureHandling: 'greedy'
             });
 
             myLocationMarker = new google.maps.Marker({
@@ -168,7 +168,6 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
                   url: iconUrl,
                   scaledSize: new google.maps.Size(60, 60)
                 },
-                animation: google.maps.Animation.DROP,
                 zIndex: 10
               });
               

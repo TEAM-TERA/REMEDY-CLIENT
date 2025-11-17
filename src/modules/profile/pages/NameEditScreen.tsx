@@ -5,8 +5,10 @@ import {
     Text,
     TextInput,
     Alert,
+    Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { styles } from '../styles/NameEditScreen';
@@ -60,10 +62,16 @@ function NameEditScreen() {
     return (
         <SafeAreaView style={styles.safeAreaView}>
             <StatusBar translucent={false} />
+            <Header title="이름 수정" />
 
-            <View style={styles.container}>
-                <Header title="이름 수정" />
-
+            <KeyboardAwareScrollView
+                style={styles.container}
+                keyboardShouldPersistTaps="handled"
+                enableOnAndroid={true}
+                enableAutomaticScroll={true}
+                extraScrollHeight={Platform.OS === 'ios' ? 20 : 100}
+                extraHeight={Platform.OS === 'ios' ? 150 : 200}
+            >
                 <View style={styles.nameEditContainer}>
                     <Text style={styles.title}>이름</Text>
                     <TextInput
@@ -81,7 +89,7 @@ function NameEditScreen() {
                     disabled={updateProfileMutation.isPending}
                     style={styles.button}
                 />
-            </View>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     );
 }

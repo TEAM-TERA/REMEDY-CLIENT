@@ -5,5 +5,5 @@ export type DropScreenProps = {
     location : string;
     songId?: string;
     imgUrl?: string;
-    previewUrl?: string;
+    hlsPath?: string;
 };

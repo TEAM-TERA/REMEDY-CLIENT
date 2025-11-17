@@ -3,4 +3,5 @@ export type MusicProps = {
     singer : string;
     onPress? : ()=>void;
     imgUrl? : string;
+    hlsPath? : string;
 };

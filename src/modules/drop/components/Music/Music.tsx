@@ -4,7 +4,7 @@ import { MusicProps } from "../../types/Music";
 import MarqueeText from "../../../../components/marquee/MarqueeText";
 import { TYPOGRAPHY } from "../../../../constants/typography";
 
-function Music({ musicTitle, singer, onPress, imgUrl }: MusicProps) {
+function Music({ musicTitle, singer, onPress, imgUrl, hlsPath }: MusicProps) {
   return (
     <TouchableOpacity style={styles.container}
     onPress={onPress}>
@@ -13,13 +13,7 @@ function Music({ musicTitle, singer, onPress, imgUrl }: MusicProps) {
         style={styles.imgContainer}
       />
       <View style={styles.textContainer}>
-        <MarqueeText
-          text={musicTitle}
-          textStyle={styles.musicTitleText}
-          thresholdChars={18}
-          spacing={100}
-          speed={0.35}
-        />
+        <Text style={styles.musicTitleText}>{musicTitle}</Text>
         <Text style={[TYPOGRAPHY.CAPTION_1, styles.singerText]}>{singer}</Text>
       </View>
     </TouchableOpacity>

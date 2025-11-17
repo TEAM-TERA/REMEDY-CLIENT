@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { Text, View, Alert } from "react-native";
+import { Text, View, Alert, Platform } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { styles } from "../styles/SignUpScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import Input from "../../../components/input/Input";
@@ -149,7 +150,14 @@ function SignUpScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <HeaderNav title="회원가입" />
-      <View style={styles.formContainer}>
+      <KeyboardAwareScrollView
+        contentContainerStyle={styles.formContainer}
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={Platform.OS === 'ios' ? 20 : 100}
+        extraHeight={Platform.OS === 'ios' ? 150 : 200}
+      >
         <Input
           placeholder="이름"
           value={formData.name}
@@ -221,7 +229,7 @@ function SignUpScreen() {
           disabled={isLoading}
           style={[styles.signUpButton, TYPOGRAPHY.BUTTON_TEXT]}
         />
-      </View>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

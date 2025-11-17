@@ -7,7 +7,9 @@ export const MAP_ZOOM = 18;
 
 export const MAP_STYLE = [
   { "featureType": "all", "elementType": "geometry.stroke", "stylers": [ { "color": "#6c697c" } ] },
-  { "featureType": "all", "elementType": "labels.text", "stylers": [ { "visibility": "off" } ] },
+  { "featureType": "all", "elementType": "labels.text", "stylers": [ { "visibility": "on" } ] },
+  { "featureType": "all", "elementType": "labels.text", "stylers": [ { "color": "#ffffff" } ] },
+  { "featureType": "all", "elementType": "labels.text.stroke", "stylers": [ { "weight": "0.1" } ] },
   { "featureType": "all", "elementType": "labels.icon", "stylers": [ { "visibility": "off" } ] },
   { "featureType": "landscape", "elementType": "geometry.fill", "stylers": [ { "color": "#10101d" } ] },
   { "featureType": "poi", "elementType": "geometry.fill", "stylers": [ { "color": "#1c1c2a" } ] },

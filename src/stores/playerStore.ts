@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import TrackPlayer, { TrackType } from 'react-native-track-player';
-import axiosInstance from '../modules/auth/api/axiosInstance';
 import Config from 'react-native-config';
 
 type PlayerState = {
@@ -18,8 +17,8 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   playIfDifferent: async (songId, meta) => {
     const { currentId } = get();
     if (currentId === songId) return;
-    const musicBase = Config.MUSIC_API_BASE_URL || axiosInstance.defaults.baseURL;
-    const streamUrl = `${musicBase}/songs/${songId}/stream`;
+    const streamBase = Config.MUSIC_STREAM_BASE_URL || Config.MUSIC_API_BASE_URL;
+    const streamUrl = `${streamBase}/hls/${songId}/playlist.m3u8`;
     try {
       await TrackPlayer.reset();
       await TrackPlayer.add({

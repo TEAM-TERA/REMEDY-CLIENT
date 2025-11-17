@@ -14,7 +14,7 @@ import Button from '../../../components/button/Button';
 import { useMyProfile } from '../hooks/useMyProfile';
 import { useMyDrop } from '../hooks/useMyDrop';
 import { useMyLikes } from '../hooks/useMyLike';
-import { getSongInfo } from '../../drop/api/dropApi';
+import { getSongInfo, getDroppingById } from '../../drop/api/dropApi';
 import { scale, verticalScale } from '../../../utils/scalers';
 
 function UserProfileScreen() {
@@ -28,9 +28,11 @@ function UserProfileScreen() {
     const { data: me, isLoading, isError, refetch, isFetching } = useMyProfile();
 
     const [songTitles, setSongTitles] = useState<Record<string, string>>({});
+    const [songImages, setSongImages] = useState<Record<string, string>>({});
+    const [likeDroppings, setLikeDroppings] = useState<Record<string, any>>({});
 
     useEffect(() => {
-        const loadTitles = async () => {
+        const loadSongInfo = async () => {
             const drops = Array.isArray(myDrops) ? myDrops : [];
             if (!drops || drops.length === 0) return;
             const uniqueIds = Array.from(new Set(drops.map((d: any) => d.songId).filter(Boolean)));
@@ -38,20 +40,54 @@ function UserProfileScreen() {
                 const results = await Promise.all(uniqueIds.map(async (id: string) => {
                     try {
                         const info = await getSongInfo(id);
-                        return [id, info?.title as string];
+                        return [id, info?.title as string, info?.albumImagePath as string];
                     } catch {
-                        return [id, id];
+                        return [id, id, ''];
                     }
                 }));
-                const map: Record<string, string> = {};
-                results.forEach(([id, title]) => { map[id as string] = (title as string) || String(id); });
-                setSongTitles(map);
+                const titleMap: Record<string, string> = {};
+                const imageMap: Record<string, string> = {};
+                results.forEach(([id, title, image]) => {
+                    titleMap[id as string] = (title as string) || String(id);
+                    imageMap[id as string] = (image as string) || '';
+                });
+                setSongTitles(titleMap);
+                setSongImages(imageMap);
             } catch {
-                console.log('songTitles 로드 실패');
+                console.log('songInfo 로드 실패');
             }
         };
-        loadTitles();
+        loadSongInfo();
     }, [myDrops]);
+
+    useEffect(() => {
+        const loadLikeDroppings = async () => {
+            const likes = Array.isArray(myLikes) ? myLikes : [];
+            if (!likes || likes.length === 0) return;
+            try {
+                const results = await Promise.all(likes.map(async (droppingId: string) => {
+                    try {
+                        const dropping = await getDroppingById(droppingId);
+                        if (dropping?.songId) {
+                            const songInfo = await getSongInfo(dropping.songId);
+                            return [droppingId, { ...dropping, songInfo }];
+                        }
+                        return [droppingId, dropping];
+                    } catch {
+                        return [droppingId, null];
+                    }
+                }));
+                const map: Record<string, any> = {};
+                results.forEach(([id, data]) => {
+                    map[id as string] = data;
+                });
+                setLikeDroppings(map);
+            } catch {
+                console.log('좋아요 드랍핑 로드 실패');
+            }
+        };
+        loadLikeDroppings();
+    }, [myLikes]);
 
     const currentData: DropItemData[] =
     activeTab === "drop"
@@ -59,16 +95,20 @@ function UserProfileScreen() {
             droppingId: d.droppingId,
             memo: songTitles[d.songId] || d.songId,
             location: d.address,
-            imageSource: undefined,
-            hasHeart: false, 
+            imageSource: songImages[d.songId] ? { uri: songImages[d.songId] } : undefined,
+            hasHeart: false,
     }))
-        : (Array.isArray(myLikes) ? myLikes : []).map((id: any) => ({
-            droppingId: id,
-            memo: "좋아요한 곡",
-            location: "",
-            imageSource: undefined,
-            hasHeart: true,
-    }));
+        : (Array.isArray(myLikes) ? myLikes : []).map((droppingId: any) => {
+            const dropping = likeDroppings[droppingId];
+            const songInfo = dropping?.songInfo;
+            return {
+                droppingId: droppingId,
+                memo: songInfo?.title || dropping?.content || "좋아요한 곡",
+                location: dropping?.address || "",
+                imageSource: songInfo?.albumImagePath ? { uri: songInfo.albumImagePath } : undefined,
+                hasHeart: true,
+            };
+    });
 
     const handleEditPress = () => {
         navigation.navigate('NameEdit');

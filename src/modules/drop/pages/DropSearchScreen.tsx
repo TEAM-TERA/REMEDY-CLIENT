@@ -86,7 +86,7 @@ function DropSearchScreen(){
                                     musicTime: item.duration,
                                     songId: item.id,
                                     imgUrl: item.albumImagePath,
-                                    previewUrl: '', 
+                                    hlsPath: item.hlsPath, 
                                     location: currentAddress,
                                 })
                             }
