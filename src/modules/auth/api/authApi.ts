@@ -17,3 +17,16 @@ export async function loginApi(email: string, password: string) {
   }
   return token;
 }
+
+type SignUpRequest = {
+  username: string;
+  password: string;
+  email: string;
+  birthDate: string;
+  gender: boolean;
+};
+
+export async function signUpApi(payload: SignUpRequest) {
+  const res = await axiosInstance.post('/auth/register', payload);
+  return res.data;
+}

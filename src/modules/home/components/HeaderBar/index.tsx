@@ -1,10 +1,12 @@
-import { View, Text, Image, TouchableOpacity,SafeAreaView, Pressable } from "react-native";
+import { View, Text, Image, TouchableOpacity,SafeAreaView, Pressable, Alert } from "react-native";
 import { styles } from "../../styles/HeaderBar/Headerbar";
 import Profile from "./Profile";
 import { scale } from "../../../../utils/scalers";
 import { TYPOGRAPHY } from "../../../../constants/typography";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "../../../../components/icon/Icon";
+import { useMyProfile } from "../../../profile/hooks/useMyProfile";
+import MarqueeText from "../../../../components/marquee/MarqueeText";
 
 interface HeaderBarProps {
   onLayout?: (height: number) => void;
@@ -15,11 +17,16 @@ interface HeaderBarProps {
 function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
 
   const navigation = useNavigation();
+  const { data: userProfile } = useMyProfile();
   const pressHandlerProfile = ()=>{
     navigation.navigate("Profile");
   }
   const pressHandlerRunning = ()=>{
-    setIsRunning?.(!isRunning);
+    const next = !isRunning;
+    if (!next) {
+      // 러닝 종료 시점
+    }
+    setIsRunning?.(next);
   }
   return (
     <SafeAreaView>
@@ -36,7 +43,13 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
           onPress={pressHandlerProfile}
           >
           <View style={{ marginLeft: scale(0.75) }}>
-            <Text style={[styles.userName, TYPOGRAPHY.HEADLINE_3]}>User_1</Text>
+            <MarqueeText
+              text={userProfile?.username || '로그인'}
+              textStyle={styles.userName}
+              thresholdChars={10}
+              spacing={100}
+              speed={0.35}
+            />
             <View style={styles.badge}>
               <Text style={[styles.badgeText, TYPOGRAPHY.CAPTION_2]}>모험가</Text>
             </View>
@@ -44,10 +57,18 @@ function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
         </Pressable>
       </View>
       <View style = {styles.iconsContainer}>
-        <Icon name="music"/>
-        <Icon name="target"/>
-        <Icon name="paint"/>
-        <Icon name="running" onPress={pressHandlerRunning} isPress={isRunning} pressname="turnRunning"/>
+        <View>
+          <Icon name="music" width={24} height={24} />
+        </View>
+        <View style={styles.iconWrap}>
+          <Icon name="target" width={24} height={24} onPress={() => navigation.navigate('Challenge' as never)} />
+        </View>
+        <View style={styles.iconWrap}>
+          <Icon name="paint" width={24} height={24} onPress={() => navigation.navigate('Customize' as never)}/>
+        </View>
+        <View style={styles.iconWrap}>
+          <Icon name="running" width={24} height={24} onPress={pressHandlerRunning} isPress={isRunning} pressname="turnRunning"/>
+        </View>
       </View>
     </View>
     </SafeAreaView>

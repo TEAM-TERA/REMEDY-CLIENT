@@ -6,23 +6,24 @@ import {
     UI_COLORS,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
+import { scale, verticalScale } from '../../../utils/scalers';
 
-const infoEditScreen = StyleSheet.create({
+export const styles = StyleSheet.create({
     safeAreaView: {
         flex: 1,
         backgroundColor: BACKGROUND_COLORS.BACKGROUND,
     },
     container: {
         flex: 1,
-        padding: 16,
-        gap: 24,
+        padding: scale(16),
+        gap: scale(24),
     },
     content: {
-        gap: 32,
+        gap: scale(32),
     },
     inputContainer: {
-        padding: 12,
-        gap: 12,
+        padding: scale(12),
+        gap: scale(12),
     },
     label: {
         color: TEXT_COLORS.DEFAULT,
@@ -30,57 +31,57 @@ const infoEditScreen = StyleSheet.create({
     },
     textInput: {
         backgroundColor: UI_COLORS.BACKGROUND,
-        borderRadius: 8,
-        paddingHorizontal: 16,
-        paddingVertical: 16,
+        borderRadius: verticalScale(8),
+        paddingHorizontal: scale(16),
+        paddingVertical: verticalScale(16),
         color: TEXT_COLORS.DEFAULT,
         ...TYPOGRAPHY.BODY_1,
     },
     dateInput: {
         backgroundColor: UI_COLORS.BACKGROUND,
-        borderRadius: 8,
-        paddingHorizontal: 16,
-        paddingVertical: 16,
+        borderRadius: verticalScale(8),
+        paddingHorizontal: scale(16),
+        paddingVertical: verticalScale(16),
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
     },
     dateInputContainer: {
         backgroundColor: UI_COLORS.BACKGROUND,
-        borderRadius: 8,
+        borderRadius: verticalScale(8),
         flexDirection: 'row',
         alignItems: 'center',
     },
     dateTextInput: {
         flex: 1,
-        paddingLeft: 16,
-        paddingVertical: 16,
-        paddingRight: 12,
+        paddingLeft: scale(16),
+        paddingVertical: verticalScale(16),
+        paddingRight: scale(12),
         color: TEXT_COLORS.DEFAULT,
         ...TYPOGRAPHY.BODY_1,
     },
     calendarButton: {
-        paddingRight: 12,
-        paddingLeft: 12,
-        paddingVertical: 16,
+        paddingRight: scale(12),
+        paddingLeft: scale(12),
+        paddingVertical: verticalScale(16),
     },
     dateText: {
         color: TEXT_COLORS.DEFAULT,
         ...TYPOGRAPHY.BODY_1,
     },
     genderContainer: {
-        padding: 12,
-        gap: 12,
+        padding: scale(12),
+        gap: scale(12),
     },
     genderButtons: {
         flexDirection: 'row',
-        gap: 8,
+        gap: scale(8),
     },
     genderButton: {
         flex: 1,
         backgroundColor: UI_COLORS.BACKGROUND,
-        borderRadius: 8,
-        padding: 12,
+        borderRadius: verticalScale(8),
+        padding: scale(12),
         alignItems: 'center',
     },
     genderButtonSelected: {
@@ -95,9 +96,9 @@ const infoEditScreen = StyleSheet.create({
     },
     submitButton: {
         backgroundColor: PRIMARY_COLORS.MINUS_TEN,
-        borderRadius: 8,
-        padding: 12,
-        margin: 12,
+        borderRadius: verticalScale(8),
+        padding: scale(12),
+        margin: scale(12),
         alignItems: 'center',
     },
     submitButtonText: {
@@ -106,4 +107,3 @@ const infoEditScreen = StyleSheet.create({
     },
 });
 
-export default infoEditScreen;

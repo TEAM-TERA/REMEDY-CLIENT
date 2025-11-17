@@ -27,16 +27,46 @@ axiosInstance.interceptors.request.use(async (config) => {
 axiosInstance.interceptors.response.use(
   (res) => res,
   async (error) => {
-    if (error?.response?.status === 401) {
+    const originalRequest = error.config;
+    
+    if (error?.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        const refreshToken = await AsyncStorage.getItem("refreshToken");
+        
+        if (refreshToken) {
+          console.log("토큰 갱신 시도...");
+          
+          const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
+            refreshToken: refreshToken
+          });
+          
+          const { accessToken, refreshToken: newRefreshToken } = response.data;
+          
+          await AsyncStorage.setItem("userToken", accessToken);
+          await AsyncStorage.setItem("refreshToken", newRefreshToken);
+          
+          axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+          originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+          
+          console.log("토큰 갱신 성공");
+          return axiosInstance(originalRequest);
+        }
+      } catch (refreshError) {
+        console.log("토큰 갱신 실패:", refreshError);
+      }
+      
+      console.log("로그아웃 처리 중...");
       await AsyncStorage.removeItem("userToken");
+      await AsyncStorage.removeItem("refreshToken");
       delete axiosInstance.defaults.headers.common["Authorization"];
 
       queryClient.clear();
 
       RootNavigation.navigate("Auth");
-
-      return Promise.reject(error);
     }
+    
     return Promise.reject(error);
   }
 );

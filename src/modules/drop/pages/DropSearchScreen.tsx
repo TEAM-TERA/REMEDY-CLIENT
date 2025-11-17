@@ -1,18 +1,16 @@
-import { View, SafeAreaView, Text, ScrollView } from "react-native";
-import { styles, historyStyles } from "../styles/DropSearchScreen";
-import { TYPOGRAPHY } from "../../../constants/typography";
+import { View, Text, ScrollView } from "react-native";
+import { styles } from "../styles/DropSearchScreen";
 import { useState, useEffect } from "react";
-import BackSvg from "../../auth/components/BackSvg/BackSvg";
+import Icon from "../../../components/icon/Icon";
 import Input from "../../../components/input/Input";
-import History from "../components/History/History";
 import Music from "../components/Music/Music";
 import { scale } from "../../../utils/scalers";
-import findMusic from "../utils/findMusic";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { DropStackParamList } from '../../../navigation/DropStack';
 import { useSongSearch, SongSearchItem } from "../hooks/useSongSearch";
 import useLocation from "../../../hooks/useLocation";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { GOOGLE_MAPS_API_KEY } from "../../../constants/map";
 
 function DropSearchScreen(){
@@ -57,14 +55,14 @@ function DropSearchScreen(){
     return(
         <SafeAreaView style = {styles.container}>
             <View style = {styles.inputContainer}>
-                <BackSvg></BackSvg>
+                <Icon name="left" width={24} height={24} fill="#FFFFFF" onPress={() => navigation.goBack()} />
                 <Input 
-                placeholder="드랍할 음악 검색" 
-                width={scale(287)}
-                value = {searchingText}
-                onChangeText = {setSearchingText}
-                onSubmitEditing = {onSearch}
-                ></Input>
+                    placeholder="드랍할 음악 검색" 
+                    containerWidth={scale(287)}
+                    value = {searchingText}
+                    onChangeText = {setSearchingText}
+                    onSubmitEditing = {onSearch}
+                />
             </View>
             <ScrollView
                 style={styles.searchMusicContainer}
@@ -80,15 +78,15 @@ function DropSearchScreen(){
                             key={item.id}
                             musicTitle={item.title}
                             singer={item.artist}
-                            imgUrl=""
+                            imgUrl={item.albumImagePath}
                             onPress={() =>
                                 navigation.navigate("DropDetail", {
                                     musicTitle: item.title,
                                     singer: item.artist,
                                     musicTime: item.duration,
                                     songId: item.id,
-                                    imgUrl: "",
-                                    previewUrl: '', 
+                                    imgUrl: item.albumImagePath,
+                                    hlsPath: item.hlsPath, 
                                     location: currentAddress,
                                 })
                             }

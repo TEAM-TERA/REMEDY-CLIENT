@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, Text, Image } from 'react-native';
-import userProfileScreen from '../styles/userProfileScreen';
+import { styles } from '../styles/userProfileScreen';
 import { PRIMARY_COLORS } from '../../../constants/colors';
 import { DropItemProps } from '../types/DropItem';
 import Icon from '../../../components/icon/Icon';
+import { scale } from '../../../utils/scalers';
 
 function DropItem({
     memo,
@@ -12,45 +13,44 @@ function DropItem({
     hasHeart = false,
 }: DropItemProps) {
     return (
-        <View style={userProfileScreen.dropBox}>
-            <View style={userProfileScreen.dropBoxFrame}>
-                <View style={userProfileScreen.dropMusic}>
+        <View style={styles.dropBox}>
+            <View style={styles.dropBoxFrame}>
+                <View style={styles.dropMusic}>
                     <Image
                         source={imageSource}
-                        style={userProfileScreen.albumImage}
+                        style={styles.albumImage}
                     />
                     {hasHeart && (
-                        <View style={userProfileScreen.heartOverlay}>
+                        <View style={styles.heartOverlay}>
                             <Icon
                                 name="heart"
-                                width={24}
-                                height={24}
-                                color="Orgba(255, 71, 87, 0.8)"
-                            />{' '}
-                            {/* 투명도 위해 상수 사용 안함 */}
+                                width={scale(24)}
+                                height={scale(24)}
+                                color="rgba(255, 71, 87, 0.8)"
+                            />
                         </View>
                     )}
-                    <View style={userProfileScreen.albumDisk}>
-                        <View style={userProfileScreen.albumDiskSmall} />
+                    <View style={styles.albumDisk}>
+                        <View style={styles.albumDiskSmall} />
                     </View>
                 </View>
 
-                <View style={userProfileScreen.memoContainer}>
+                <View style={styles.memoContainer}>
                     <Text
-                        style={userProfileScreen.memoText}
+                        style={styles.memoText}
                         numberOfLines={1}
                         ellipsizeMode="tail"
                     >
                         {memo}
                     </Text>
-                    <View style={userProfileScreen.location}>
+                    <View style={styles.location}>
                         <Icon
                             name="location"
-                            width={16}
-                            height={16}
+                            width={scale(16)}
+                            height={scale(16)}
                             color={PRIMARY_COLORS.PLUS_TWENTY}
                         />
-                        <Text style={userProfileScreen.locationText}>
+                        <Text style={styles.locationText}>
                             {location}
                         </Text>
                     </View>
@@ -60,3 +60,4 @@ function DropItem({
     );
 }
 export default DropItem;
+

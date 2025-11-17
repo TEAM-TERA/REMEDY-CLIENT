@@ -1,21 +1,21 @@
 import React from 'react';
 import { TouchableOpacity, Text } from 'react-native';
-import infoEditScreen from '../styles/infoEditScreen';
+import { styles } from '../styles/infoEditScreen';
 import { GenderButtonProps } from '../types/InfoEdit';
 
 function GenderButton({ label, isSelected, onPress }: GenderButtonProps) {
     return (
         <TouchableOpacity
             style={[
-                infoEditScreen.genderButton,
-                isSelected && infoEditScreen.genderButtonSelected,
+                styles.genderButton,
+                isSelected && styles.genderButtonSelected,
             ]}
             onPress={onPress}
         >
             <Text
                 style={[
-                    infoEditScreen.genderButtonText,
-                    isSelected && infoEditScreen.genderButtonTextSelected,
+                    styles.genderButtonText,
+                    isSelected && styles.genderButtonTextSelected,
                 ]}
             >
                 {label}
@@ -25,3 +25,4 @@ function GenderButton({ label, isSelected, onPress }: GenderButtonProps) {
 }
 
 export default GenderButton;
+

@@ -5,25 +5,26 @@ import {
     UI_COLORS,
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
-
+import { scale } from '../../../utils/scalers';
+import { verticalScale } from '../../../utils/scalers';
 export const styles = StyleSheet.create({
     challengeContainer: {
         flexDirection: 'row',
     },
     sideBar: {
-        width: 12,
+        width: scale(12),
         backgroundColor: PRIMARY_COLORS.DEFAULT,
-        borderTopLeftRadius: 8,
-        borderBottomLeftRadius: 8,
+        borderTopLeftRadius: verticalScale(8),
+        borderBottomLeftRadius: verticalScale(8),
     },
     content: {
         flex: 1,
         gap: 4,
-        paddingVertical: 16,
-        paddingHorizontal: 12,
+        paddingVertical: verticalScale(16),
+        paddingHorizontal: scale(12),
         backgroundColor: UI_COLORS.BACKGROUND_BLUE,
-        borderTopRightRadius: 8,
-        borderBottomRightRadius: 8,
+        borderTopRightRadius: verticalScale(8),
+        borderBottomRightRadius: verticalScale(8),
     },
     challengeWrapper: {
         flexDirection: 'row',
@@ -32,7 +33,7 @@ export const styles = StyleSheet.create({
     },
     challengeTitleWrapper: {
         flexDirection: 'row',
-        gap: 8,
+        gap: scale(8),
         alignItems: 'center',
     },
     challengeTitle: {
@@ -41,7 +42,7 @@ export const styles = StyleSheet.create({
     },
     challengeCoinWrapper: {
         flexDirection: 'row',
-        gap: 4,
+        gap: scale(4),
         alignItems: 'center',
     },
     challengeCoinText: {
@@ -50,21 +51,30 @@ export const styles = StyleSheet.create({
     },
     challengeProgressWrapper: {
         flexDirection: 'row',
+        justifyContent: 'flex-end',
         alignItems: 'center',
-        gap: 8,
     },
     challengeProgressText: {
         color: PRIMARY_COLORS.DEFAULT,
         ...TYPOGRAPHY.BODY_1,
     },
-    progressBar: {
+    progressContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(8),
+    },
+    progressBarWrapper: {
         flex: 1,
-        height: 4,
+    },
+    progressBar: {
+        height: verticalScale(6),
         backgroundColor: TEXT_COLORS.CAPTION,
+        borderRadius: verticalScale(3),
+        marginVertical: verticalScale(8),
         overflow: 'hidden',
     },
     progressFill: {
-        height: '100%',
+        height: verticalScale(100),
         backgroundColor: PRIMARY_COLORS.DEFAULT,
     },
     detailText: {

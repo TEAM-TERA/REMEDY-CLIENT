@@ -9,7 +9,8 @@ import { navigate } from '../../../../navigation';
 import DropButton from './DropButton';
 import { useQuery } from '@tanstack/react-query';
 import { getSongInfo } from '../../../drop/api/dropApi';
-import { Dropping } from '../../types/musicList';
+import { usePlayerStore } from '../../../../stores/playerStore';
+import TrackPlayer, { Event } from 'react-native-track-player';
 
 const SWIPE_THRESHOLD = 80;
 const INVERT_DIRECTION = false;
@@ -26,10 +27,12 @@ function MusicWheel({ droppings }: MusicWheelProps) {
   const totalSongs = droppings?.length || 0;
   const rotation = useSharedValue(0);
   const startRotation = useSharedValue(0);
+  const setQueue = usePlayerStore(s => s.setQueue);
+  const playIfDifferent = usePlayerStore(s => s.playIfDifferent);
+  const playNext = usePlayerStore(s => s.playNext);
 
-  // 컴포넌트 마운트 시 정확한 시작 위치 설정
   useEffect(() => {
-    rotation.value = 0; // 항상 0도에서 시작
+    rotation.value = 0;
   }, [rotation]);
 
   const song1Query = useQuery({
@@ -50,13 +53,36 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     enabled: !!(droppings?.[2]?.songId),
   });
 
-  const songQueries = [song1Query, song2Query, song3Query];
+  const song4Query = useQuery({
+    queryKey: ['songInfo', droppings?.[3]?.songId],
+    queryFn: () => getSongInfo(droppings[3].songId),
+    enabled: !!(droppings?.[3]?.songId),
+  });
+
+  const song5Query = useQuery({
+    queryKey: ['songInfo', droppings?.[4]?.songId],
+    queryFn: () => getSongInfo(droppings[4].songId),
+    enabled: !!(droppings?.[4]?.songId),
+  });
+
+  const song6Query = useQuery({
+    queryKey: ['songInfo', droppings?.[5]?.songId],
+    queryFn: () => getSongInfo(droppings[5].songId),
+    enabled: !!(droppings?.[5]?.songId),
+  });
+
+  const song7Query = useQuery({
+    queryKey: ['songInfo', droppings?.[6]?.songId],
+    queryFn: () => getSongInfo(droppings[6].songId),
+    enabled: !!(droppings?.[6]?.songId),
+  });
+
+  const songQueries = [song1Query, song2Query, song3Query, song4Query, song5Query, song6Query, song7Query];
 
   const handlerPressDrop = ()=>{
     navigate('Drop');
   }
 
-  // rotation 값에 따라 -120도에 가장 가까운 노드 인덱스 계산
   const mainNodeIndex = useDerivedValue(() => {
     'worklet';
     let closestIndex = 0;
@@ -83,22 +109,19 @@ function MusicWheel({ droppings }: MusicWheelProps) {
       return nodes;
     }
 
-    // 6개 노드를 원형으로 배치 (무한 스크롤 효과)
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
-      // 현재 인덱스 기반으로 데이터 할당
       const dataIndex = (currentIndex + nodeIndex) % totalSongs;
 
       if (droppings[dataIndex]) {
         const dropping = droppings[dataIndex];
-        const songInfo = {
-          title: dropping.title,
-          artist: dropping.singer,
-        };
+        let songInfo = null;
+        if (songQueries[dataIndex]?.data) {
+          songInfo = songQueries[dataIndex].data;
+        }
 
-      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 100;
+        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 100;
 
-      // 첫 번째 노드를 기본 메인으로 설정 (실제 동적 변경은 MusicNode에서)
-      const isMainNode = nodeIndex === 0;
+        const isMainNode = nodeIndex === 0;
 
         nodes.push({
           position: {
@@ -125,6 +148,35 @@ function MusicWheel({ droppings }: MusicWheelProps) {
       setCurrentIndex((prev: number) => (prev + 1) % totalSongs);
     }
   };
+
+  // Keep queue synced with droppings
+  useEffect(() => {
+    if (droppings && droppings.length > 0) {
+      setQueue(droppings.map(d => d.songId).filter(Boolean));
+    }
+  }, [droppings, setQueue]);
+
+  // Auto play when wheel selects a new main item
+  useEffect(() => {
+    if (!droppings || droppings.length === 0) return;
+    const current = droppings[currentIndex % droppings.length];
+    if (!current?.songId) return;
+    // Try to pass minimal meta if loaded
+    const q = songQueries.find(q => q?.data?.id === current.songId);
+    playIfDifferent(current.songId, {
+      title: q?.data?.title || current.title,
+      artist: q?.data?.artist || current.singer,
+      artwork: current.albumImageUrl,
+    });
+  }, [currentIndex, droppings]);
+
+  // Auto play next when current finishes
+  useEffect(() => {
+    const sub = TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async () => {
+      await playNext();
+    });
+    return () => { try { sub.remove(); } catch {} };
+  }, [playNext]);
 
   const pan = Gesture.Pan()
     .onBegin(() => {

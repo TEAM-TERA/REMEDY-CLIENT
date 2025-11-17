@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import { scale } from "../../../../utils/scalers";
-import { BACKGROUND_COLORS, TEXT_COLORS } from "../../../../constants/colors";
+import { BACKGROUND_COLORS, TEXT_COLORS, UI_COLORS } from "../../../../constants/colors";
+import { TYPOGRAPHY } from "../../../../constants/typography";
 
 export const styles = StyleSheet.create({
   container: {
@@ -15,22 +16,30 @@ export const styles = StyleSheet.create({
   },
   leftSection: {
     flexDirection: "row",
-    alignItems: "center"
+    gap: scale(8),
+    alignItems: "center",
+    marginLeft: scale(12)
   },
   userName: {
     color: TEXT_COLORS.DEFAULT,
-    marginBottom: scale(0.2)
+    marginBottom: scale(0.2),
+    ...TYPOGRAPHY.HEADLINE_3
   },
   badge: {
-    backgroundColor: BACKGROUND_COLORS.BACKGROUND_RED,
-    borderRadius: scale(0.5),
-    paddingHorizontal: scale(0.5),
-    paddingVertical: scale(0.15),
+    borderRadius: scale(16),
+    height: scale(20),
+    paddingLeft: scale(6),
+    paddingRight: scale(6),
+    paddingTop: scale(2),
+    paddingBottom: scale(2),
     alignSelf: "flex-start",
-    marginTop: scale(0.1)
+    justifyContent: "center",
+    marginTop: scale(0.1),
+    borderColor: TEXT_COLORS.CAPTION_LIGHTER,
+    borderWidth: scale(0.5)
   },
   badgeText: {
-    color: TEXT_COLORS.CAPTION_RED
+    color: TEXT_COLORS.CAPTION_LIGHTER
   },
   rightSection: {
     flexDirection: "row",
@@ -38,10 +47,11 @@ export const styles = StyleSheet.create({
   },
   iconsContainer: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    display: "flex",
+    justifyContent: "flex-end",
     alignItems: "center",
-    gap: scale(20),
     marginRight: scale(16)
+  },
+  iconWrap: {
+    marginLeft: scale(20)
   }
 });

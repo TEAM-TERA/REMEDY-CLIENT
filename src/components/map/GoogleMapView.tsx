@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Platform, PermissionsAndroid, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useNavigation } from '@react-navigation/native';
-import Geolocation, { GeoPosition } from 'react-native-geolocation-service';
 import { PRIMARY_COLORS } from '../../constants/colors';
 import { MAP_RADIUS, MAP_ZOOM, MAP_STYLE, MARKER_STYLES, GOOGLE_MAPS_API_KEY } from '../../constants/map';
 import { Dropping } from '../../modules/home/types/musicList';
-import useLocation from '../../hooks/useLocation';
 
 
 interface GoogleMapViewProps {
@@ -17,25 +15,24 @@ interface GoogleMapViewProps {
 export default function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
   const webviewRef = useRef<WebView>(null);
   const navigation = useNavigation();
-
-  const safeLocation = currentLocation || { latitude: 37.5665, longitude: 126.9780 };
+  const [isMapReady, setIsMapReady] = useState(false);
 
   useEffect(() => {
-    console.log('Droppings data:', droppings);
-    console.log('Droppings length:', droppings?.length);
-    console.log('Droppings structure:', JSON.stringify(droppings, null, 2));
-    
-    if (webviewRef.current && droppings && droppings.length > 0) {
-      setTimeout(() => {
-        const message = JSON.stringify({ type: 'droppings', payload: droppings });
-        console.log('Sending to WebView:', message);
-        webviewRef.current?.postMessage(message);
-      }, 1000);
-    } else {
-      console.log('Not sending to WebView - webviewRef:', !!webviewRef.current, 'droppings:', !!droppings, 'length:', droppings?.length);
+    if (isMapReady && webviewRef.current && droppings && droppings.length > 0) {
+      const message = JSON.stringify({ type: 'droppings', payload: droppings });
+      webviewRef.current.postMessage(message);
     }
-  }, [droppings]);
+  }, [droppings, isMapReady]);
 
+  useEffect(() => {
+    if (!isMapReady || !webviewRef.current || !currentLocation) return;
+    
+    const message = JSON.stringify({
+      type: 'updateLocation',
+      payload: { latitude: currentLocation.latitude, longitude: currentLocation.longitude },
+    });
+    webviewRef.current.postMessage(message);
+  }, [currentLocation, isMapReady]);
 
   const html = `
     <!DOCTYPE html>
@@ -48,28 +45,33 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
         <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=geometry"></script>
         <script>
           var map;
+          var myLocationMarker;
+          var userCircle;
+          var mapReady = false;
+          var existingMarkers = [];
+          var messageQueue = [];
+          var lastCenter = null;
+          
           function initMap() {
-            const center = { lat: ${safeLocation.latitude}, lng: ${safeLocation.longitude} };
+            const center = { lat: 37.5665, lng: 126.9780 };
 
             map = new google.maps.Map(document.getElementById('map'), {
               center,
               zoom: ${MAP_ZOOM},
               styles: ${JSON.stringify(MAP_STYLE)},
               disableDefaultUI: true,
-              gestureHandling: 'none'
+              gestureHandling: 'greedy'
             });
 
-            new google.maps.Marker({
+            myLocationMarker = new google.maps.Marker({
               position: center,
-              map,
+              map: map,
               title: '내 위치',
-              icon: {
-                url: "${MARKER_STYLES.MY_LOCATION}",
-                scaledSize: new google.maps.Size(40, 40)
-              }
+              icon: { url: "${MARKER_STYLES.MY_LOCATION}", scaledSize: new google.maps.Size(40, 40), anchor: new google.maps.Point(20, 20) },
+              zIndex: 0
             });
 
-            new google.maps.Circle({
+            userCircle = new google.maps.Circle({
               strokeColor: "#FFFFFF",
               strokeOpacity: 0,
               strokeWeight: 0,
@@ -77,13 +79,16 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
               fillOpacity: 0.2,
               map,
               center,
-              radius: ${MAP_RADIUS}
+              radius: ${MAP_RADIUS},
+              zIndex: 0
             });
 
-            window.ReactNativeWebView?.postMessage("initMap called");
+            google.maps.event.addListenerOnce(map, 'idle', function() {
+              mapReady = true;
+              window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'mapReady' }));
+              processQueue();
+            });
           }
-
-          var existingMarkers = [];
 
           function clearDroppings() {
             existingMarkers.forEach(marker => marker.setMap(null));
@@ -91,21 +96,69 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
           }
 
           function addDroppings(drops) {
-            console.log('Adding droppings to map:', drops);
+            if (!mapReady || !map) return;
+            
             clearDroppings();
             
             drops.forEach(function(drop) {
-              console.log('Processing drop:', drop);
               const dropPosition = new google.maps.LatLng(drop.latitude, drop.longitude);
-              const centerPosition = new google.maps.LatLng(${safeLocation.latitude}, ${safeLocation.longitude});
-              const distance = google.maps.geometry.spherical.computeDistanceBetween(centerPosition, dropPosition);
-
+              const centerPositionDynamic = map.getCenter();
+              const distance = google.maps.geometry.spherical.computeDistanceBetween(centerPositionDynamic, dropPosition);
               const radius = ${MAP_RADIUS};
 
-              // 거리에 따라 다른 아이콘 사용
               const iconUrl = distance <= radius 
-                ? "https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/a6b92c55-063d-4be3-9e07-2863714d55f1/image.png?table=block&id=2752845a-0c9f-80c2-a2b9-ffceba8ca2ed&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758823200000&signature=V8FHMorfGi6UzxGFl4YPouDRArDvmc9khkNHftBKRNc&downloadName=image.png"
-                : "https://file.notion.so/f/f/f74ce79a-507a-45d0-8a14-248ea481b327/3292e931-4479-40da-ab55-719824478764/image.png?table=block&id=2322845a-0c9f-8069-8720-e3a085f5acfa&spaceId=f74ce79a-507a-45d0-8a14-248ea481b327&expirationTimestamp=1758823200000&signature=FiQeTx1MJ7ziAQFXS9phQTK1U5ExF1GZcFCoXPuhvCA&downloadName=image.png";
+                ? "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+                  '<svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                  '<g filter="url(#filter0_d_660_1355)">' +
+                  '<circle cx="36.8" cy="36.8003" r="17.5" fill="black"/>' +
+                  '</g>' +
+                  '<g filter="url(#filter1_d_660_1355)">' +
+                  '<path d="M43 28.2C43 27.8405 42.8657 27.4999 42.634 27.272C42.4023 27.0441 42.0977 26.9528 41.8039 27.0233L31.8039 29.4233C31.3365 29.5355 31 30.028 31 30.6V41.5366C30.6872 41.4481 30.3506 41.4 30 41.4C28.3431 41.4 27 42.4745 27 43.8C27 45.1255 28.3431 46.2 30 46.2C31.6568 46.2 33 45.1255 33 43.8V33.9838L41 32.0638V39.1366C40.6872 39.0481 40.3506 39 40 39C38.3431 39 37 40.0745 37 41.4C37 42.7255 38.3431 43.8 40 43.8C41.6569 43.8 43 42.7255 43 41.4V28.2Z" fill="#F3124E"/>' +
+                  '</g>' +
+                  '<defs>' +
+                  '<filter id="filter0_d_660_1355" x="-0.699951" y="-0.699707" width="75" height="75" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.937255 0 0 0 0 0.0627451 0 0 0 0 0.298039 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1355"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1355" result="shape"/>' +
+                  '</filter>' +
+                  '<filter id="filter1_d_660_1355" x="7" y="7" width="56" height="59.2002" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.937255 0 0 0 0 0.0627451 0 0 0 0 0.298039 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1355"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1355" result="shape"/>' +
+                  '</filter>' +
+                  '</defs>' +
+                  '</svg>'
+                )
+                : "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+                  '<svg width="75" height="75" viewBox="0 0 76 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                  '<g filter="url(#filter0_d_660_1369)">' +
+                  '<circle cx="37.8" cy="36.8003" r="17.5" fill="#14151C"/>' +
+                  '</g>' +
+                  '<path d="M44 28.2C44 27.8405 43.8657 27.4999 43.634 27.272C43.4023 27.0441 43.0977 26.9528 42.8039 27.0233L32.8039 29.4233C32.3365 29.5355 32 30.028 32 30.6V41.5366C31.6872 41.4481 31.3506 41.4 31 41.4C29.3431 41.4 28 42.4745 28 43.8C28 45.1255 29.3431 46.2 31 46.2C32.6568 46.2 34 45.1255 34 43.8V33.9838L42 32.0638V39.1366C41.6872 39.0481 41.3506 39 41 39C39.3431 39 38 40.0745 38 41.4C38 42.7255 39.3431 43.8 41 43.8C42.6569 43.8 44 42.7255 44 41.4V28.2Z" fill="#656581"/>' +
+                  '<defs>' +
+                  '<filter id="filter0_d_660_1369" x="0.300049" y="-0.699707" width="75" height="75" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.396078 0 0 0 0 0.396078 0 0 0 0 0.505882 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1369"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1369" result="shape"/>' +
+                  '</filter>' +
+                  '</defs>' +
+                  '</svg>'
+                );
 
               const marker = new google.maps.Marker({
                 position: { lat: drop.latitude, lng: drop.longitude },
@@ -115,14 +168,13 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
                   url: iconUrl,
                   scaledSize: new google.maps.Size(60, 60)
                 },
-                animation: google.maps.Animation.DROP
+                zIndex: 10
               });
               
               existingMarkers.push(marker);
               
               marker.addListener('click', function() {
                 const isInCircle = distance <= radius;
-                console.log('Marker clicked, distance:', distance, 'radius:', radius, 'isInCircle:', isInCircle);
                 if (isInCircle) {
                   window.ReactNativeWebView?.postMessage(JSON.stringify({
                     type: 'markerClick',
@@ -152,31 +204,148 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
                 }
               });
             });
-            
-            console.log('Total markers added:', existingMarkers.length);
           }
 
-          window.addEventListener('message', function(event) {
+          function updateLocation(lat, lng) {
+            if (!mapReady || !map) return;
+            
+            const newPosition = new google.maps.LatLng(lat, lng);
+            
+            if (lastCenter && 
+                Math.abs(lastCenter.lat - lat) < 0.00001 && 
+                Math.abs(lastCenter.lng - lng) < 0.00001) {
+              return;
+            }
+            
+            lastCenter = { lat, lng };
+            
+            map.panTo(newPosition);
+            
+            if (myLocationMarker) {
+              myLocationMarker.setPosition(newPosition);
+            }
+            
+            if (userCircle) {
+              userCircle.setCenter(newPosition);
+            }
+
+            existingMarkers.forEach(function(marker) {
+              const markerPos = marker.getPosition();
+              const distance = google.maps.geometry.spherical.computeDistanceBetween(newPosition, markerPos);
+              const radius = ${MAP_RADIUS};
+              
+              const iconUrl = distance <= radius 
+                ? "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+                  '<svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                  '<g filter="url(#filter0_d_660_1355)">' +
+                  '<circle cx="36.8" cy="36.8003" r="17.5" fill="black"/>' +
+                  '</g>' +
+                  '<g filter="url(#filter1_d_660_1355)">' +
+                  '<path d="M43 28.2C43 27.8405 42.8657 27.4999 42.634 27.272C42.4023 27.0441 42.0977 26.9528 41.8039 27.0233L31.8039 29.4233C31.3365 29.5355 31 30.028 31 30.6V41.5366C30.6872 41.4481 30.3506 41.4 30 41.4C28.3431 41.4 27 42.4745 27 43.8C27 45.1255 28.3431 46.2 30 46.2C31.6568 46.2 33 45.1255 33 43.8V33.9838L41 32.0638V39.1366C40.6872 39.0481 40.3506 39 40 39C38.3431 39 37 40.0745 37 41.4C37 42.7255 38.3431 43.8 40 43.8C41.6569 43.8 43 42.7255 43 41.4V28.2Z" fill="#F3124E"/>' +
+                  '</g>' +
+                  '<defs>' +
+                  '<filter id="filter0_d_660_1355" x="-0.699951" y="-0.699707" width="75" height="75" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.937255 0 0 0 0 0.0627451 0 0 0 0 0.298039 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1355"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1355" result="shape"/>' +
+                  '</filter>' +
+                  '<filter id="filter1_d_660_1355" x="7" y="7" width="56" height="59.2002" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.937255 0 0 0 0 0.0627451 0 0 0 0 0.298039 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1355"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1355" result="shape"/>' +
+                  '</filter>' +
+                  '</defs>' +
+                  '</svg>'
+                )
+                : "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+                  '<svg width="75" height="75" viewBox="0 0 76 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                  '<g filter="url(#filter0_d_660_1369)">' +
+                  '<circle cx="37.8" cy="36.8003" r="17.5" fill="#14151C"/>' +
+                  '</g>' +
+                  '<path d="M44 28.2C44 27.8405 43.8657 27.4999 43.634 27.272C43.4023 27.0441 43.0977 26.9528 42.8039 27.0233L32.8039 29.4233C32.3365 29.5355 32 30.028 32 30.6V41.5366C31.6872 41.4481 31.3506 41.4 31 41.4C29.3431 41.4 28 42.4745 28 43.8C28 45.1255 29.3431 46.2 31 46.2C32.6568 46.2 34 45.1255 34 43.8V33.9838L42 32.0638V39.1366C41.6872 39.0481 41.3506 39 41 39C39.3431 39 38 40.0745 38 41.4C38 42.7255 39.3431 43.8 41 43.8C42.6569 43.8 44 42.7255 44 41.4V28.2Z" fill="#656581"/>' +
+                  '<defs>' +
+                  '<filter id="filter0_d_660_1369" x="0.300049" y="-0.699707" width="75" height="75" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.396078 0 0 0 0 0.396078 0 0 0 0 0.505882 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1369"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1369" result="shape"/>' +
+                  '</filter>' +
+                  '</defs>' +
+                  '</svg>'
+                );
+              
+              marker.setIcon({
+                url: iconUrl,
+                scaledSize: new google.maps.Size(60, 60)
+              });
+            });
+          }
+
+          function processMessage(data) {
+            if (data.type === 'droppings') {
+              if (mapReady && map && data.payload && data.payload.length > 0) {
+                addDroppings(data.payload);
+              }
+            } else if (data.type === 'updateLocation') {
+              const lat = Number(data.payload?.latitude);
+              const lng = Number(data.payload?.longitude);
+              
+              if (!isNaN(lat) && !isNaN(lng)) {
+                updateLocation(lat, lng);
+              }
+            }
+          }
+
+          function processQueue() {
+            while (messageQueue.length > 0) {
+              const data = messageQueue.shift();
+              processMessage(data);
+            }
+          }
+
+          // document.addEventListener 사용
+          document.addEventListener('message', function(event) {
             try {
-              console.log('Received message:', event.data);
               const data = JSON.parse(event.data);
-              if (data.type === 'droppings') {
-                console.log('Received droppings:', data.payload);
-                if (map && data.payload && data.payload.length > 0) {
-                  addDroppings(data.payload);
-                } else {
-                  console.log('Map not ready or no droppings data');
-                }
+              
+              if (!mapReady) {
+                messageQueue.push(data);
+              } else {
+                processMessage(data);
               }
             } catch (e) {
-              console.error("Message parsing error:", e.message);
-              window.ReactNativeWebView?.postMessage("droppings error: " + e.message);
+              // Silent error
             }
           });
 
-          window.onerror = function(message, source, lineno, colno, error) {
-            window.ReactNativeWebView?.postMessage("JS Error: " + message);
-          };
+          // window.addEventListener도 유지 (플랫폼에 따라 다를 수 있음)
+          window.addEventListener('message', function(event) {
+            try {
+              const data = JSON.parse(event.data);
+              
+              if (!mapReady) {
+                messageQueue.push(data);
+              } else {
+                processMessage(data);
+              }
+            } catch (e) {
+              // Silent error
+            }
+          });
 
           window.onload = initMap;
         </script>
@@ -189,7 +358,7 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
 
   return (
     <>
-      {!safeLocation && (
+      {!currentLocation && (
         <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
       )}
       <WebView
@@ -204,28 +373,26 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
         mixedContentMode="always"
         geolocationEnabled={true}
         scrollEnabled={false}
-        onLoadEnd={() => {
-          if (droppings && droppings.length > 0) {
-            setTimeout(() => {
-              const message = JSON.stringify({ type: 'droppings', payload: droppings });
-              console.log('Sending to WebView on load end:', message);
-              webviewRef.current?.postMessage(message);
-            }, 500);
-          }
-        }}
         onMessage={(event) => {
-          console.log('WebView says:', event.nativeEvent.data);
           const message = event.nativeEvent.data;
+          
           if (message.startsWith('{') && message.endsWith('}')) {
             try {
               const data = JSON.parse(message);
+              
+              if (data.type === 'mapReady') {
+                setIsMapReady(true);
+                return;
+              }
+              
               if (data.type === 'markerClick') {
                 if (data.action === 'navigateToMusic') {
                   (navigation as any).navigate('Music', { 
                     droppingId: data.payload.droppingId || data.payload.id,
                     songId: data.payload.songId || data.payload.song_id,
-                    title: data.payload.content || data.payload.title || '드랍핑 음악',
-                    message: data.payload.content || data.payload.message || '',
+                    title: data.payload.title || '드랍핑 음악',
+                    artist: data.payload.artist || '알 수 없는 아티스트',
+                    message: data.payload.content || '',
                     location: data.payload.address || data.payload.location || '위치 정보 없음'
                   });
                 } else if (data.action === 'showDetails') {
@@ -237,18 +404,11 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
                 }
               }
             } catch (e) {
-              console.log('JSON 파싱 에러:', e);
+              // Silent error
             }
-          } else {
-            console.log('WebView 메시지:', message);
           }
         }}
       />
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { flex: 1 },
-});

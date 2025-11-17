@@ -9,6 +9,13 @@ export async function getMyProfile() {
 }
 
 export async function updateMyProfile(payload: UpdateProfilePayload) {
+  console.log('updateMyProfile API 호출:', {
+    url: USERS_PATH,
+    method: 'PATCH',
+    payload
+  });
+  
   const { data } = await axiosInstance.patch<UpdateProfileResponse>(USERS_PATH, payload);
+  console.log('updateMyProfile API 응답:', data);
   return data;
 }

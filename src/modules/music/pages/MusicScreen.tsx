@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, FlatList, ScrollView, ActivityIndicator, RefreshControl, Alert, Image } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { styles } from '../styles/MusicScreen';
 import Icon from '../../../components/icon/Icon';
 import { PRIMARY_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import CdPlayer from '../../../components/cdPlayer/CdPlayer';
 import PlayBar from '../../../components/playBar/PlayBar';
+// import Header from '../../profile/components/Header';
 import { useMusicComments } from '../hooks/useMusicComments';
 import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import { useDropLikeCount } from '../hooks/useLike';
 import { useToggleLike } from '../hooks/useLike';
+import { useMyLikes } from '../hooks/useLike';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
 import { useBackgroundAudioPermission } from '../../../hooks/useBackgroundAudioPermission';
 import { useQuery } from '@tanstack/react-query';
-import { getSongInfo } from '../../drop/api/dropApi';
+import { getSongInfo, getDroppingById } from '../../drop/api/dropApi';
 import type { Comment } from '../types/comment';
+import MarqueeText from '../../../components/marquee/MarqueeText';
 
 type Props = {
   route: {
@@ -32,9 +36,14 @@ type Props = {
 
 function MusicScreen({ route }: Props) {
   const { droppingId, songId, title, artist, message, location, likeCount } = route.params;
+  
   const musicLikeCount = useDropLikeCount(droppingId);
   const toggleLike = useToggleLike(droppingId);
+  const myLikes = useMyLikes();
+  const isLiked = !!myLikes.data?.includes(droppingId);
   const [comment, setComment] = useState('');
+  const scrollViewRef = useRef<any>(null);
+  const commentInputRef = useRef<TextInput>(null);
 
   const serverImageUrl = Image.resolveAssetSource(require('../../../assets/images/normal_music.png')).uri;
   const musicPlayer = useHLSPlayer(songId);
@@ -46,16 +55,16 @@ function MusicScreen({ route }: Props) {
     enabled: !!songId,
   });
 
+  const { data: droppingInfo } = useQuery({
+    queryKey: ['droppingInfo', droppingId],
+    queryFn: () => getDroppingById(droppingId || ''),
+    enabled: !!droppingId,
+  });
+
   const { data: comments, isLoading, isError, refetch, isFetching } =
     useMusicComments(droppingId);
 
   const createComment = useCreateMusicComment(droppingId);
-
-  useEffect(() => {
-    if (songId) {
-      musicPlayer.loadMusic(songId);
-    }
-  }, [songId]);
 
   const [hasRequestedPermission, setHasRequestedPermission] = useState(false);
 
@@ -65,12 +74,6 @@ function MusicScreen({ route }: Props) {
       requestBackgroundAudioPermission();
     }
   }, [songId, hasRequestedPermission, requestBackgroundAudioPermission]);
-
-  useEffect(() => {
-    if (musicPlayer?.error) {
-      Alert.alert('음악 재생 오류', musicPlayer.error);
-    }
-  }, [musicPlayer?.error]);
 
   const handlePost = () => {
     const text = comment.trim();
@@ -92,40 +95,50 @@ function MusicScreen({ route }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView
+      {/* <Header onBackPress={() => navigation.goBack()}/> */}
+      <KeyboardAwareScrollView
+        ref={scrollViewRef}
         contentContainerStyle={{ flexGrow: 1 }}
-        refreshControl={
-          <RefreshControl
-            refreshing={isFetching && !isLoading}
-            onRefresh={() => { void refetch(); }}
-          />
-        }
+        keyboardShouldPersistTaps="handled"
+        enableOnAndroid={true}
+        enableAutomaticScroll={true}
+        extraScrollHeight={Platform.OS === 'ios' ? 80 : 200}
+        extraHeight={Platform.OS === 'ios' ? 250 : 350}
+        showsVerticalScrollIndicator={true}
+        bounces={true}
+        enableResetScrollToCoords={false}
       >
         <View style={styles.innerContainer}>
-          <CdPlayer imageUrl={songInfo?.imageUrl || serverImageUrl} />
+          <CdPlayer imageUrl={songInfo?.albumImagePath} />
 
           <View style={styles.content}>
             <View style={styles.infoRow}>
               <View style={styles.infoTextWrapper}>
-                <Text style={styles.title}>
-                  {songInfo?.title || title || '드랍핑 음악'}
-                </Text>
+                <MarqueeText
+                  text={songInfo?.title || title || '드랍핑 음악'}
+                  textStyle={styles.title}
+                  thresholdChars={18}
+                  spacing={100}
+                  speed={0.35}
+                />
                 <Text style={styles.artist}>
                   by {songInfo?.artist || artist || '알 수 없는 아티스트'}
                 </Text>
               </View>
 
               <View style={styles.likeCommentRow}>
-                {typeof likeCount === 'number' ? (
-                  <TouchableOpacity 
-                    style={styles.smallLikeCommentRow}
-                    onPress={() => toggleLike.mutate()}
-                    disabled={toggleLike.isPending}
-                  >
+                <TouchableOpacity 
+                  style={styles.smallLikeCommentRow}
+                  onPress={() => toggleLike.mutate()}
+                  disabled={toggleLike.isPending}
+                >
+                  {isLiked ? (
+                    <Icon name="heart" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
+                  ) : (
                     <Icon name="like" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
-                    <Text style={styles.likeCommentText}>{musicLikeCount.data?.likeCount}</Text>
-                  </TouchableOpacity>
-                ) : null}
+                  )}
+                  <Text style={styles.likeCommentText}>{musicLikeCount.data?.likeCount ?? 0}</Text>
+                </TouchableOpacity>
 
                 <TouchableOpacity style={styles.smallLikeCommentRow}>
                   <Icon name="chat" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
@@ -133,6 +146,14 @@ function MusicScreen({ route }: Props) {
                 </TouchableOpacity>
               </View>
             </View>
+
+            {musicPlayer.error && (
+              <View style={{ padding: 12, backgroundColor: '#FFE5E5', borderRadius: 8, marginBottom: 8 }}>
+                <Text style={{ color: '#D32F2F', fontSize: 12 }}>
+                  {musicPlayer.error}
+                </Text>
+              </View>
+            )}
 
             <PlayBar
               currentTime={musicPlayer.currentTime}
@@ -143,10 +164,12 @@ function MusicScreen({ route }: Props) {
             />
           </View>
 
-          {(message || location) && (
+          {((message || droppingInfo?.content) || location) && (
             <View style={styles.inner}>
               <View style={styles.messageBox}>
-                {message ? <Text style={styles.messageText}>{message}</Text> : null}
+                {(message || droppingInfo?.content) ? (
+                  <Text style={styles.messageText}>{message || droppingInfo?.content}</Text>
+                ) : null}
                 {location ? (
                   <View style={styles.messageLocationRow}>
                     <Icon name="location" width={14} height={14} color={PRIMARY_COLORS.DEFAULT} />
@@ -158,7 +181,18 @@ function MusicScreen({ route }: Props) {
           )}
 
           <View style={styles.commentSection}>
-            <Text style={styles.commentTitle}>댓글</Text>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <Text style={styles.commentTitle}>댓글</Text>
+              <TouchableOpacity
+                onPress={() => { void refetch(); }}
+                disabled={isFetching}
+                style={{ paddingHorizontal: 12, paddingVertical: 4 }}
+              >
+                <Text style={{ color: isFetching ? TEXT_COLORS.CAPTION_RED : PRIMARY_COLORS.DEFAULT, fontSize: 14 }}>
+                  {isFetching ? '새로고침 중...' : '새로고침'}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
             {isLoading ? (
               <View style={{ paddingVertical: 12, alignItems: 'center' }}>
@@ -180,11 +214,17 @@ function MusicScreen({ route }: Props) {
 
             <View style={styles.commentInputRow}>
               <TextInput
+                ref={commentInputRef}
                 style={styles.commentInput}
                 placeholder="댓글 작성"
                 placeholderTextColor={TEXT_COLORS.CAPTION_RED}
                 value={comment}
                 onChangeText={setComment}
+                onFocus={() => {
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd?.({ animated: true });
+                  }, 100);
+                }}
               />
               <TouchableOpacity
                 style={styles.commentButton}
@@ -214,7 +254,7 @@ function MusicScreen({ route }: Props) {
             />
           </View>
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 }

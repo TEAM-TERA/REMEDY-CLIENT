@@ -4,11 +4,11 @@ import { TYPOGRAPHY } from "../../../../constants/typography";
 import LeftArrowSvg from "../../../../components/icon/icons/LeftArrowSvg";
 import Blank from "../Blank/Blank";
 
-function HeaderNav(){
+function HeaderNav({title}: {title: string}){
     return(
         <View style = {styles.container}>
             <LeftArrowSvg></LeftArrowSvg>
-            <Text style = {[TYPOGRAPHY.SUBTITLE, styles.text]}>로그인</Text>
+            <Text style = {[TYPOGRAPHY.SUBTITLE, styles.text]}>{title}</Text>
             <Blank></Blank>
         </View>
     )

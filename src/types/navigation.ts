@@ -3,6 +3,8 @@ export type RootStackParamList = {
   Auth: undefined;
   Profile: undefined;
   Drop: undefined;
+  Challenge: undefined;
+  Customize: undefined;
 
   Music: {
     droppingId: string;
@@ -10,7 +12,19 @@ export type RootStackParamList = {
     title: string;
     artist: string;
     location: string;
+    message?: string;
   };
+};
+
+export type AuthStackParamList = {
+  Login: undefined;
+  Terms: undefined;
+  SignUp: {
+    requiredServiceTerms: boolean;
+    requiredPrivacyTerms: boolean;
+    locationConsent?: boolean;
+    marketingConsent?: boolean;
+  } | undefined;
 };
 
 export type ProfileStackParamList = {
@@ -18,6 +32,7 @@ export type ProfileStackParamList = {
   NameEdit: undefined;
   Setting: undefined;
   InfoEdit: undefined;
+  Logout: undefined;
 };
 
 declare global {

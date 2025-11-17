@@ -1,7 +1,7 @@
 import { ViewStyle, TextStyle } from 'react-native';
 
 export type HeaderProps = {
-    title: string;
+    title?: string;
     onBackPress?: () => void;
     rightComponent?: React.ReactNode;
     headerStyle?: ViewStyle;

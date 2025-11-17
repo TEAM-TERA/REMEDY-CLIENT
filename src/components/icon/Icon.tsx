@@ -18,6 +18,9 @@ import TurnRunningSvg from './icons/TurnRunningSvg';
 import ClockSvg from './icons/ClockSvg';
 import PauseSvg from './icons/PauseSvg';
 import PlaySvg from './icons/PlaySvg';
+import CustomBoxSvg from './icons/CustomBoxSvg';
+import NameTagSvg from './icons/NameTagSvg';
+import PlayerSvg from './icons/PlayerSVG';
 
 const icons = {
     edit: EditSvg,
@@ -38,9 +41,12 @@ const icons = {
     clock: ClockSvg,
     pause: PauseSvg,
     play: PlaySvg,
+    customBox: CustomBoxSvg,
+    nameTag: NameTagSvg,
+    player: PlayerSvg,
 };
 
-type IconName = keyof typeof icons;
+export type IconName = keyof typeof icons;
 
 interface Props {
     name: IconName;
@@ -53,10 +59,16 @@ interface Props {
     onPress?: () => void;
 }
 
-const Icon: React.FC<Props> = ({ name, onPress, pressname = name, isPress = false, ...props }) => {
+const Icon: React.FC<Props> = ({
+    name,
+    onPress,
+    pressname = name,
+    isPress = false,
+    ...props
+}) => {
     const SvgIcon = icons[name];
     if (onPress) {
-        if (isPress){
+        if (isPress) {
             const SvgIconPress = icons[pressname];
             return (
                 <TouchableOpacity onPress={onPress}>

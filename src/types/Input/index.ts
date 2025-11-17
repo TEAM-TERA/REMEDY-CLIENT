@@ -3,6 +3,9 @@ export type InputProps = {
     value? : string;
     onChangeText? : (text : string) => void;
     width? : number | `${number}%`;
+    containerWidth?: number | `${number}%`;
     onSubmitEditing? : ()=>void;
     secureTextEntry?: boolean;
+    keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
+    error?: string;
 };

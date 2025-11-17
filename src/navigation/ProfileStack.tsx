@@ -6,6 +6,7 @@ import UserProfileScreen from "../modules/profile/pages/UserProfileScreen";
 import NameEditScreen from "../modules/profile/pages/NameEditScreen";
 import SettingScreen from "../modules/profile/pages/SettingScreen";
 import InfoEditScreen from "../modules/profile/pages/InfoEditScreen";
+import LogoutScreen from "../modules/auth/pages/LogoutScreen";
 
 const Stack = createNativeStackNavigator<ProfileStackParamList>();
 
@@ -16,6 +17,7 @@ function ProfileStack() {
       <Stack.Screen name = "NameEdit" component={NameEditScreen} options={{ headerShown: false }}/>
       <Stack.Screen name = "Setting" component={SettingScreen} options={{ headerShown: false }}/>
       <Stack.Screen name = "InfoEdit" component={InfoEditScreen} options={{ headerShown: false }}/>
+      <Stack.Screen name = "Logout" component={LogoutScreen} options={{ headerShown: false }}/>
     </Stack.Navigator>
   );
 }

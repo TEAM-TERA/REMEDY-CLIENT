@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
-import { Text, View, SafeAreaView } from "react-native";
+import { Text, View, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/LoginScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import Input from "../../../components/input/Input";
@@ -7,6 +8,7 @@ import Button from "../../../components/button/Button";
 import HeaderNav from "../components/HeaderNav/HeaderNav";
 import { AuthContext } from "../auth-context";
 import { useLogin } from "../hooks/useLogin";
+import { useAuthNavigation } from "../../../hooks/navigation/useAuthNavigation";
 import { useAppNavigation } from "../../../hooks/navigation/useAppNavigation";
 
 function LoginScreen() {
@@ -15,7 +17,8 @@ function LoginScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const loginMutation = useLogin();
-  const navigation = useAppNavigation();
+  const authNavigation = useAuthNavigation();
+  const appNavigation = useAppNavigation();
 
   const handleLogin = () => {
     setError(null);
@@ -25,7 +28,7 @@ function LoginScreen() {
             onSuccess : async (accssToken) => {
                 await login(accssToken);
                 console.log("로그인 완료");
-                navigation.reset({
+                appNavigation.reset({
                   index: 0,
                   routes: [{ name: 'Home' }],
                 });
@@ -46,9 +49,13 @@ function LoginScreen() {
     )
   };
 
+  const handleSignUp = () => {
+    authNavigation.navigate('Terms');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderNav />
+      <HeaderNav title="로그인" />
       <View style={styles.inputContainer}>
         <Input
           placeholder="이메일을 입력해주세요"
@@ -70,8 +77,12 @@ function LoginScreen() {
       <View style={styles.buttonContainer}>
         <Button title="로그인" onPress={handleLogin} disabled={isLoading} />
         <View style={styles.textContainer}>
-          <Text style={[styles.text, TYPOGRAPHY.CAPTION_1]}>비밀번호 재설정</Text>
-          <Text style={[styles.text, TYPOGRAPHY.CAPTION_1]}>회원가입</Text>
+          <TouchableOpacity>
+            <Text style={[styles.text, TYPOGRAPHY.CAPTION_1]}>비밀번호 재설정</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={handleSignUp}>
+            <Text style={[styles.text, TYPOGRAPHY.CAPTION_1]}>회원가입</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>

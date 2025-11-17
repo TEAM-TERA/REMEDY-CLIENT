@@ -1,6 +1,8 @@
 import { StyleSheet } from 'react-native';
 import { BACKGROUND_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
+import { scale } from '../../../utils/scalers';
+import { verticalScale } from '../../../utils/scalers';
 
 export const styles = StyleSheet.create({
     safeAreaView: {
@@ -8,19 +10,19 @@ export const styles = StyleSheet.create({
         backgroundColor: BACKGROUND_COLORS.BACKGROUND,
     },
     container: {
-        paddingVertical: 16,
-        paddingHorizontal: 16,
+        paddingVertical: verticalScale(16),
+        paddingHorizontal: scale(16),
         gap: 24,
     },
     section: {
         flex: 1,
-        paddingVertical: 12,
-        paddingHorizontal: 12,
+        paddingVertical: verticalScale(12),
+        paddingHorizontal: scale(12),
         gap: 12,
     },
     nav: {
         flexDirection: 'row',
-        gap: 12,
+        gap: scale(12),
     },
     navText: {
         color: TEXT_COLORS.CAPTION,
@@ -29,5 +31,19 @@ export const styles = StyleSheet.create({
     navTextActive: {
         color: TEXT_COLORS.DEFAULT,
         ...TYPOGRAPHY.SUBTITLE,
+    },
+    emptyStateContainer: {
+        paddingVertical: verticalScale(40),
+        alignItems: 'center',
+    },
+    emptyStateText: {
+        color: TEXT_COLORS.CAPTION,
+    },
+    centeredContainer: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    errorText: {
+        color: TEXT_COLORS.CAPTION,
     },
 });

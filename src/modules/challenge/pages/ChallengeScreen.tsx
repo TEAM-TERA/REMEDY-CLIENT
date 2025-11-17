@@ -1,25 +1,56 @@
 import React, { useState } from 'react';
-import { ScrollView, View, Text, TouchableOpacity } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../../types/navigation';
 import Header from '../../profile/components/Header';
 import { styles } from '../styles/ChallengeScreen';
-import {
-    dailyChallengeData,
-    alwaysChallengeData,
-} from '../datas/challengeData';
+import { useActiveAchievements } from '../hooks/useAchievements';
+import { useMyDrop } from '../../profile/hooks/useMyDrop';
 import ChallengeCard from '../components/ChallengeCard';
 import { PRIMARY_COLORS, TERTIARY_COLORS } from '../../../constants/colors';
 
 function ChallengeScreen() {
-    const navigation =
-        useNavigation<StackNavigationProp<RootStackParamList, 'Challenge'>>();
+    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList, 'Challenge'>>();
     const [activeTab, setActiveTab] = useState<'daily' | 'always'>('daily');
     const [openCardIds, setOpenCardIds] = useState<number[]>([]);
-    const currentData =
-        activeTab === 'daily' ? dailyChallengeData : alwaysChallengeData;
+
+    const { data: achievements, isLoading, error } = useActiveAchievements({
+        period: activeTab === 'daily' ? 'DAILY' : 'PERMANENT'
+    });
+    const { data: myDrops } = useMyDrop();
+    
+    if (isLoading) {
+        return (
+            <SafeAreaView style={styles.safeAreaView}>
+                <Header
+                    title="도전 과제"
+                    onBackPress={() => navigation.goBack()}
+                />
+                <View style={[styles.container, styles.centeredContainer]}>
+                    <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    if (error) {
+        return (
+            <SafeAreaView style={styles.safeAreaView}>
+                <Header
+                    title="도전 과제"
+                    onBackPress={() => navigation.goBack()}
+                />
+                <View style={[styles.container, styles.centeredContainer]}>
+                    <Text style={styles.errorText}>도전과제를 불러오는데 실패했습니다.</Text>
+                </View>
+            </SafeAreaView>
+        );
+    }
+
+    const achievementList = Array.isArray(achievements) ? achievements : [];
+    const currentData = achievementList;
 
     return (
         <SafeAreaView style={styles.safeAreaView}>
@@ -37,8 +68,7 @@ function ChallengeScreen() {
                             <Text
                                 style={[
                                     styles.navText,
-                                    activeTab === 'daily' &&
-                                        styles.navTextActive,
+                                    activeTab === 'daily' && styles.navTextActive,
                                 ]}
                             >
                                 일일
@@ -51,8 +81,7 @@ function ChallengeScreen() {
                             <Text
                                 style={[
                                     styles.navText,
-                                    activeTab === 'always' &&
-                                        styles.navTextActive,
+                                    activeTab === 'always' && styles.navTextActive,
                                 ]}
                             >
                                 상시
@@ -60,31 +89,49 @@ function ChallengeScreen() {
                         </TouchableOpacity>
                     </View>
 
-                    {currentData.map(challenge => (
-                        <ChallengeCard
-                            key={challenge.id}
-                            title={challenge.title}
-                            description={challenge.description}
-                            coin={challenge.coin}
-                            progress={`${challenge.progress}%`}
-                            sideBarColor={
-                                activeTab === 'daily'
-                                    ? PRIMARY_COLORS.DEFAULT
-                                    : TERTIARY_COLORS.DEFAULT
-                            }
-                            isOpen={openCardIds.includes(challenge.id)}
-                            onToggle={() =>
-                                setOpenCardIds(prev =>
-                                    prev.includes(challenge.id)
-                                        ? prev.filter(id => id !== challenge.id)
-                                        : [...prev, challenge.id],
-                                )
-                            }
-                        />
-                    ))}
+                    {currentData.length === 0 ? (
+                        <View style={styles.emptyStateContainer}>
+                            <Text style={styles.emptyStateText}>
+                                {activeTab === 'daily'
+                                    ? '진행 중인 일일 도전과제가 없습니다.'
+                                    : '진행 중인 상시 도전과제가 없습니다.'}
+                            </Text>
+                        </View>
+                    ) : (
+                        currentData.map(achievement => {
+                            const current = (myDrops || []).length;
+                            const target = achievement.targetValue;
+                            const percent = target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0;
+
+                            return (
+                                <ChallengeCard
+                                    key={achievement.achievementId}
+                                    title={achievement.title}
+                                    description={`${current} / ${target}`}
+                                    coin={achievement.rewardAmount}
+                                    progress={`${percent}%`}
+                                    totalCount={target}
+                                    sideBarColor={
+                                        activeTab === 'daily'
+                                            ? PRIMARY_COLORS.DEFAULT
+                                            : TERTIARY_COLORS.DEFAULT
+                                    }
+                                    isOpen={openCardIds.includes(achievement.achievementId)}
+                                    onToggle={() =>
+                                        setOpenCardIds(prev =>
+                                            prev.includes(achievement.achievementId)
+                                                ? prev.filter(id => id !== achievement.achievementId)
+                                                : [...prev, achievement.achievementId],
+                                        )
+                                    }
+                                />
+                            );
+                        })
+                    )}
                 </View>
             </ScrollView>
         </SafeAreaView>
     );
 }
+
 export default ChallengeScreen;

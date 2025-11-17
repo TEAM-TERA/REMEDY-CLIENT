@@ -12,4 +12,5 @@ export type ChallengeProps = {
     coin: number;
     progress: string;
     sideBarColor: string;
+    totalCount?: number;
 };

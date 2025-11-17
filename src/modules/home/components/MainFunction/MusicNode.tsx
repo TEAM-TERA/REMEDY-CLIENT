@@ -78,6 +78,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
           title: data.songInfo?.title || '드랍핑 음악',
           artist: data.songInfo?.artist || '알 수 없는 아티스트',
           location: data.dropping.address,
+          message: data.dropping.content,
         });
     };
 
@@ -89,7 +90,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
                 style={styles.container}
             >
                 <Image
-                    source={data.dropping.imageSource || require('../../../../assets/images/profileImage.png')}
+                    source={data.songInfo?.albumImagePath && data.songInfo.albumImagePath.trim() !== "" ? { uri: data.songInfo.albumImagePath } : require('../../../../assets/images/profileImage.png')}
                     style={styles.musicImg}
                 />
                 <Text style={styles.musicTitle}>

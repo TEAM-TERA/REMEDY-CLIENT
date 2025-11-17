@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Image } from 'react-native';
-import TrackPlayer, { Event, State, useTrackPlayerEvents } from 'react-native-track-player';
+import TrackPlayer, { Event, State, useTrackPlayerEvents, TrackType} from 'react-native-track-player';
 import axiosInstance from '../../modules/auth/api/axiosInstance';
+import Config from 'react-native-config';
 
 interface MusicPlayerState {
   isPlaying: boolean;
@@ -9,11 +10,6 @@ interface MusicPlayerState {
   duration: number;
   isLoading: boolean;
   error: string | null;
-}
-
-interface HLSSegment {
-  duration: number;
-  url: string;
 }
 
 export function useHLSPlayer(songId?: string) {
@@ -27,8 +23,13 @@ export function useHLSPlayer(songId?: string) {
 
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackTrackChanged, Event.PlaybackError], (event) => {
-    if (event.type === Event.PlaybackState) {
+  type TrackEvent =
+    | { type: 'playback-state'; state: number }
+    | { type: 'playback-error'; code?: string; message?: string }
+    | { type: 'playback-active-track-changed'; index?: number; track?: string | number };
+    
+  useTrackPlayerEvents([Event.PlaybackState, Event.PlaybackActiveTrackChanged, Event.PlaybackError], (event: TrackEvent) => {
+    if (event.type === 'playback-state') {
       setState(prev => ({
         ...prev,
         isPlaying: event.state === State.Playing,
@@ -40,7 +41,7 @@ export function useHLSPlayer(songId?: string) {
       }
     }
     
-    if (event.type === Event.PlaybackError) {
+    if (event.type === 'playback-error') {
       setState(prev => ({ ...prev, error: '재생 에러가 발생했습니다' }));
     }
   });
@@ -57,83 +58,56 @@ export function useHLSPlayer(songId?: string) {
         duration: duration || 0,
       }));
     } catch (error) {
-      // Progress 업데이트 실패 시 무시
-    }
-  };
-
-  const parseHLSPlaylist = async (playlistUrl: string): Promise<HLSSegment[]> => {
-    try {
-      const response = await fetch(playlistUrl);
-      const playlistText = await response.text();
-      
-      const lines = playlistText.split('\n');
-      const segments: HLSSegment[] = [];
-      let currentDuration = 0;
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
-        
-        if (line.startsWith('#EXTINF:')) {
-          const durationMatch = line.match(/#EXTINF:([0-9.]+)/);
-          if (durationMatch) {
-            currentDuration = parseFloat(durationMatch[1]);
-          }
-        } else if (line && !line.startsWith('#')) {
-          const segmentUrl = line.startsWith('http') 
-            ? line 
-            : `${axiosInstance.defaults.baseURL}/songs/${songId}/segments/${line}`;
-          
-          segments.push({
-            duration: currentDuration,
-            url: segmentUrl
-          });
-        }
-      }
-      
-      return segments;
-    } catch (error) {
-      throw error;
     }
   };
 
 
-  const loadMusic = async (songId: string, imgUrl?: string) => {
-    if (!songId) return;
 
+  const loadMusic = async (songId?: string, hlsPath?: string, imgUrl?: string) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
       await TrackPlayer.reset();
 
-      const hlsStreamUrl = `${axiosInstance.defaults.baseURL}/songs/${songId}/stream`;
-      const serverImageUrl = Image.resolveAssetSource(require('../../assets/images/normal_music.png')).uri;
-      
-      let processedHlsUrl = hlsStreamUrl;
+      if (!hlsPath || hlsPath.trim() === '' || hlsPath === 'undefined') {
+        console.warn('⚠️ Invalid hlsPath, using default:', hlsPath);
+        hlsPath = `hls/${songId}/playlist.m3u8`;
+      }
+
+      const streamBase = Config.MUSIC_API_BASE_URL;
+      const hlsStreamUrl = `${streamBase}/${hlsPath}`;
+
+      try {
+        const m3u8Response = await fetch(hlsStreamUrl);
+
+        if (!m3u8Response.ok) {
+          throw new Error(`M3U8 파일을 찾을 수 없습니다 (${m3u8Response.status})`);
+        }
+
+        const m3u8Text = await m3u8Response.text();
+
+        if (m3u8Text.trim().startsWith('<html') || m3u8Text.trim().startsWith('<!DOCTYPE')) {
+          throw new Error('M3U8 파일이 존재하지 않습니다');
+        }
+
+        console.log('M3U8 Content:', m3u8Text);
+        
+        const lines = m3u8Text.split('\n');
+        const firstSegment = lines.find(line => line.trim() && !line.startsWith('#'));
+        if (firstSegment) {
+          const segmentUrl = firstSegment.startsWith('http') 
+            ? firstSegment 
+            : `${hlsStreamUrl.substring(0, hlsStreamUrl.lastIndexOf('/'))}/${firstSegment.trim()}`;
+          console.log('First Segment URL:', segmentUrl);
+
+          const segmentResponse = await fetch(segmentUrl, { method: 'HEAD' });
+          console.log('Segment accessible:', segmentResponse.status);
+        }
+      } catch (debugError) {
+        console.error('Debug fetch error:', debugError);
+      }
       let trackTitle = '음악';
       let trackArtist = '알 수 없음';
-      
-      try {
-        const response = await fetch(hlsStreamUrl);
-        
-        if (response.ok) {
-          const text = await response.text();
-          
-          const processedM3U8 = text
-            .split('\n')
-            .map(line => {
-              if (line && !line.startsWith('#') && !line.startsWith('http')) {
-                const absoluteUrl = `${axiosInstance.defaults.baseURL}/songs/${songId}/segments/${line}`;
-                return absoluteUrl;
-              }
-              return line;
-            })
-            .join('\n');
-          
-          const dataUrl = `data:application/vnd.apple.mpegurl;base64,${btoa(processedM3U8)}`;
-          processedHlsUrl = dataUrl;
-        }
-      } catch (fetchError) {
-      }
 
       try {
         const songInfoResponse = await fetch(`${axiosInstance.defaults.baseURL}/songs/${songId}`);
@@ -141,39 +115,48 @@ export function useHLSPlayer(songId?: string) {
           const songInfo = await songInfoResponse.json();
           trackTitle = songInfo.title || '음악';
           trackArtist = songInfo.artist || '알 수 없음';
+          if (!imgUrl) {
+            imgUrl = songInfo.albumImagePath;
+          }
         }
       } catch (songInfoError) {
+        console.error('노래 정보 조회 실패:', songInfoError);
       }
-      
+
+      const serverImageUrl = Image.resolveAssetSource(require('../../assets/images/normal_music.png')).uri;
+
       const track = {
         id: songId,
-        url: processedHlsUrl,
+        url: hlsStreamUrl,
         title: trackTitle,
         artist: trackArtist,
-        artwork: imgUrl || serverImageUrl,
+        artwork: imgUrl && imgUrl.trim() !== '' ? imgUrl : serverImageUrl,
         album: trackTitle,
         genre: 'Music',
+        type: TrackType.HLS,
         date: new Date().toISOString(),
       };
+  
+      console.log('Adding track:', track);
       await TrackPlayer.add(track);
-
+  
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
       progressIntervalRef.current = setInterval(updateProgress, 1000);
-
+  
       setState(prev => ({ ...prev, isLoading: false }));
-
-      setTimeout(async () => {
-        try {
-          await TrackPlayer.play();
-          setState(prev => ({ ...prev, isPlaying: true }));
-        } catch (error) {
-          console.error('자동 재생 실패:', error);
-        }
-      }, 1000);
-
+      
+      try {
+        await TrackPlayer.play();
+        setState(prev => ({ ...prev, isPlaying: true }));
+      } catch (playError) {
+        console.error('Play error:', playError);
+        setState(prev => ({ ...prev, error: '재생 실패' }));
+      }
+  
     } catch (error) {
+      console.error('음악 로드 실패:', error);
       setState(prev => ({ 
         ...prev, 
         isLoading: false, 
@@ -184,19 +167,13 @@ export function useHLSPlayer(songId?: string) {
 
   const togglePlay = async () => {
     try {
-      const playerState = await TrackPlayer.getState();
-      
-      if (playerState === State.Playing) {
+      if (state.isPlaying) {
         await TrackPlayer.pause();
       } else {
-        if (playerState === State.Buffering || playerState === State.Loading) {
-          await TrackPlayer.stop();
-          await TrackPlayer.play();
-        } else {
-          await TrackPlayer.play();
-        }
+        await TrackPlayer.play();
       }
     } catch (error) {
+      console.error('Toggle play error:', error);
       setState(prev => ({ ...prev, error: '재생에 실패했습니다' }));
     }
   };
@@ -219,9 +196,28 @@ export function useHLSPlayer(songId?: string) {
   }, []);
 
   useEffect(() => {
-    if (songId) {
-      loadMusic(songId);
-    }
+    const loadSong = async () => {
+      if (!songId) return;
+
+      try {
+        const songInfoResponse = await fetch(`${axiosInstance.defaults.baseURL}/songs/${songId}`);
+        if (songInfoResponse.ok) {
+          const songInfo = await songInfoResponse.json();
+          const hlsPath = songInfo.hlsPath || `hls/${songId}/playlist.m3u8`;
+          const imgUrl = songInfo.albumImagePath;
+          await loadMusic(songId, hlsPath, imgUrl);
+        } else {
+          const hlsPath = `hls/${songId}/playlist.m3u8`;
+          await loadMusic(songId, hlsPath);
+        }
+      } catch (error) {
+        console.error('곡 정보 조회 실패:', error);
+        const hlsPath = `hls/${songId}/playlist.m3u8`;
+        await loadMusic(songId, hlsPath);
+      }
+    };
+
+    loadSong();
   }, [songId]);
 
   return {
