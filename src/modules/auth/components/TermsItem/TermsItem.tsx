@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { styles } from '../../styles/TermsScreen';
 import { TYPOGRAPHY } from '../../../../constants/typography';
 import { TEXT_COLORS } from '../../../../constants/colors';
+import Icon from '../../../../components/icon/Icon';
 
 type TermsItemProps = {
   title: string;
@@ -38,7 +39,7 @@ function TermsItem({
             {title}{required ? ' *' : ''}
           </Text>
         </View>
-        <Text style={[styles.expandIcon, TYPOGRAPHY.BODY_2]}>{expanded ? '˄' : '˅'}</Text>
+        <Text style={[styles.expandIcon, TYPOGRAPHY.BODY_2]}>{expanded ? <Icon name="toggleOff" /> : <Icon name="toggleOn" />}</Text>
       </TouchableOpacity>
 
       {expanded && (

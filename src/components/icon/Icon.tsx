@@ -21,6 +21,8 @@ import PlaySvg from './icons/PlaySvg';
 import CustomBoxSvg from './icons/CustomBoxSvg';
 import NameTagSvg from './icons/NameTagSvg';
 import PlayerSvg from './icons/PlayerSVG';
+import ToggleOffSvg from './icons/ToggleOffSvg';
+import ToggleOnSvg from './icons/ToggleOnSvg';
 
 const icons = {
     edit: EditSvg,
@@ -44,6 +46,8 @@ const icons = {
     customBox: CustomBoxSvg,
     nameTag: NameTagSvg,
     player: PlayerSvg,
+    toggleOff: ToggleOffSvg,
+    toggleOn: ToggleOnSvg, 
 };
 
 export type IconName = keyof typeof icons;
