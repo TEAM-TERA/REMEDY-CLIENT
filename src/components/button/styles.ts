@@ -11,6 +11,7 @@ export const styles = StyleSheet.create({
         alignItems : "center",
         gap : scale(8),
         alignSelf : "stretch",
+        borderRadius : scale(8),
         backgroundColor : PRIMARY_COLORS.DEFAULT
     },
     text : {

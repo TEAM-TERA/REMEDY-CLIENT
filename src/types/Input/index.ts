@@ -8,4 +8,7 @@ export type InputProps = {
     secureTextEntry?: boolean;
     keyboardType?: 'default' | 'email-address' | 'numeric' | 'phone-pad';
     error?: string;
+    helperText?: string;
+    onFocus?: () => void;
+    onBlur?: () => void;
 };
