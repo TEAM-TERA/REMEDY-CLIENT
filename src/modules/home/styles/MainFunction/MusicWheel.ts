@@ -1,13 +1,13 @@
 import { StyleSheet } from 'react-native';
-import { scale } from '../../../../utils/scalers';
+import { scale, verticalScale } from '../../../../utils/scalers';
 
 export const styles = StyleSheet.create({
   container: {
     width: scale(300),
     height: scale(300),
     position: 'absolute',
-    left: '92%',
-    bottom: scale(-140), 
+    right: -scale(280),
+    bottom: -verticalScale(120),
     transform: [{ translateX: -scale(150) }],
     backgroundColor: 'rgba(0, 0, 0, 0.75)',
     borderRadius: scale(150),
@@ -19,11 +19,11 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
-    top: -50,
+    top: -verticalScale(30),
   },
   dropButtonWrapper: {
     position: 'absolute',
-    bottom: 120,
+    bottom: verticalScale(120),
     alignSelf: 'center',
   },
 });

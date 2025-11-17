@@ -16,7 +16,7 @@ const SWIPE_THRESHOLD = 80;
 const INVERT_DIRECTION = false;
 const sign = INVERT_DIRECTION ? -1 : 1;
 const ANGLE_PER_ITEM = 45;
-const TOTAL_NODES = 7;
+const TOTAL_NODES = 8;
 
 interface MusicWheelProps {
   droppings: any[];
@@ -89,10 +89,10 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     let minDistance = Infinity;
 
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
-      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 120;
+      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 60;
       const currentAngle = baseAngle + rotation.value;
       const normalizedAngle = ((currentAngle + 180) % 360) - 180;
-      const distanceFromMain = Math.abs(normalizedAngle - (-120));
+      const distanceFromMain = Math.abs(normalizedAngle - (-60));
 
       if (distanceFromMain < minDistance) {
         minDistance = distanceFromMain;
@@ -110,19 +110,16 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     }
 
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
-      // 현재 인덱스 기반으로 데이터 할당
       const dataIndex = (currentIndex + nodeIndex) % totalSongs;
 
       if (droppings[dataIndex]) {
         const dropping = droppings[dataIndex];
-
-        // 해당 드랍핑의 실제 songInfo 조회
         let songInfo = null;
         if (songQueries[dataIndex]?.data) {
           songInfo = songQueries[dataIndex].data;
         }
 
-        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 120;
+        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 100;
 
         const isMainNode = nodeIndex === 0;
 
