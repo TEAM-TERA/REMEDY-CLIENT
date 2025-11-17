@@ -13,17 +13,18 @@ interface Item {
 interface ItemCardProps {
     item: Item;
     buttonText: string;
+    showPrice?: boolean;
+    isEquipped?: boolean;
+    onButtonPress?: (item: Item) => void;
 }
 
-function ItemCard({ item, buttonText }: ItemCardProps) {
-    console.log(
-        'ItemCard item:',
-        item.name,
-        'color:',
-        item.color,
-        'type:',
-        item.type,
-    );
+function ItemCard({
+    item,
+    buttonText,
+    showPrice,
+    isEquipped,
+    onButtonPress,
+}: ItemCardProps) {
 
     const renderItemPreview = () => {
         if (item.type === 'player') {
@@ -60,15 +61,22 @@ function ItemCard({ item, buttonText }: ItemCardProps) {
 
     return (
         <View style={styles.card}>
-            <View style={styles.itemWrapper}>
+            <View style={showPrice ? styles.itemWrapper : styles.itemWrapperCentered}>
                 {renderItemPreview()}
-                <View style={styles.coinWrapper}>
-                    <Text style={styles.priceText}>{item.price}</Text>
-                    <Icon name="coin" />
-                </View>
+                {showPrice && (
+                    <View style={styles.coinWrapper}>
+                        <Text style={styles.priceText}>{item.price}</Text>
+                        <Icon name="coin" />
+                    </View>
+                )}
             </View>
-            <TouchableOpacity style={styles.buyButton}>
-                <Text style={styles.buyText}>{buttonText}</Text>
+            <TouchableOpacity
+                style={[styles.buyButton, isEquipped && styles.equippedButton]}
+                onPress={() => onButtonPress?.(item)}
+            >
+                <Text style={[styles.buyText, isEquipped && styles.equippedButtonText]}>
+                    {isEquipped ? '장착됨' : buttonText}
+                </Text>
             </TouchableOpacity>
         </View>
     );

@@ -90,6 +90,12 @@ export const styles = StyleSheet.create({
         gap: scale(16),
         alignItems: 'center',
     },
+    itemWrapperCentered: {
+        flexDirection: 'row',
+        gap: scale(16),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     itemHeader: {
         flexDirection: 'row',
     },
@@ -137,5 +143,21 @@ export const styles = StyleSheet.create({
         color: TEXT_COLORS.CAPTION_LIGHTER,
         ...TYPOGRAPHY.BODY_1,
         fontWeight: '600',
+    },
+    equippedButton: {
+        backgroundColor: 'transparent',
+        borderWidth: scale(1.5),
+        borderColor: TEXT_COLORS.CAPTION,
+    },
+    equippedButtonText: {
+        color: TEXT_COLORS.CAPTION,
+    },
+    disabledButton: {
+        backgroundColor: 'transparent',
+        borderWidth: scale(1.5),
+        borderColor: TEXT_COLORS.CAPTION,
+    },
+    disabledButtonText: {
+        color: TEXT_COLORS.CAPTION,
     },
 });
