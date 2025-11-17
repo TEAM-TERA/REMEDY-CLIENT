@@ -101,15 +101,9 @@ function SignUpScreen() {
       setErrors(prev => ({ ...prev, [field]: error }));
     }
     
-    // confirmPassword 필드인 경우 password와 비교
-    if (field === "confirmPassword") {
-      const error = value !== formData.password ? "비밀번호가 일치하지 않습니다" : "";
-      setErrors(prev => ({ ...prev, confirmPassword: error }));
-    }
-    
     // password 변경 시 confirmPassword 재검증
     if (field === "password" && formData.confirmPassword) {
-      const error = formData.confirmPassword !== value ? "비밀번호가 일치하지 않습니다" : "";
+      const error = validateField("confirmPassword", formData.confirmPassword)
       setErrors(prev => ({ ...prev, confirmPassword: error }));
     }
   };
