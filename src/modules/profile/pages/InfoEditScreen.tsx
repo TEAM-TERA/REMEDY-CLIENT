@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../types/navigation';
@@ -10,6 +11,7 @@ import FormInput from '../components/FormInput';
 import DateInput from '../components/DateInput';
 import GenderButton from '../components/GenderButton';
 import { InfoEditFormData, GenderType } from '../types/InfoEdit';
+import { useMyProfile } from '../hooks/useMyProfile';
 
 function InfoEditScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
@@ -18,6 +20,14 @@ function InfoEditScreen() {
         birthDate: '',
         gender: 'male',
     });
+    const { data: me } = useMyProfile();
+
+    useEffect(() => {
+        if (!me) return;
+        const name = me.username || '';
+        const birthDate = (me.birthDate || '').replaceAll('-', '.');
+        setFormData({ name, birthDate, gender: 'male' });
+    }, [me]);
 
     const handleNameChange = (text: string) => {
         setFormData(prev => ({ ...prev, name: text }));
@@ -42,10 +52,17 @@ function InfoEditScreen() {
 
     return (
         <SafeAreaView style={styles.safeAreaView}>
-            <View style={styles.container}>
-                <Header title="정보 수정" />
+            <Header title="정보 수정" />
 
-                <View style={styles.content}>
+            <KeyboardAwareScrollView
+                style={styles.container}
+                contentContainerStyle={styles.content}
+                keyboardShouldPersistTaps="handled"
+                enableOnAndroid={true}
+                enableAutomaticScroll={true}
+                extraScrollHeight={Platform.OS === 'ios' ? 20 : 100}
+                extraHeight={Platform.OS === 'ios' ? 150 : 200}
+            >
                     <FormInput
                         label="이름"
                         value={formData.name}
@@ -85,8 +102,7 @@ function InfoEditScreen() {
                             수정하기
                         </Text>
                     </TouchableOpacity>
-                </View>
-            </View>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     );
 }

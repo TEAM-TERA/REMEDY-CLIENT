@@ -25,7 +25,7 @@ function DateInput({
                     placeholderTextColor={TEXT_COLORS.CAPTION}
                     keyboardType="numeric"
                 />
-                <TouchableOpacity onPress={onDatePickerPress}>
+                <TouchableOpacity onPress={onDatePickerPress} style={styles.calendarButton}>
                     <Icon name="calendar" width={scale(24)} height={scale(24)} />
                 </TouchableOpacity>
             </View>
@@ -34,3 +34,4 @@ function DateInput({
 }
 
 export default DateInput;
+

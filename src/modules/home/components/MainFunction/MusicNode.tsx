@@ -93,7 +93,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
                 style={styles.container}
             >
                 <Image
-                    source={data.dropping.albumImageUrl || require('../../../../assets/images/profileImage.png')}
+                    source={data.songInfo?.albumImagePath && data.songInfo.albumImagePath.trim() !== "" ? { uri: data.songInfo.albumImagePath } : require('../../../../assets/images/profileImage.png')}
                     style={styles.musicImg}
                 />
                 <Text style={styles.musicTitle}>

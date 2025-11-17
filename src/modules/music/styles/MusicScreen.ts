@@ -100,7 +100,7 @@ export const styles = StyleSheet.create({
         gap: scale(4),
     },
     messageBox: {
-        backgroundColor: UI_COLORS.BACKGROUND_RED,
+        backgroundColor: UI_COLORS.BACKGROUND,
         borderRadius: verticalScale(12),
         paddingVertical: verticalScale(16),
         paddingHorizontal: scale(16),

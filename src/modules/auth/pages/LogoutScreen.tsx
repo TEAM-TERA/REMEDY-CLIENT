@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
-import { Text, View, SafeAreaView, Alert } from "react-native";
+import { Text, View, Alert } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/LogoutScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import Button from "../../../components/button/Button";

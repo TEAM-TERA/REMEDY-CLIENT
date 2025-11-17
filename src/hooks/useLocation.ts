@@ -40,7 +40,7 @@ const useLocation = () => {
               {
                 enableHighAccuracy,
                 timeout: 15000,
-                maximumAge: 10000,
+                maximumAge: 0,
                 forceRequestLocation: true,
                 showLocationDialog: true,
               }
@@ -53,9 +53,9 @@ const useLocation = () => {
               (err) => console.warn('Watch error', err),
               {
                 enableHighAccuracy,
-                distanceFilter: 10,
-                interval: 5000,
-                fastestInterval: 2000,
+                distanceFilter: 3,
+                interval: 2000,
+                fastestInterval: 1000,
                 showLocationDialog: true,
                 useSignificantChanges: false,
               }

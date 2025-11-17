@@ -25,3 +25,4 @@ function GenderButton({ label, isSelected, onPress }: GenderButtonProps) {
 }
 
 export default GenderButton;
+

@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import { scale } from "../../../../utils/scalers";
 import { BACKGROUND_COLORS, TEXT_COLORS, UI_COLORS } from "../../../../constants/colors";
+import { TYPOGRAPHY } from "../../../../constants/typography";
 
 export const styles = StyleSheet.create({
   container: {
@@ -21,7 +22,8 @@ export const styles = StyleSheet.create({
   },
   userName: {
     color: TEXT_COLORS.DEFAULT,
-    marginBottom: scale(0.2)
+    marginBottom: scale(0.2),
+    ...TYPOGRAPHY.HEADLINE_3
   },
   badge: {
     borderRadius: scale(16),

@@ -1,18 +1,16 @@
-import { View, SafeAreaView, Text, ScrollView } from "react-native";
-import { styles, historyStyles } from "../styles/DropSearchScreen";
-import { TYPOGRAPHY } from "../../../constants/typography";
+import { View, Text, ScrollView } from "react-native";
+import { styles } from "../styles/DropSearchScreen";
 import { useState, useEffect } from "react";
 import Icon from "../../../components/icon/Icon";
 import Input from "../../../components/input/Input";
-import History from "../components/History/History";
 import Music from "../components/Music/Music";
 import { scale } from "../../../utils/scalers";
-import findMusic from "../utils/findMusic";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from '@react-navigation/stack';
 import { DropStackParamList } from '../../../navigation/DropStack';
 import { useSongSearch, SongSearchItem } from "../hooks/useSongSearch";
 import useLocation from "../../../hooks/useLocation";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { GOOGLE_MAPS_API_KEY } from "../../../constants/map";
 
 function DropSearchScreen(){
@@ -88,7 +86,7 @@ function DropSearchScreen(){
                                     musicTime: item.duration,
                                     songId: item.id,
                                     imgUrl: item.albumImagePath,
-                                    previewUrl: '', 
+                                    hlsPath: item.hlsPath, 
                                     location: currentAddress,
                                 })
                             }

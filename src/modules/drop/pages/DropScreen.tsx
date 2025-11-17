@@ -1,4 +1,5 @@
-import { View, Text, TextInput, ScrollView, Image } from 'react-native';
+import { View, Text, TextInput, Image, Platform } from 'react-native';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { useState, useEffect, useContext, useRef } from 'react';
 import { styles } from '../styles/DropScreen';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -16,15 +17,13 @@ import Geolocation from 'react-native-geolocation-service';
 import { useQuery } from '@tanstack/react-query';
 import { getSongInfo } from '../api/dropApi';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
-import useLocation from '../../../hooks/useLocation';
-import { isPlaying } from 'react-native-track-player';
+import MarqueeText from '../../../components/marquee/MarqueeText';
 import { ConfirmModal } from '../../../components';
 
 function DropScreen() {
     const route = useRoute<RouteProp<DropStackParamList, 'DropDetail'>>();
     const navigation = useNavigation();
-    const { musicTitle, singer, musicTime, location, imgUrl, previewUrl, songId } = route.params;
-    const { location: userLocation } = useLocation();
+    const { musicTitle, singer, musicTime, location, imgUrl, hlsPath, songId } = route.params;
     const { userToken } = useContext(AuthContext);
     const createDroppingMutation = useCreateDropping();
   
@@ -50,8 +49,8 @@ function DropScreen() {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
           });
-        }, 
-        (error) => {
+        },
+        () => {
           setCurrentLocation({
             latitude: 37.5665,
             longitude: 126.9780,
@@ -66,10 +65,11 @@ function DropScreen() {
     }, []);
 
     useEffect(() => {
-      if (songId) {
-        musicPlayer.loadMusic(songId, imgUrl || serverImageUrl);
+      console.log('hlsPath', hlsPath);
+      if (hlsPath) {
+        musicPlayer.loadMusic(songId, hlsPath, imgUrl || serverImageUrl);
       }
-    }, [songId, imgUrl]);
+    }, [songId, imgUrl, hlsPath]);
   
     const handleCreateDropping = () => {
       if (!userToken) {
@@ -124,56 +124,71 @@ function DropScreen() {
   
     return (
       <>
-      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-        <CdPlayer imageUrl={songInfo?.albumImagePath} />
-        <View style={styles.playerContainer}>
-          <View style={styles.textContainer}>
-            <Text style={[TYPOGRAPHY.HEADLINE_1, styles.titleText]}>{musicTitle}</Text>
-            <Text style={[TYPOGRAPHY.SUBTITLE, styles.singerText]}>{singer}</Text>
-          </View>
-          <PlayBar
-            currentTime={musicPlayer.currentTime}
-            musicTime={musicPlayer.duration || musicTime || 30}
-            onSeek={musicPlayer.seekTo}
-            onTogglePlay={musicPlayer.togglePlay}
-            isPlaying={musicPlayer.isPlaying}
-          />
-        </View>
-  
-        <View style={styles.informationContainer}>
-          <View style={styles.remainTextContainer}>
-            <Text style={[TYPOGRAPHY.SUBTITLE, styles.remainText]}>남길 한마디</Text>
-            <TextInput
-              style={styles.remainInput}
-              placeholder="음악과 남길 한마디를 적어주세요"
-              textAlignVertical="top"
-              multiline
-              placeholderTextColor={TEXT_COLORS.CAPTION_RED}
-              value={content}
-              onChangeText={setContent}
-            />
-          </View>
-        </View>
-  
-        <View style={styles.informationContainer}>
-          <View style={styles.remainTextContainer}>
-            <Text style={[TYPOGRAPHY.SUBTITLE, styles.remainText]}>위치 선택</Text>
-            <View style={styles.locationContainer}>
-              <LocationMarkerSvg />
-              <Text style={[TYPOGRAPHY.CAPTION_1, styles.locationText]}>{location}</Text>
+        <KeyboardAwareScrollView
+          style={styles.container}
+          contentContainerStyle={styles.contentContainer}
+          keyboardShouldPersistTaps="handled"
+          enableOnAndroid={true}
+          enableAutomaticScroll={true}
+          extraScrollHeight={Platform.OS === 'ios' ? 20 : 100}
+          extraHeight={Platform.OS === 'ios' ? 150 : 200}
+        >
+            <CdPlayer imageUrl={songInfo?.albumImagePath} />
+            <View style={styles.playerContainer}>
+              <View style={styles.textContainer}>
+                <MarqueeText
+                  text={musicTitle}
+                  textStyle={styles.titleText}
+                  thresholdChars={18}
+                  spacing={100}
+                  speed={0.35}
+                />
+                <Text style={[TYPOGRAPHY.SUBTITLE, styles.singerText]}>{singer}</Text>
+              </View>
+              <PlayBar
+                currentTime={musicPlayer.currentTime}
+                musicTime={musicPlayer.duration || musicTime || 30}
+                onSeek={musicPlayer.seekTo}
+                onTogglePlay={musicPlayer.togglePlay}
+                isPlaying={musicPlayer.isPlaying}
+              />
             </View>
-            <GoogleMapView droppings={[]} currentLocation={currentLocation || { latitude: 37.5665, longitude: 126.9780 }} />
-          </View>
-        </View>
-  
-        <View style={styles.buttonContainer}>
-          <Button
-            title="드롭핑 생성"
-            onPress={handleCreateDropping}
-            disabled={createDroppingMutation.isPending}
-          />
-        </View>
-      </ScrollView>
+
+            <View style={styles.informationContainer}>
+              <View style={styles.remainTextContainer}>
+                <Text style={[TYPOGRAPHY.SUBTITLE, styles.remainText]}>남길 한마디</Text>
+                <TextInput
+                  style={styles.remainInput}
+                  placeholder="음악과 남길 한마디를 적어주세요"
+                  textAlignVertical="top"
+                  multiline
+                  placeholderTextColor={TEXT_COLORS.CAPTION_RED}
+                  value={content}
+                  onChangeText={setContent}
+                  returnKeyType="default"
+                />
+              </View>
+            </View>
+
+            <View style={styles.informationContainer}>
+              <View style={styles.remainTextContainer}>
+                <Text style={[TYPOGRAPHY.SUBTITLE, styles.remainText]}>위치 선택</Text>
+                <View style={styles.locationContainer}>
+                  <LocationMarkerSvg />
+                  <Text style={[TYPOGRAPHY.CAPTION_1, styles.locationText]}>{location}</Text>
+                </View>
+                <GoogleMapView droppings={[]} currentLocation={currentLocation || { latitude: 37.5665, longitude: 126.9780 }} />
+              </View>
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <Button
+                title="드롭핑 생성"
+                onPress={handleCreateDropping}
+                disabled={createDroppingMutation.isPending}
+              />
+            </View>
+          </KeyboardAwareScrollView>
       <ConfirmModal
         visible={modalVisible}
         title={modalTitle}

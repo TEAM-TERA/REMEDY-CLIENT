@@ -27,7 +27,7 @@ function HomeScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }} edges={['top']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }}>
         <View style={{ flex: 1, position: 'relative' }}>
             <HeaderBar setIsRunning={async (next:boolean)=>{
                 if (isRunning && !next) {
