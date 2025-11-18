@@ -28,19 +28,21 @@ function TermsItem({
 }: TermsItemProps) {
   return (
     <View style={styles.card}>
-      <TouchableOpacity
-        onPress={onToggleExpand}
-        activeOpacity={0.8}
-        style={styles.cardHeader}
-      >
+      <View style={styles.cardHeader}>
         <View style={styles.headerLeft}>
-          <View style={[styles.checkCircle, checked ? styles.checkCircleOn : styles.checkCircleOff]} />
-          <Text style={[styles.headerTitle, TYPOGRAPHY.BODY_2]}>
-            {title}{required ? ' *' : ''}
-          </Text>
+          <TouchableOpacity onPress={onToggleChecked} activeOpacity={0.7}>
+            <View style={[styles.checkCircle, checked ? styles.checkCircleOn : styles.checkCircleOff]} />
+          </TouchableOpacity>
+          <TouchableOpacity onPress={onToggleExpand} activeOpacity={0.8} style={{ flex: 1 }}>
+            <Text style={[styles.headerTitle, TYPOGRAPHY.BODY_2]}>
+              {title}{required ? ' *' : ''}
+            </Text>
+          </TouchableOpacity>
         </View>
-        <Text style={[styles.expandIcon, TYPOGRAPHY.BODY_2]}>{expanded ? <Icon name="toggleOff" /> : <Icon name="toggleOn" />}</Text>
-      </TouchableOpacity>
+        <TouchableOpacity onPress={onToggleExpand} activeOpacity={0.8}>
+          <Text style={[styles.expandIcon, TYPOGRAPHY.BODY_2]}>{expanded ? <Icon name="toggleOff" /> : <Icon name="toggleOn" />}</Text>
+        </TouchableOpacity>
+      </View>
 
       {expanded && (
         <>
