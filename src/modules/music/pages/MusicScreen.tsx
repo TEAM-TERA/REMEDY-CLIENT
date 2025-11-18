@@ -164,9 +164,15 @@ function MusicScreen({ route }: Props) {
             />
           </View>
 
-          {((message || droppingInfo?.content) || location) && (
+          {((message || droppingInfo?.content) || location || droppingInfo?.username) && (
             <View style={styles.inner}>
               <View style={styles.messageBox}>
+                {droppingInfo?.username && (
+                  <View style={styles.commentItemInfo}>
+                    <View style={[styles.userDot, { backgroundColor: '#7C4DFF' }]} />
+                    <Text style={styles.userName}>{droppingInfo.username}</Text>
+                  </View>
+                )}
                 {(message || droppingInfo?.content) ? (
                   <Text style={styles.messageText}>{message || droppingInfo?.content}</Text>
                 ) : null}
@@ -244,7 +250,7 @@ function MusicScreen({ route }: Props) {
                 <View style={styles.commentItemWrapper}>
                   <View style={styles.commentItemInfo}>
                     <View style={[styles.userDot, { backgroundColor: '#7C4DFF' }]} />
-                    <Text style={styles.userName}>익명</Text>
+                    <Text style={styles.userName}>{item.username || '익명'}</Text>
                   </View>
                   <Text style={styles.commentItemText}>{item.content}</Text>
                 </View>
