@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useSharedValue, withSpring, useDerivedValue } from 'react-native-reanimated';
+import Animated, { runOnJS, useSharedValue, withSpring, useDerivedValue, useAnimatedReaction } from 'react-native-reanimated';
 import { styles } from '../../styles/MainFunction/MusicWheel';
 import MusicNode from './MusicNode';
 import { VisibleNode } from '../../types/musicList';
@@ -35,17 +35,21 @@ function MusicWheel({ droppings }: MusicWheelProps) {
   const musicPlayer = useHLSPlayer(currentSongId);
 
   useEffect(() => {
-    console.log('🎡 MusicWheel mounted, droppings count:', droppings?.length);
+    if (__DEV__) {
+      console.log('🎡 MusicWheel mounted, droppings count:', droppings?.length);
+    }
     rotation.value = 0;
   }, [rotation]);
 
   useEffect(() => {
-    console.log('📊 Droppings changed, count:', droppings?.length);
-    console.log('📊 Current index:', currentIndex);
-    console.log('👁️ Visual main index:', visualMainIndex);
-    console.log('✋ Is swiping:', isSwiping);
-    console.log('🎯 Actual main data index:', actualMainDataIndex);
-    console.log('🎵 Current song ID:', currentSongId);
+    if (__DEV__) {
+      console.log('📊 Droppings changed, count:', droppings?.length);
+      console.log('📊 Current index:', currentIndex);
+      console.log('👁️ Visual main index:', visualMainIndex);
+      console.log('✋ Is swiping:', isSwiping);
+      console.log('🎯 Actual main data index:', actualMainDataIndex);
+      console.log('🎵 Current song ID:', currentSongId);
+    }
   }, [droppings, currentIndex, visualMainIndex, isSwiping, actualMainDataIndex, currentSongId]);
 
   const visibleSongIds = React.useMemo(() => {
@@ -69,9 +73,9 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     })),
   });
 
-  const handlerPressDrop = ()=>{
+  const handlerPressDrop = React.useCallback(() => {
     navigate('Drop');
-  }
+  }, []);
 
   const mainNodeIndex = useDerivedValue(() => {
     'worklet';
@@ -93,18 +97,18 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     return closestIndex;
   });
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const currentMainNode = mainNodeIndex.value;
-      if (currentMainNode !== visualMainIndex) {
-        setVisualMainIndex(currentMainNode);
+  // setInterval 대신 useAnimatedReaction 사용 (성능 최적화)
+  useAnimatedReaction(
+    () => mainNodeIndex.value,
+    (currentValue, previousValue) => {
+      if (currentValue !== previousValue) {
+        runOnJS(setVisualMainIndex)(currentValue);
       }
-    }, 100);
+    },
+    []
+  );
 
-    return () => clearInterval(interval);
-  }, [visualMainIndex, mainNodeIndex]);
-
-  const getVisibleNodes = () => {
+  const visibleNodes = React.useMemo(() => {
     const nodes: VisibleNode[] = [];
     if (!droppings || droppings.length === 0) {
       return nodes;
@@ -141,19 +145,23 @@ function MusicWheel({ droppings }: MusicWheelProps) {
       }
     }
     return nodes;
-  };
+  }, [droppings, currentIndex, totalSongs, visibleSongIds, songQueries]);
 
-  const updateIndex = (direction: string) => {
-    console.log('🔄 updateIndex called, direction:', direction, 'visualMainIndex:', visualMainIndex);
+  const updateIndex = React.useCallback((direction: string) => {
+    if (__DEV__) {
+      console.log('🔄 updateIndex called, direction:', direction, 'visualMainIndex:', visualMainIndex);
+    }
 
     setCurrentIndex((prev: number) => {
       const newIndex = (prev + visualMainIndex + totalSongs) % totalSongs;
-      console.log('📍 Setting currentIndex from', prev, 'to', newIndex);
+      if (__DEV__) {
+        console.log('📍 Setting currentIndex from', prev, 'to', newIndex);
+      }
       return newIndex;
     });
 
     setVisualMainIndex(0);
-  };
+  }, [visualMainIndex, totalSongs]);
 
 
   const pan = Gesture.Pan()
@@ -205,8 +213,6 @@ function MusicWheel({ droppings }: MusicWheelProps) {
             });
         }
     });
-
-  const visibleNodes = getVisibleNodes();
 
   if (totalSongs === 0) {
     return (

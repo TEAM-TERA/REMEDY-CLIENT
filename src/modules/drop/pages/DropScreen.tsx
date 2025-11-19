@@ -1,6 +1,7 @@
+import React from 'react';
 import { View, Text, TextInput, Image, Platform } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { useState, useEffect, useContext, useRef } from 'react';
+import { useState, useEffect, useContext, useRef, useCallback, useMemo } from 'react';
 import { styles } from '../styles/DropScreen';
 import { TYPOGRAPHY } from '../../../constants/typography';
 import { TEXT_COLORS } from '../../../constants/colors';
@@ -35,12 +36,14 @@ function DropScreen() {
     const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
     const musicPlayer = useHLSPlayer(songId);
-    const serverImageUrl = Image.resolveAssetSource(require('../../../assets/images/normal_music.png')).uri;
+
     const { data: songInfo } = useQuery({
       queryKey: ['songInfo', songId],
       queryFn: () => getSongInfo(songId || ''),
       enabled: !!songId,
     });
+
+    const defaultLocation = useMemo(() => ({ latitude: 37.5665, longitude: 126.9780 }), []);
 
     useEffect(() => {
       Geolocation.getCurrentPosition(
@@ -51,10 +54,7 @@ function DropScreen() {
           });
         },
         () => {
-          setCurrentLocation({
-            latitude: 37.5665,
-            longitude: 126.9780,
-          });
+          setCurrentLocation(defaultLocation);
         },
         {
           enableHighAccuracy: true,
@@ -62,10 +62,10 @@ function DropScreen() {
           maximumAge: 10000,
         }
       );
-    }, []);
+    }, [defaultLocation]);
 
-  
-    const handleCreateDropping = () => {
+
+    const handleCreateDropping = useCallback(() => {
       if (!userToken) {
         setModalTitle('로그인 필요');
         setModalMessage('드롭핑을 생성하려면 로그인이 필요합니다.');
@@ -114,8 +114,10 @@ function DropScreen() {
           },
         }
       );
-    };
+    }, [userToken, currentLocation, songId, content, location, createDroppingMutation, navigation]);
   
+    const mapLocation = useMemo(() => currentLocation || defaultLocation, [currentLocation, defaultLocation]);
+
     return (
       <>
         <KeyboardAwareScrollView
@@ -126,6 +128,8 @@ function DropScreen() {
           enableAutomaticScroll={true}
           extraScrollHeight={Platform.OS === 'ios' ? 20 : 100}
           extraHeight={Platform.OS === 'ios' ? 150 : 200}
+          removeClippedSubviews={true}
+          scrollEventThrottle={16}
         >
             <CdPlayer imageUrl={songInfo?.albumImagePath} isPlaying={musicPlayer.isPlaying} />
             <View style={styles.playerContainer}>
@@ -171,7 +175,7 @@ function DropScreen() {
                   <LocationMarkerSvg />
                   <Text style={[TYPOGRAPHY.CAPTION_1, styles.locationText]}>{location}</Text>
                 </View>
-                <GoogleMapView droppings={[]} currentLocation={currentLocation || { latitude: 37.5665, longitude: 126.9780 }} />
+                <GoogleMapView droppings={[]} currentLocation={mapLocation} />
               </View>
             </View>
 

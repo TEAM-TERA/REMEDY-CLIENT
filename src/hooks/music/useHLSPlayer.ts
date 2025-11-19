@@ -93,21 +93,31 @@ export function useHLSPlayer(songId?: string) {
           throw new Error('M3U8 파일이 존재하지 않습니다');
         }
 
-        console.log('M3U8 Content:', m3u8Text);
-        
+        if (__DEV__) {
+          console.log('M3U8 Content:', m3u8Text);
+        }
+
         const lines = m3u8Text.split('\n');
         const firstSegment = lines.find(line => line.trim() && !line.startsWith('#'));
         if (firstSegment) {
-          const segmentUrl = firstSegment.startsWith('http') 
-            ? firstSegment 
+          const segmentUrl = firstSegment.startsWith('http')
+            ? firstSegment
             : `${hlsStreamUrl.substring(0, hlsStreamUrl.lastIndexOf('/'))}/${firstSegment.trim()}`;
-          console.log('First Segment URL:', segmentUrl);
+
+          if (__DEV__) {
+            console.log('First Segment URL:', segmentUrl);
+          }
 
           const segmentResponse = await fetch(segmentUrl, { method: 'HEAD' });
-          console.log('Segment accessible:', segmentResponse.status);
+
+          if (__DEV__) {
+            console.log('Segment accessible:', segmentResponse.status);
+          }
         }
       } catch (debugError) {
-        console.error('Debug fetch error:', debugError);
+        if (__DEV__) {
+          console.error('Debug fetch error:', debugError);
+        }
       }
       let trackTitle = '음악';
       let trackArtist = '알 수 없음';
@@ -123,7 +133,9 @@ export function useHLSPlayer(songId?: string) {
           }
         }
       } catch (songInfoError) {
-        console.error('노래 정보 조회 실패:', songInfoError);
+        if (__DEV__) {
+          console.error('노래 정보 조회 실패:', songInfoError);
+        }
       }
 
       const serverImageUrl = Image.resolveAssetSource(require('../../assets/images/normal_music.png')).uri;
@@ -139,8 +151,10 @@ export function useHLSPlayer(songId?: string) {
         type: TrackType.HLS,
         date: new Date().toISOString(),
       };
-  
-      console.log('Adding track:', track);
+
+      if (__DEV__) {
+        console.log('Adding track:', track);
+      }
       await TrackPlayer.add(track);
   
       if (progressIntervalRef.current) {
@@ -154,12 +168,16 @@ export function useHLSPlayer(songId?: string) {
         await TrackPlayer.play();
         setState(prev => ({ ...prev, isPlaying: true }));
       } catch (playError) {
-        console.error('Play error:', playError);
+        if (__DEV__) {
+          console.error('Play error:', playError);
+        }
         setState(prev => ({ ...prev, error: '재생 실패' }));
       }
-  
+
     } catch (error) {
-      console.error('음악 로드 실패:', error);
+      if (__DEV__) {
+        console.error('음악 로드 실패:', error);
+      }
       setState(prev => ({ 
         ...prev, 
         isLoading: false, 
@@ -203,7 +221,9 @@ export function useHLSPlayer(songId?: string) {
       if (!songId) return;
 
       if (globalCurrentSongId === songId) {
-        console.log('⏭️ Same song already loaded, syncing state:', songId);
+        if (__DEV__) {
+          console.log('⏭️ Same song already loaded, syncing state:', songId);
+        }
 
         // 이미 재생중인 곡이면 현재 상태를 동기화
         try {
@@ -225,19 +245,25 @@ export function useHLSPlayer(songId?: string) {
           }
           progressIntervalRef.current = setInterval(updateProgress, 1000);
 
-          console.log('✅ Synced to playing song:', {
-            position: progress.position,
-            duration: progress.duration,
-            state: playbackState.state
-          });
+          if (__DEV__) {
+            console.log('✅ Synced to playing song:', {
+              position: progress.position,
+              duration: progress.duration,
+              state: playbackState.state
+            });
+          }
         } catch (error) {
-          console.error('Failed to sync player state:', error);
+          if (__DEV__) {
+            console.error('Failed to sync player state:', error);
+          }
         }
 
         return;
       }
 
-      console.log('🎵 Loading new song:', songId);
+      if (__DEV__) {
+        console.log('🎵 Loading new song:', songId);
+      }
       globalCurrentSongId = songId;
 
       try {
@@ -252,7 +278,9 @@ export function useHLSPlayer(songId?: string) {
           await loadMusic(songId, hlsPath);
         }
       } catch (error) {
-        console.error('곡 정보 조회 실패:', error);
+        if (__DEV__) {
+          console.error('곡 정보 조회 실패:', error);
+        }
         const hlsPath = `hls/${songId}/playlist.m3u8`;
         await loadMusic(songId, hlsPath);
       }

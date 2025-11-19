@@ -7,7 +7,6 @@ import Icon from '../../../components/icon/Icon';
 import { PRIMARY_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import CdPlayer from '../../../components/cdPlayer/CdPlayer';
 import PlayBar from '../../../components/playBar/PlayBar';
-// import Header from '../../profile/components/Header';
 import { useMusicComments } from '../hooks/useMusicComments';
 import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import { useDropLikeCount } from '../hooks/useLike';
@@ -75,21 +74,21 @@ function MusicScreen({ route }: Props) {
     }
   }, [songId, hasRequestedPermission, requestBackgroundAudioPermission]);
 
-  const handlePost = () => {
+  const handlePost = React.useCallback(() => {
     const text = comment.trim();
     if (!text) return;
     createComment.mutate(text, {
       onSuccess: () => setComment(''),
     });
-  };
+  }, [comment, createComment]);
 
-  const handleTogglePlay = () => {
+  const handleTogglePlay = React.useCallback(() => {
     musicPlayer.togglePlay();
-  };
+  }, [musicPlayer]);
 
-  const handleSeek = (time: number) => {
+  const handleSeek = React.useCallback((time: number) => {
     musicPlayer.seekTo(time);
-  };
+  }, [musicPlayer]);
 
   const commentCount = comments?.length ?? 0;
 

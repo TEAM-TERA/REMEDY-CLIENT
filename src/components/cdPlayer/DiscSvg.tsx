@@ -1,18 +1,17 @@
-import { memo } from 'react';
-import Svg, { 
-  Defs, 
-  Filter, 
-  FeFlood, 
-  FeColorMatrix, 
-  FeMorphology, 
-  FeOffset, 
-  FeGaussianBlur, 
-  FeComposite, 
-  FeBlend, 
-  G, 
-  Circle, 
-  ClipPath, 
-  Image as SvgImage 
+import Svg, {
+  Defs,
+  Filter,
+  FeFlood,
+  FeColorMatrix,
+  FeMorphology,
+  FeOffset,
+  FeGaussianBlur,
+  FeComposite,
+  FeBlend,
+  G,
+  Circle,
+  ClipPath,
+  Image as SvgImage
 } from "react-native-svg";
 
 interface DiscSvgProps {
@@ -24,36 +23,40 @@ const FILTER_ID = "filter0_d";
 const CLIP_PATH_ID = "cd_clip";
 
 function DiscSvg({ imageUrl, tilt = 0 }: DiscSvgProps) {
+  if (__DEV__ && Math.random() < 0.01) {
+    console.log('🎨 DiscSvg rendering with tilt:', Math.round(tilt), '°');
+  }
+
   return (
     <Svg width={407} height={231} viewBox="0 0 407 231" fill="none">
       <Defs>
-        <Filter 
+        <Filter
           id={FILTER_ID}
-          x="0" 
-          y="0" 
-          width="406.613" 
-          height="406.613" 
+          x="0"
+          y="0"
+          width="406.613"
+          height="406.613"
           filterUnits="userSpaceOnUse"
         >
           <FeFlood floodOpacity="0" result="BackgroundImageFix" />
-          <FeColorMatrix 
-            in="SourceAlpha" 
-            type="matrix" 
-            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" 
-            result="hardAlpha" 
+          <FeColorMatrix
+            in="SourceAlpha"
+            type="matrix"
+            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+            result="hardAlpha"
           />
-          <FeMorphology 
-            radius="1" 
-            operator="dilate" 
-            in="SourceAlpha" 
-            result="effect1_dropShadow" 
+          <FeMorphology
+            radius="1"
+            operator="dilate"
+            in="SourceAlpha"
+            result="effect1_dropShadow"
           />
           <FeOffset dy="4" />
           <FeGaussianBlur stdDeviation="2" />
           <FeComposite in2="hardAlpha" operator="out" />
-          <FeColorMatrix 
-            type="matrix" 
-            values="0 0 0 0 0.94902 0 0 0 0 0.247059 0 0 0 0 0.435294 0 0 0 0.15 0" 
+          <FeColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.94902 0 0 0 0 0.247059 0 0 0 0 0.435294 0 0 0 0.15 0"
           />
           <FeBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow" />
           <FeBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
@@ -62,19 +65,21 @@ function DiscSvg({ imageUrl, tilt = 0 }: DiscSvgProps) {
           <Circle cx={204} cy={210} r={198} />
         </ClipPath>
       </Defs>
-      
-      <G filter={`url(#${FILTER_ID})`} transform={`rotate(${tilt} 204 210)`}>
-        {imageUrl && (
-          <SvgImage
-            x={6}
-            y={12}
-            width={396}
-            height={396}
-            href={{ uri: imageUrl }}
-            clipPath={`url(#${CLIP_PATH_ID})`}
-            preserveAspectRatio="xMidYMid slice"
-          />
-        )}
+
+      <G filter={`url(#${FILTER_ID})`}>
+        <G transform={`rotate(${tilt} 204 210)`}>
+          {imageUrl && (
+            <SvgImage
+              x={6}
+              y={12}
+              width={396}
+              height={396}
+              href={{ uri: imageUrl }}
+              clipPath={`url(#${CLIP_PATH_ID})`}
+              preserveAspectRatio="xMidYMid slice"
+            />
+          )}
+        </G>
         <Circle cx={204} cy={210} r={60} fill="#130309" fillOpacity={0.5} />
         <Circle cx={204} cy={210} r={40} fill="#130309" />
       </G>
@@ -82,9 +87,4 @@ function DiscSvg({ imageUrl, tilt = 0 }: DiscSvgProps) {
   );
 }
 
-export default memo(DiscSvg, (prev, next) => {
-  const imageUrlSame = prev.imageUrl === next.imageUrl;
-  const tiltDiff = Math.abs((prev.tilt || 0) - (next.tilt || 0));
-  
-  return imageUrlSame && tiltDiff < 5;
-});
+export default DiscSvg;

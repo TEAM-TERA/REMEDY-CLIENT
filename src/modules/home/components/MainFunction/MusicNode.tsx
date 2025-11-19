@@ -20,11 +20,18 @@ interface MusicNodeProps {
     nodeIndex: number;
 }
 
-function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, mainNodeIndex, nodeIndex }: MusicNodeProps) {
+const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, mainNodeIndex, nodeIndex }: MusicNodeProps) {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     // 모든 노드가 같은 반지름의 원 위에 배치
     const radius = scale(120);
+
+    const imageSource = React.useMemo(() => {
+        if (data.songInfo?.albumImagePath && data.songInfo.albumImagePath.trim() !== "") {
+            return { uri: data.songInfo.albumImagePath };
+        }
+        return require('../../../../assets/images/profileImage.png');
+    }, [data.songInfo?.albumImagePath]);
 
     const animatedStyle = useAnimatedStyle(() => {
         'worklet';
@@ -71,7 +78,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
         };
     });
 
-    const handlePress = () => {
+    const handlePress = React.useCallback(() => {
         navigation.navigate('Music', {
           droppingId: data.dropping.droppingId,
           songId: data.dropping.songId,
@@ -80,7 +87,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
           location: data.dropping.address,
           message: data.dropping.content,
         });
-    };
+    }, [navigation, data.dropping.droppingId, data.dropping.songId, data.dropping.address, data.dropping.content, data.songInfo?.title, data.songInfo?.artist]);
 
 
     return (
@@ -90,7 +97,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
                 style={styles.container}
             >
                 <Image
-                    source={data.songInfo?.albumImagePath && data.songInfo.albumImagePath.trim() !== "" ? { uri: data.songInfo.albumImagePath } : require('../../../../assets/images/profileImage.png')}
+                    source={imageSource}
                     style={styles.musicImg}
                 />
                 <Text style={styles.musicTitle}>
@@ -102,6 +109,18 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
             </TouchableOpacity>
         </Animated.View>
     );
-}
+}, (prevProps, nextProps) => {
+    // rotation과 mainNodeIndex는 SharedValue/DerivedValue이므로 참조 비교로 충분
+    // 실제 값 변경은 worklet 내부에서 처리됨
+    return (
+        prevProps.data.dropping.droppingId === nextProps.data.dropping.droppingId &&
+        prevProps.data.dropping.songId === nextProps.data.dropping.songId &&
+        prevProps.baseAngle === nextProps.baseAngle &&
+        prevProps.nodeIndex === nextProps.nodeIndex &&
+        prevProps.data.songInfo?.albumImagePath === nextProps.data.songInfo?.albumImagePath &&
+        prevProps.data.songInfo?.title === nextProps.data.songInfo?.title &&
+        prevProps.data.songInfo?.artist === nextProps.data.songInfo?.artist
+    );
+});
 
 export default MusicNode;
