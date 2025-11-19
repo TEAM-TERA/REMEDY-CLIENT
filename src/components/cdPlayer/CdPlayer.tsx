@@ -1,5 +1,6 @@
 import { View } from 'react-native';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, memo, useState, useCallback } from 'react';
+import { useSharedValue, withRepeat, withTiming, cancelAnimation, useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { styles } from './styles';
 import DiscSvg from './DiscSvg';
 
@@ -9,44 +10,32 @@ interface CdPlayerProps {
 }
 
 function CdPlayer({ imageUrl, isPlaying = true }: CdPlayerProps) {
+    const rotation = useSharedValue(0);
     const [tilt, setTilt] = useState(0);
-    const animationFrameRef = useRef<number | null>(null);
-    const startTimeRef = useRef<number | null>(null);
+
+    const updateTilt = useCallback((value: number) => {
+        setTilt(value);
+    }, []);
 
     useEffect(() => {
         if (isPlaying) {
-            const animate = (timestamp: number) => {
-                if (!startTimeRef.current) {
-                    startTimeRef.current = timestamp;
-                }
-
-                const elapsed = timestamp - startTimeRef.current;
-                const rotationValue = (elapsed / 3000) * 360; // 3초에 360도 회전
-
-                setTilt(rotationValue % 360);
-
-                if (__DEV__ && Math.random() < 0.01) {
-                    console.log('🎵 CD rotation:', Math.round(rotationValue % 360), '°');
-                }
-
-                animationFrameRef.current = requestAnimationFrame(animate);
-            };
-
-            animationFrameRef.current = requestAnimationFrame(animate);
+            rotation.value = withRepeat(
+                withTiming(360, { duration: 3000 }),
+                -1,
+                false
+            );
         } else {
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-                animationFrameRef.current = null;
-            }
-            startTimeRef.current = null;
+            cancelAnimation(rotation);
         }
+    }, [isPlaying, rotation]);
 
-        return () => {
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-            }
-        };
-    }, [isPlaying]);
+    useAnimatedReaction(
+        () => rotation.value,
+        (value) => {
+            runOnJS(updateTilt)(value);
+        },
+        []
+    );
 
     return (
         <View style={styles.container}>
@@ -55,4 +44,4 @@ function CdPlayer({ imageUrl, isPlaying = true }: CdPlayerProps) {
     );
 }
 
-export default CdPlayer;
+export default memo(CdPlayer);

@@ -59,6 +59,7 @@ export default function App() {
       <AuthProvider>
         <QueryClientProvider client={queryClient}>
           <RootNavigation />
+          <FPSCounter />
         </QueryClientProvider>
       </AuthProvider>
     </GestureHandlerRootView>

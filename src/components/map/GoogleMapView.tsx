@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useNavigation } from '@react-navigation/native';
@@ -12,10 +12,11 @@ interface GoogleMapViewProps {
   currentLocation: { latitude: number, longitude: number };
 }
 
-export default function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
+function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
   const webviewRef = useRef<WebView>(null);
   const navigation = useNavigation();
   const [isMapReady, setIsMapReady] = useState(false);
+  const previousLocation = useRef<{ latitude: number, longitude: number } | null>(null);
 
   useEffect(() => {
     if (isMapReady && webviewRef.current && droppings && droppings.length > 0) {
@@ -26,7 +27,16 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
 
   useEffect(() => {
     if (!isMapReady || !webviewRef.current || !currentLocation) return;
-    
+
+    const prev = previousLocation.current;
+    if (prev &&
+        Math.abs(prev.latitude - currentLocation.latitude) < 0.000001 &&
+        Math.abs(prev.longitude - currentLocation.longitude) < 0.000001) {
+      return;
+    }
+
+    previousLocation.current = { ...currentLocation };
+
     const message = JSON.stringify({
       type: 'updateLocation',
       payload: { latitude: currentLocation.latitude, longitude: currentLocation.longitude },
@@ -34,7 +44,42 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
     webviewRef.current.postMessage(message);
   }, [currentLocation, isMapReady]);
 
-  const html = `
+  const handleMessage = useCallback((event: any) => {
+    const message = event.nativeEvent.data;
+
+    if (message.startsWith('{') && message.endsWith('}')) {
+      try {
+        const data = JSON.parse(message);
+
+        if (data.type === 'mapReady') {
+          setIsMapReady(true);
+          return;
+        }
+
+        if (data.type === 'markerClick') {
+          if (data.action === 'navigateToMusic') {
+            (navigation as any).navigate('Music', {
+              droppingId: data.payload.droppingId || data.payload.id,
+              songId: data.payload.songId || data.payload.song_id,
+              title: data.payload.title || '드랍핑 음악',
+              artist: data.payload.artist || '알 수 없는 아티스트',
+              message: data.payload.content || '',
+              location: data.payload.address || data.payload.location || '위치 정보 없음'
+            });
+          } else if (data.action === 'showDetails') {
+            Alert.alert(
+              "알림",
+              "확인할 수 없는 드랍입니다",
+              [{ text: "확인", style: "default" }]
+            );
+          }
+        }
+      } catch (e) {
+      }
+    }
+  }, [navigation]);
+
+  const html = useMemo(() => `
     <!DOCTYPE html>
     <html>
       <head>
@@ -317,7 +362,6 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
             }
           }
 
-          // document.addEventListener 사용
           document.addEventListener('message', function(event) {
             try {
               const data = JSON.parse(event.data);
@@ -328,11 +372,9 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
                 processMessage(data);
               }
             } catch (e) {
-              // Silent error
             }
           });
 
-          // window.addEventListener도 유지 (플랫폼에 따라 다를 수 있음)
           window.addEventListener('message', function(event) {
             try {
               const data = JSON.parse(event.data);
@@ -343,7 +385,6 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
                 processMessage(data);
               }
             } catch (e) {
-              // Silent error
             }
           });
 
@@ -354,7 +395,7 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
         <div id="map"></div>
       </body>
     </html>
-  `;
+  `, [GOOGLE_MAPS_API_KEY, MAP_ZOOM, MAP_STYLE, MARKER_STYLES.MY_LOCATION, PRIMARY_COLORS.DEFAULT, MAP_RADIUS]);
 
   return (
     <>
@@ -373,41 +414,23 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
         mixedContentMode="always"
         geolocationEnabled={true}
         scrollEnabled={false}
-        onMessage={(event) => {
-          const message = event.nativeEvent.data;
-          
-          if (message.startsWith('{') && message.endsWith('}')) {
-            try {
-              const data = JSON.parse(message);
-              
-              if (data.type === 'mapReady') {
-                setIsMapReady(true);
-                return;
-              }
-              
-              if (data.type === 'markerClick') {
-                if (data.action === 'navigateToMusic') {
-                  (navigation as any).navigate('Music', { 
-                    droppingId: data.payload.droppingId || data.payload.id,
-                    songId: data.payload.songId || data.payload.song_id,
-                    title: data.payload.title || '드랍핑 음악',
-                    artist: data.payload.artist || '알 수 없는 아티스트',
-                    message: data.payload.content || '',
-                    location: data.payload.address || data.payload.location || '위치 정보 없음'
-                  });
-                } else if (data.action === 'showDetails') {
-                  Alert.alert(
-                    "알림",
-                    "확인할 수 없는 드랍입니다",
-                    [{ text: "확인", style: "default" }]
-                  );
-                }
-              }
-            } catch (e) {
-            }
-          }
-        }}
+        onMessage={handleMessage}
       />
     </>
   );
 }
+
+export default React.memo(GoogleMapView, (prevProps, nextProps) => {
+  const locationChanged = prevProps.currentLocation && nextProps.currentLocation
+    ? Math.abs(prevProps.currentLocation.latitude - nextProps.currentLocation.latitude) > 0.000001 ||
+      Math.abs(prevProps.currentLocation.longitude - nextProps.currentLocation.longitude) > 0.000001
+    : prevProps.currentLocation !== nextProps.currentLocation;
+
+  const droppingsChanged = prevProps.droppings.length !== nextProps.droppings.length ||
+    prevProps.droppings.some((prev, index) => {
+      const next = nextProps.droppings[index];
+      return !next || prev.droppingId !== next.droppingId;
+    });
+
+  return !locationChanged && !droppingsChanged;
+});

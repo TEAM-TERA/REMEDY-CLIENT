@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -43,10 +43,13 @@ function MusicScreen({ route }: Props) {
   const [comment, setComment] = useState('');
   const scrollViewRef = useRef<any>(null);
   const commentInputRef = useRef<TextInput>(null);
-
-  const serverImageUrl = Image.resolveAssetSource(require('../../../assets/images/normal_music.png')).uri;
   const musicPlayer = useHLSPlayer(songId);
-  const { hasPermission, requestBackgroundAudioPermission } = useBackgroundAudioPermission();
+
+  const MemoMarquee = memo(MarqueeText);
+  
+  
+  
+  const { requestBackgroundAudioPermission } = useBackgroundAudioPermission();
 
   const { data: songInfo } = useQuery({
     queryKey: ['songInfo', songId],
@@ -112,7 +115,7 @@ function MusicScreen({ route }: Props) {
           <View style={styles.content}>
             <View style={styles.infoRow}>
               <View style={styles.infoTextWrapper}>
-                <MarqueeText
+                <MemoMarquee
                   text={songInfo?.title || title || '드랍핑 음악'}
                   textStyle={styles.title}
                   thresholdChars={18}
