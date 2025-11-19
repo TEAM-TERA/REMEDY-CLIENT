@@ -39,7 +39,7 @@ function HomeScreen() {
                   try { await pause(); } catch {}
                 }
                 if (!isRunning && next) {
-                  const list = droppings ?? [];
+                  const list = Array.isArray(droppings) ? droppings : [];
                   if (list.length > 0) {
                     const near = list[0];
                     const idx = Math.floor(Math.random() * list.length);
@@ -68,9 +68,9 @@ function HomeScreen() {
               />
             )}
             <View style={{ flex: 1 }}>
-                <GoogleMapView droppings={droppings} currentLocation={currentLocation}/>
+                <GoogleMapView droppings={Array.isArray(droppings) ? droppings : []} currentLocation={currentLocation}/>
             </View>
-            <MusicWheel droppings={droppings}/>
+            <MusicWheel droppings={Array.isArray(droppings) ? droppings : []}/>
         </View>
         <ConfirmModal
           visible={runModalVisible}

@@ -44,8 +44,6 @@ function MusicScreen({ route }: Props) {
   const scrollViewRef = useRef<any>(null);
   const commentInputRef = useRef<TextInput>(null);
   const musicPlayer = useHLSPlayer(songId);
-
-  const MemoMarquee = memo(MarqueeText);
   
   
   
@@ -115,7 +113,7 @@ function MusicScreen({ route }: Props) {
           <View style={styles.content}>
             <View style={styles.infoRow}>
               <View style={styles.infoTextWrapper}>
-                <MemoMarquee
+                <MarqueeText
                   text={songInfo?.title || title || '드랍핑 음악'}
                   textStyle={styles.title}
                   thresholdChars={18}

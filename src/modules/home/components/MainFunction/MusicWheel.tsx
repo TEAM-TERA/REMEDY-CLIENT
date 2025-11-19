@@ -23,46 +23,47 @@ interface MusicWheelProps {
 
 function MusicWheel({ droppings }: MusicWheelProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const totalSongs = droppings?.length || 0;
+  const safeDroppings = Array.isArray(droppings) ? droppings : [];
+  const totalSongs = safeDroppings.length;
   const rotation = useSharedValue(0);
   const startRotation = useSharedValue(0);
 
   const [visualMainIndex, setVisualMainIndex] = useState<number>(0);
   const [isSwiping, setIsSwiping] = useState<boolean>(false);
 
-  const actualMainDataIndex = isSwiping ? currentIndex : ((currentIndex + visualMainIndex) % totalSongs);
-  const currentSongId = droppings?.[actualMainDataIndex]?.songId;
+  const actualMainDataIndex = totalSongs > 0 ? (isSwiping ? currentIndex : ((currentIndex + visualMainIndex) % totalSongs)) : 0;
+  const currentSongId = safeDroppings[actualMainDataIndex]?.songId;
   const musicPlayer = useHLSPlayer(currentSongId);
 
   useEffect(() => {
     if (__DEV__) {
-      console.log('🎡 MusicWheel mounted, droppings count:', droppings?.length);
+      console.log('🎡 MusicWheel mounted, droppings count:', safeDroppings.length);
     }
     rotation.value = 0;
   }, [rotation]);
 
   useEffect(() => {
     if (__DEV__) {
-      console.log('📊 Droppings changed, count:', droppings?.length);
+      console.log('📊 Droppings changed, count:', safeDroppings.length);
       console.log('📊 Current index:', currentIndex);
       console.log('👁️ Visual main index:', visualMainIndex);
       console.log('✋ Is swiping:', isSwiping);
       console.log('🎯 Actual main data index:', actualMainDataIndex);
       console.log('🎵 Current song ID:', currentSongId);
     }
-  }, [droppings, currentIndex, visualMainIndex, isSwiping, actualMainDataIndex, currentSongId]);
+  }, [safeDroppings, currentIndex, visualMainIndex, isSwiping, actualMainDataIndex, currentSongId]);
 
   const visibleSongIds = React.useMemo(() => {
-    if (!droppings || droppings.length === 0) return [];
+    if (totalSongs === 0) return [];
     const ids = [];
     for (let i = 0; i < Math.min(TOTAL_NODES, totalSongs); i++) {
       const dataIndex = (currentIndex + i) % totalSongs;
-      if (droppings[dataIndex]?.songId) {
-        ids.push(droppings[dataIndex].songId);
+      if (safeDroppings[dataIndex]?.songId) {
+        ids.push(safeDroppings[dataIndex].songId);
       }
     }
     return ids;
-  }, [droppings, currentIndex, totalSongs]);
+  }, [safeDroppings, currentIndex, totalSongs]);
 
   const songQueries = useQueries({
     queries: visibleSongIds.map(songId => ({
@@ -110,15 +111,15 @@ function MusicWheel({ droppings }: MusicWheelProps) {
 
   const visibleNodes = React.useMemo(() => {
     const nodes: VisibleNode[] = [];
-    if (!droppings || droppings.length === 0) {
+    if (totalSongs === 0) {
       return nodes;
     }
 
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
       const dataIndex = (currentIndex + nodeIndex) % totalSongs;
 
-      if (droppings[dataIndex]) {
-        const dropping = droppings[dataIndex];
+      if (safeDroppings[dataIndex]) {
+        const dropping = safeDroppings[dataIndex];
         const isMainNode = nodeIndex === 0;
 
         let songInfo = null;
@@ -145,20 +146,22 @@ function MusicWheel({ droppings }: MusicWheelProps) {
       }
     }
     return nodes;
-  }, [droppings, currentIndex, totalSongs, visibleSongIds, songQueries]);
+  }, [safeDroppings, currentIndex, totalSongs, visibleSongIds, songQueries]);
 
   const updateIndex = React.useCallback((direction: string) => {
     if (__DEV__) {
       console.log('🔄 updateIndex called, direction:', direction, 'visualMainIndex:', visualMainIndex);
     }
 
-    setCurrentIndex((prev: number) => {
-      const newIndex = (prev + visualMainIndex + totalSongs) % totalSongs;
-      if (__DEV__) {
-        console.log('📍 Setting currentIndex from', prev, 'to', newIndex);
-      }
-      return newIndex;
-    });
+    if (totalSongs > 0) {
+      setCurrentIndex((prev: number) => {
+        const newIndex = (prev + visualMainIndex + totalSongs) % totalSongs;
+        if (__DEV__) {
+          console.log('📍 Setting currentIndex from', prev, 'to', newIndex);
+        }
+        return newIndex;
+      });
+    }
 
     setVisualMainIndex(0);
   }, [visualMainIndex, totalSongs]);

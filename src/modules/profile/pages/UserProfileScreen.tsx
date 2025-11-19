@@ -22,20 +22,27 @@ function UserProfileScreen() {
     const [activeTab, setActiveTab] = useState<'drop' | 'like'>('drop');
     const defaultProfileImg = require('../../../assets/images/profileImage.png');
 
-    const { data: myDrops, isLoading: dropLoading } = useMyDrop();
-    const { data: myLikes, isLoading: likeLoading } = useMyLikes();
+    const { data: myDrops = [], isLoading: dropLoading } = useMyDrop();
+    const { data: myLikes = [], isLoading: likeLoading } = useMyLikes();
 
     const { data: me, isLoading, isError, refetch, isFetching } = useMyProfile();
 
     const [songTitles, setSongTitles] = useState<Record<string, string>>({});
     const [songImages, setSongImages] = useState<Record<string, string>>({});
     const [likeDroppings, setLikeDroppings] = useState<Record<string, any>>({});
+    const [likeDroppingsLoading, setLikeDroppingsLoading] = useState(false);
 
     useEffect(() => {
         const loadSongInfo = async () => {
-            const drops = Array.isArray(myDrops) ? myDrops : [];
-            if (!drops || drops.length === 0) return;
-            const uniqueIds = Array.from(new Set(drops.map((d: any) => d.songId).filter(Boolean)));
+            if (!myDrops || !Array.isArray(myDrops) || myDrops.length === 0) return;
+
+            const drops = myDrops;
+            const uniqueIds = Array.from(new Set(
+                drops
+                    .filter((d: any) => d && d.songId)
+                    .map((d: any) => d.songId)
+                    .filter(Boolean)
+            ));
             try {
                 const results = await Promise.all(uniqueIds.map(async (id: string) => {
                     try {
@@ -62,28 +69,46 @@ function UserProfileScreen() {
 
     useEffect(() => {
         const loadLikeDroppings = async () => {
-            const likes = Array.isArray(myLikes) ? myLikes : [];
-            if (!likes || likes.length === 0) return;
+            if (!myLikes || !Array.isArray(myLikes) || myLikes.length === 0) {
+                setLikeDroppings({});
+                setLikeDroppingsLoading(false);
+                return;
+            }
+
+            const likes = myLikes;
+
+            setLikeDroppingsLoading(true);
             try {
                 const results = await Promise.all(likes.map(async (droppingId: string) => {
                     try {
+                        console.log(`좋아요 드랍핑 로드 중: ${droppingId}`);
                         const dropping = await getDroppingById(droppingId);
+                        console.log(`드랍핑 정보:`, dropping);
+
                         if (dropping?.songId) {
                             const songInfo = await getSongInfo(dropping.songId);
+                            console.log(`곡 정보:`, songInfo);
                             return [droppingId, { ...dropping, songInfo }];
                         }
                         return [droppingId, dropping];
-                    } catch {
+                    } catch (error) {
+                        console.error(`드랍핑 ${droppingId} 로드 실패:`, error);
                         return [droppingId, null];
                     }
                 }));
+
                 const map: Record<string, any> = {};
                 results.forEach(([id, data]) => {
-                    map[id as string] = data;
+                    if (data !== null) {
+                        map[id as string] = data;
+                    }
                 });
+                console.log('좋아요 드랍핑 최종 데이터:', map);
                 setLikeDroppings(map);
-            } catch {
-                console.log('좋아요 드랍핑 로드 실패');
+            } catch (error) {
+                console.error('좋아요 드랍핑 로드 실패:', error);
+            } finally {
+                setLikeDroppingsLoading(false);
             }
         };
         loadLikeDroppings();
@@ -91,24 +116,51 @@ function UserProfileScreen() {
 
     const currentData: DropItemData[] =
     activeTab === "drop"
-        ? (Array.isArray(myDrops) ? myDrops : []).map((d: any) => ({
-            droppingId: d.droppingId,
-            memo: songTitles[d.songId] || d.songId,
-            location: d.address,
-            imageSource: songImages[d.songId] ? { uri: songImages[d.songId] } : undefined,
-            hasHeart: false,
-    }))
-        : (Array.isArray(myLikes) ? myLikes : []).map((droppingId: any) => {
-            const dropping = likeDroppings[droppingId];
-            const songInfo = dropping?.songInfo;
-            return {
-                droppingId: droppingId,
-                memo: songInfo?.title || dropping?.content || "좋아요한 곡",
-                location: dropping?.address || "",
-                imageSource: songInfo?.albumImagePath ? { uri: songInfo.albumImagePath } : undefined,
-                hasHeart: true,
-            };
-    });
+        ? (myDrops || [])
+            .filter((d: any) => d && d.droppingId) // null/undefined 아이템 필터링
+            .map((d: any) => ({
+                droppingId: d.droppingId,
+                memo: songTitles[d.songId] || d.songId || "알 수 없는 곡",
+                location: d.address || "위치 정보 없음",
+                imageSource: songImages[d.songId] ? { uri: songImages[d.songId] } : undefined,
+                hasHeart: false,
+            }))
+        : (myLikes || [])
+            .filter((droppingId: string) => droppingId) // null/undefined 아이템 필터링
+            .map((droppingId: string) => {
+                const dropping = likeDroppings[droppingId];
+                const songInfo = dropping?.songInfo;
+
+                // 로딩 중이거나 데이터가 없는 경우 처리
+                if (likeDroppingsLoading && !dropping) {
+                    return {
+                        droppingId: droppingId,
+                        memo: "로딩 중...",
+                        location: "위치 정보 로딩 중...",
+                        imageSource: undefined,
+                        hasHeart: true,
+                    };
+                }
+
+                // 데이터가 없는 경우
+                if (!dropping) {
+                    return {
+                        droppingId: droppingId,
+                        memo: "데이터를 불러올 수 없습니다",
+                        location: "위치 정보 없음",
+                        imageSource: undefined,
+                        hasHeart: true,
+                    };
+                }
+
+                return {
+                    droppingId: droppingId,
+                    memo: songInfo?.title || dropping?.content || "좋아요한 곡",
+                    location: dropping?.address || "위치 정보 없음",
+                    imageSource: songInfo?.albumImagePath ? { uri: songInfo.albumImagePath } : undefined,
+                    hasHeart: true,
+                };
+            });
 
     const handleEditPress = () => {
         navigation.navigate('NameEdit');
@@ -122,7 +174,8 @@ function UserProfileScreen() {
         refetch();
     }
     
-    if(isLoading){
+    // 로딩 상태 처리
+    if(isLoading || (dropLoading && !myDrops) || (likeLoading && !myLikes)){
         return (
             <SafeAreaView style={styles.safeAreaView}>
               <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
@@ -133,6 +186,7 @@ function UserProfileScreen() {
         );
     }
 
+    // 에러 상태 처리
     if (isError) {
         return (
           <SafeAreaView style={styles.safeAreaView}>
@@ -221,15 +275,32 @@ function UserProfileScreen() {
                         keyboardShouldPersistTaps="handled"
                         nestedScrollEnabled
                     >
-                        {currentData.map((item) => (
-                            <DropItem
-                                key={item.droppingId}
-                                memo={item.memo}
-                                location={item.location}
-                                imageSource={item.imageSource}
-                                hasHeart={item.hasHeart}
-                            />
-                        ))}
+                        {activeTab === 'like' && likeDroppingsLoading && currentData.length === 0 ? (
+                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: verticalScale(40) }}>
+                                <ActivityIndicator />
+                                <Text style={{ marginTop: verticalScale(8), color: TEXT_COLORS.CAPTION }}>
+                                    좋아요 목록을 불러오고 있습니다...
+                                </Text>
+                            </View>
+                        ) : currentData.length === 0 ? (
+                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: verticalScale(40) }}>
+                                <Text style={{ color: TEXT_COLORS.CAPTION }}>
+                                    {activeTab === 'drop' ? '아직 드랍한 음악이 없습니다' : '좋아요한 음악이 없습니다'}
+                                </Text>
+                            </View>
+                        ) : (
+                            (currentData || [])
+                                .filter((item) => item && item.droppingId) // null/undefined 아이템 필터링
+                                .map((item) => (
+                                    <DropItem
+                                        key={item.droppingId}
+                                        memo={item.memo || "제목 없음"}
+                                        location={item.location || "위치 정보 없음"}
+                                        imageSource={item.imageSource}
+                                        hasHeart={item.hasHeart || false}
+                                    />
+                                ))
+                        )}
                     </ScrollView>
                 </View>
             </View>
