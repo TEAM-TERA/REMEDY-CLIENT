@@ -108,7 +108,7 @@ function MusicScreen({ route }: Props) {
         enableResetScrollToCoords={false}
       >
         <View style={styles.innerContainer}>
-          <CdPlayer imageUrl={songInfo?.albumImagePath} />
+          <CdPlayer imageUrl={songInfo?.albumImagePath} isPlaying={musicPlayer.isPlaying} />
 
           <View style={styles.content}>
             <View style={styles.infoRow}>

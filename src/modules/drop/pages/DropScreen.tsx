@@ -127,7 +127,7 @@ function DropScreen() {
           extraScrollHeight={Platform.OS === 'ios' ? 20 : 100}
           extraHeight={Platform.OS === 'ios' ? 150 : 200}
         >
-            <CdPlayer imageUrl={songInfo?.albumImagePath} />
+            <CdPlayer imageUrl={songInfo?.albumImagePath} isPlaying={musicPlayer.isPlaying} />
             <View style={styles.playerContainer}>
               <View style={styles.textContainer}>
                 <MarqueeText
