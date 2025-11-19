@@ -13,6 +13,8 @@ import Svg, {
   ClipPath,
   Image as SvgImage
 } from "react-native-svg";
+import Animated, { useSharedValue, useAnimatedProps, withTiming } from "react-native-reanimated";
+import { useEffect } from "react";
 
 interface DiscSvgProps {
   imageUrl?: string;
@@ -21,11 +23,26 @@ interface DiscSvgProps {
 
 const FILTER_ID = "filter0_d";
 const CLIP_PATH_ID = "cd_clip";
+const AnimatedG = Animated.createAnimatedComponent(G);
 
 function DiscSvg({ imageUrl, tilt = 0 }: DiscSvgProps) {
-  if (__DEV__ && Math.random() < 0.01) {
-    console.log('🎨 DiscSvg rendering with tilt:', Math.round(tilt), '°');
-  }
+  const rotate = useSharedValue(0);
+
+  useEffect(() => {
+    rotate.value = withTiming(rotate.value + tilt, { duration: 200 });
+  }, [tilt]);
+
+  const animatedProps = useAnimatedProps(() => ({
+    transform: [
+      { translateX: 204 },
+      { translateY: 210 },
+      { rotateZ: `${rotate.value}deg` },
+      { translateX: -204 },
+      { translateY: -210 },
+    ],
+  }));
+
+  
 
   return (
     <Svg width={407} height={231} viewBox="0 0 407 231" fill="none">
@@ -45,12 +62,7 @@ function DiscSvg({ imageUrl, tilt = 0 }: DiscSvgProps) {
             values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
             result="hardAlpha"
           />
-          <FeMorphology
-            radius="1"
-            operator="dilate"
-            in="SourceAlpha"
-            result="effect1_dropShadow"
-          />
+          <FeMorphology radius="1" operator="dilate" in="SourceAlpha" result="effect1_dropShadow" />
           <FeOffset dy="4" />
           <FeGaussianBlur stdDeviation="2" />
           <FeComposite in2="hardAlpha" operator="out" />
@@ -61,13 +73,14 @@ function DiscSvg({ imageUrl, tilt = 0 }: DiscSvgProps) {
           <FeBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow" />
           <FeBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape" />
         </Filter>
+
         <ClipPath id={CLIP_PATH_ID}>
           <Circle cx={204} cy={210} r={198} />
         </ClipPath>
       </Defs>
 
       <G filter={`url(#${FILTER_ID})`}>
-        <G transform={`rotate(${tilt} 204 210)`}>
+        <AnimatedG animatedProps={animatedProps}>
           {imageUrl && (
             <SvgImage
               x={6}
@@ -79,7 +92,8 @@ function DiscSvg({ imageUrl, tilt = 0 }: DiscSvgProps) {
               preserveAspectRatio="xMidYMid slice"
             />
           )}
-        </G>
+        </AnimatedG>
+
         <Circle cx={204} cy={210} r={60} fill="#130309" fillOpacity={0.5} />
         <Circle cx={204} cy={210} r={40} fill="#130309" />
       </G>
