@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { ActivityIndicator, Alert, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useNavigation } from '@react-navigation/native';
 import { PRIMARY_COLORS } from '../../constants/colors';
@@ -10,24 +10,65 @@ import { Dropping } from '../../modules/home/types/musicList';
 interface GoogleMapViewProps {
   droppings: Dropping[];
   currentLocation: { latitude: number, longitude: number };
+  currentPlayingDroppingId?: string | number;
 }
 
-function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
+function GoogleMapView({ droppings, currentLocation, currentPlayingDroppingId }: GoogleMapViewProps) {
   const webviewRef = useRef<WebView>(null);
   const navigation = useNavigation();
   const [isMapReady, setIsMapReady] = useState(false);
   const previousLocation = useRef<{ latitude: number, longitude: number } | null>(null);
 
   useEffect(() => {
-    if (isMapReady && webviewRef.current && droppings && droppings.length > 0) {
-      const message = JSON.stringify({ type: 'droppings', payload: droppings });
+  }, [currentPlayingDroppingId]);
+
+  useEffect(() => {
+    if (webviewRef.current && droppings) {
+      console.log('React Native -> WebView 데이터 전송:', {
+        droppings: droppings.length,
+        currentPlayingDroppingId: currentPlayingDroppingId
+      });
+      const message = JSON.stringify({
+        type: 'droppings',
+        payload: droppings,
+        currentPlayingDroppingId: currentPlayingDroppingId != null ? String(currentPlayingDroppingId) : null
+      });
       webviewRef.current.postMessage(message);
     }
-  }, [droppings, isMapReady]);
+  }, [droppings, currentPlayingDroppingId]);
 
-  // 지도 초기화 시 현재 위치로 이동
   useEffect(() => {
-    if (isMapReady && webviewRef.current && currentLocation) {
+    console.log('[SYNC] useEffect 트리거됨:', {
+      currentPlayingDroppingId,
+      isMapReady,
+      hasWebviewRef: !!webviewRef.current
+    });
+
+    if (webviewRef.current && currentPlayingDroppingId != null) {
+      const timestamp = new Date().toISOString();
+      console.log('[SYNC] 강제 메시지 전송 시도:', {
+        timestamp,
+        newCurrentPlayingDroppingId: currentPlayingDroppingId,
+        isMapReady,
+        hasWebviewRef: !!webviewRef.current
+      });
+      const message = JSON.stringify({
+        type: 'updateCurrentDropping',
+        currentPlayingDroppingId: String(currentPlayingDroppingId),
+        timestamp
+      });
+
+      try {
+        webviewRef.current.postMessage(message);
+        console.log('[SYNC] 강제 메시지 전송 성공');
+      } catch (error) {
+        console.error('[SYNC] 강제 메시지 전송 실패:', error);
+      }
+    }
+  }, [currentPlayingDroppingId, isMapReady]);
+
+  useEffect(() => {
+    if (webviewRef.current && currentLocation) {
       const message = JSON.stringify({
         type: 'initLocation',
         payload: { latitude: currentLocation.latitude, longitude: currentLocation.longitude },
@@ -63,7 +104,12 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
         const data = JSON.parse(message);
 
         if (data.type === 'mapReady') {
+          console.log('[MAP] mapReady 수신됨 - setIsMapReady(true) 호출');
           setIsMapReady(true);
+          return;
+        }
+
+        if (data.type === 'debug') {
           return;
         }
 
@@ -78,11 +124,6 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
               location: data.payload.address || data.payload.location || '위치 정보 없음'
             });
           } else if (data.action === 'showDetails') {
-            Alert.alert(
-              "알림",
-              "확인할 수 없는 드랍입니다",
-              [{ text: "확인", style: "default" }]
-            );
           }
         }
       } catch (e) {
@@ -108,6 +149,7 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
           var messageQueue = [];
           var lastCenter = null;
           var myLocationMarker;
+          var currentPlayingDroppingId = null;
           
           function initMap() {
             const center = { lat: 37.5665, lng: 126.9780 };
@@ -115,7 +157,7 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
             map = new google.maps.Map(document.getElementById('map'), {
               center,
               zoom: ${MAP_ZOOM},
-              minZoom: 6,  // 대한민국 전체 수준 (6~7 정도가 적당)
+              minZoom: 6,
               maxZoom: 20, // 최대 확대 레벨
               restriction: {
                 latLngBounds: new google.maps.LatLngBounds(
@@ -136,11 +178,18 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
               gestureHandling: 'greedy'
             });
 
-            // Google Maps 기본 내 위치 기능만 사용
 
             google.maps.event.addListenerOnce(map, 'idle', function() {
               mapReady = true;
-              window.ReactNativeWebView?.postMessage(JSON.stringify({ type: 'mapReady' }));
+              console.log('[WebView] Google Maps idle 이벤트 발생 - mapReady 메시지 전송 시도');
+
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'mapReady' }));
+                console.log('[WebView] mapReady 메시지 전송 성공');
+              } else {
+                console.error('[WebView] ReactNativeWebView가 없음');
+              }
+
               processQueue();
             });
           }
@@ -170,21 +219,160 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
               title: '내 위치'
             });
 
-            console.log('📍 내 위치 마커 생성:', lat, lng);
+            console.log('내 위치 마커 생성:', lat, lng);
           }
 
-          function addDroppings(drops) {
+          function updateAllMarkersForCurrentSong(newCurrentPlayingDroppingId) {
+            existingMarkers.forEach(function(marker) {
+              marker.setIcon({
+                url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+                  '<svg width="75" height="75" viewBox="0 0 76 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                  '<g filter="url(#filter0_d_660_1369)">' +
+                  '<circle cx="37.8" cy="36.8003" r="17.5" fill="#14151C"/>' +
+                  '</g>' +
+                  '<path d="M44 28.2C44 27.8405 43.8657 27.4999 43.634 27.272C43.4023 27.0441 43.0977 26.9528 42.8039 27.0233L32.8039 29.4233C32.3365 29.5355 32 30.028 32 30.6V41.5366C31.6872 41.4481 31.3506 41.4 31 41.4C29.3431 41.4 28 42.4745 28 43.8C28 45.1255 29.3431 46.2 31 46.2C32.6568 46.2 34 45.1255 34 43.8V33.9838L42 32.0638V39.1366C41.6872 39.0481 41.3506 39 41 39C39.3431 39 38 40.0745 38 41.4C38 42.7255 39.3431 43.8 41 43.8C42.6569 43.8 44 42.7255 44 41.4V28.2Z" fill="#656581"/>' +
+                  '<defs>' +
+                  '<filter id="filter0_d_660_1369" x="0.300049" y="-0.699707" width="75" height="75" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.396078 0 0 0 0 0.396078 0 0 0 0 0.505882 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1369"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1369" result="shape"/>' +
+                  '</filter>' +
+                  '</defs>' +
+                  '</svg>'
+                ),
+                scaledSize: new google.maps.Size(60, 60)
+              });
+              marker.setZIndex(100);
+            });
+
+            if (newCurrentPlayingDroppingId) {
+              let foundMatch = false;
+              let debugInfo = [];
+
+              existingMarkers.forEach(function(marker, index) {
+                const droppingData = marker.droppingData;
+                if (droppingData) {
+                  const dropMatch = String(droppingData.droppingId) === String(newCurrentPlayingDroppingId);
+
+                  debugInfo.push({
+                    index: index,
+                    droppingId: droppingData.droppingId,
+                    songId: droppingData.songId,
+                    songIdType: typeof droppingData.songId,
+                    dropMatch: dropMatch
+                  });
+
+                  if (dropMatch) {
+                    foundMatch = true;
+                    marker.setIcon({
+                      url: "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+                        '<svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                        '<g filter="url(#filter0_d_660_1355)">' +
+                        '<circle cx="36.8" cy="36.8003" r="17.5" fill="black"/>' +
+                        '</g>' +
+                        '<g filter="url(#filter1_d_660_1355)">' +
+                        '<path d="M43 28.2C43 27.8405 42.8657 27.4999 42.634 27.272C42.4023 27.0441 42.0977 26.9528 41.8039 27.0233L31.8039 29.4233C31.3365 29.5355 31 30.028 31 30.6V41.5366C30.6872 41.4481 30.3506 41.4 30 41.4C28.3431 41.4 27 42.4745 27 43.8C27 45.1255 28.3431 46.2 30 46.2C31.6568 46.2 33 45.1255 33 43.8V33.9838L41 32.0638V39.1366C40.6872 39.0481 40.3506 39 40 39C38.3431 39 37 40.0745 37 41.4C37 42.7255 38.3431 43.8 40 43.8C41.6569 43.8 43 42.7255 43 41.4V28.2Z" fill="#F3124E"/>' +
+                        '</g>' +
+                        '<defs>' +
+                        '<filter id="filter0_d_660_1355" x="-0.699951" y="-0.699707" width="75" height="75" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                        '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                        '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                        '<feOffset/>' +
+                        '<feGaussianBlur stdDeviation="10"/>' +
+                        '<feComposite in2="hardAlpha" operator="out"/>' +
+                        '<feColorMatrix type="matrix" values="0 0 0 0 0.937255 0 0 0 0 0.0627451 0 0 0 0 0.298039 0 0 0 1 0"/>' +
+                        '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1355"/>' +
+                        '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1355" result="shape"/>' +
+                        '</filter>' +
+                        '<filter id="filter1_d_660_1355" x="7" y="7" width="56" height="59.2002" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                        '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                        '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                        '<feOffset/>' +
+                        '<feGaussianBlur stdDeviation="10"/>' +
+                        '<feComposite in2="hardAlpha" operator="out"/>' +
+                        '<feColorMatrix type="matrix" values="0 0 0 0 0.937255 0 0 0 0 0.0627451 0 0 0 0 0.298039 0 0 0 1 0"/>' +
+                        '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_660_1355"/>' +
+                        '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_660_1355" result="shape"/>' +
+                        '</filter>' +
+                        '</defs>' +
+                        '</svg>'
+                      ),
+                      scaledSize: new google.maps.Size(60, 60)
+                    });
+                    marker.setZIndex(2000);
+
+                    const position = marker.getPosition();
+                    if (position) {
+                      map.panTo(position);
+                    }
+                  }
+                }
+              });
+
+              if (window.ReactNativeWebView) {
+                let debugMessage = foundMatch ?
+                  ('✅ 빨간 핀 찾음!\\n드랍핑ID: ' + newCurrentPlayingDroppingId) :
+                  ('❌ 일치하는 핀 없음\\n드랍핑ID: ' + newCurrentPlayingDroppingId + '\\n타입: ' + typeof newCurrentPlayingDroppingId);
+
+                debugMessage += '\\n\\n📊 마커 정보:';
+                for (let i = 0; i < Math.min(3, debugInfo.length); i++) {
+                  const info = debugInfo[i];
+                  debugMessage += '\\n[' + i + '] songId:' + info.songId + '(' + info.songIdType + ') droppingId:' + info.droppingId;
+                }
+
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                  type: 'debug',
+                  message: debugMessage
+                }));
+              }
+            }
+          }
+
+          function focusOnCurrentlyPlayingMusic(currentPlayingDroppingId) {
+            if (!currentPlayingDroppingId) return;
+
+            existingMarkers.forEach(function(marker) {
+              const droppingData = marker.droppingData;
+              if (droppingData && (String(droppingData.droppingId) === String(currentPlayingDroppingId))) {
+                const position = marker.getPosition();
+                if (position) {
+                  console.log('재생 중인 음악으로 화면 이동:', position.lat(), position.lng());
+                  map.panTo(position);
+                }
+              }
+            });
+          }
+
+          function addDroppings(drops, currentPlayingDroppingId) {
             if (!mapReady || !map) return;
-            
+
             clearDroppings();
-            
+
             drops.forEach(function(drop) {
               const dropPosition = new google.maps.LatLng(drop.latitude, drop.longitude);
               const centerPositionDynamic = map.getCenter();
               const distance = google.maps.geometry.spherical.computeDistanceBetween(centerPositionDynamic, dropPosition);
               const radius = ${MAP_RADIUS};
 
-              const iconUrl = distance <= radius 
+              const isCurrentlyPlaying = currentPlayingDroppingId &&
+                (String(drop.droppingId) === String(currentPlayingDroppingId));
+
+              console.log('마커 생성 중:', {
+                droppingId: drop.droppingId,
+                songId: drop.songId,
+                currentPlayingDroppingId: currentPlayingDroppingId,
+                droppingIdMatch: String(drop.droppingId) === String(currentPlayingDroppingId),
+                isCurrentlyPlaying: isCurrentlyPlaying,
+                songIdType: typeof drop.songId,
+                currentPlayingDroppingIdType: typeof currentPlayingDroppingId
+              });
+
+              const iconUrl = isCurrentlyPlaying
                 ? "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
                   '<svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
                   '<g filter="url(#filter0_d_660_1355)">' +
@@ -246,10 +434,19 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
                   url: iconUrl,
                   scaledSize: new google.maps.Size(60, 60)
                 },
-                zIndex: 10
+                zIndex: isCurrentlyPlaying ? 2000 : 100
               });
-              
+
+              marker.droppingData = drop;
+
               existingMarkers.push(marker);
+
+              if (isCurrentlyPlaying) {
+                console.log('현재 재생 중인 음악 위치로 이동:', drop.latitude, drop.longitude);
+                setTimeout(() => {
+                  map.panTo({ lat: drop.latitude, lng: drop.longitude });
+                }, 500);
+              }
               
               marker.addListener('click', function() {
                 const isInCircle = distance <= radius;
@@ -282,6 +479,7 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
                 }
               });
             });
+            updateAllMarkersForCurrentSong(currentPlayingSongId);
           }
 
           function updateLocation(lat, lng) {
@@ -297,15 +495,16 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
 
             lastCenter = { lat, lng };
 
-            // 지도 중심을 부드럽게 이동 (Google Maps 기본 기능에 맡기고 중심만 업데이트)
             map.panTo(newPosition);
 
             existingMarkers.forEach(function(marker) {
-              const markerPos = marker.getPosition();
-              const distance = google.maps.geometry.spherical.computeDistanceBetween(newPosition, markerPos);
-              const radius = ${MAP_RADIUS};
-              
-              const iconUrl = distance <= radius 
+              const droppingData = marker.droppingData;
+              if (!droppingData) return;
+
+              const isCurrentlyPlaying = currentPlayingSongId &&
+                (droppingData.songId === currentPlayingSongId || droppingData.droppingId === currentPlayingSongId);
+
+              const iconUrl = isCurrentlyPlaying 
                 ? "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
                   '<svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
                   '<g filter="url(#filter0_d_660_1355)">' +
@@ -363,20 +562,70 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
                 url: iconUrl,
                 scaledSize: new google.maps.Size(60, 60)
               });
+
+              marker.setZIndex(isCurrentlyPlaying ? 2000 : 100);
             });
           }
 
           function processMessage(data) {
             if (data.type === 'droppings') {
-              if (mapReady && map && data.payload && data.payload.length > 0) {
-                addDroppings(data.payload);
+              const previousPlayingDroppingId = currentPlayingDroppingId;
+              currentPlayingDroppingId = data.currentPlayingDroppingId;
+              console.log('WebView - 현재 재생 중인 드랍핑 ID:', currentPlayingDroppingId);
+              console.log('WebView - 받은 드랍핑 개수:', data.payload?.length || 0);
+
+              if (mapReady && map && data.payload) {
+                if (data.payload.length > 0) {
+                  addDroppings(data.payload, data.currentPlayingDroppingId);
+                  updateAllMarkersForCurrentSong(currentPlayingDroppingId);
+                } else {
+                  console.log('WebView - 드랍핑이 없어서 기존 마커 제거');
+                  clearDroppings();
+                }
+              }
+
+              if (previousPlayingDroppingId !== currentPlayingDroppingId) {
+                console.log('재생 드랍핑 변경됨:', previousPlayingDroppingId, '->', currentPlayingDroppingId);
+                updateAllMarkersForCurrentSong(currentPlayingDroppingId);
+              }
+            } else if (data.type === 'updateCurrentDropping') {
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                  type: 'debug',
+                  message: 'WebView 메시지 수신됨\\n드랍핑ID: ' + data.currentPlayingDroppingId + '\\n타입: ' + typeof data.currentPlayingDroppingId
+                }));
+              }
+
+              const previousPlayingDroppingId = currentPlayingDroppingId;
+              currentPlayingDroppingId = data.currentPlayingDroppingId;
+              const timestamp = data.timestamp;
+              console.log('[SYNC] WebView 즉시 재생 음악 업데이트:', {
+                timestamp,
+                previousPlayingDroppingId,
+                newCurrentPlayingDroppingId: currentPlayingDroppingId,
+                changed: previousPlayingDroppingId !== currentPlayingDroppingId,
+                existingMarkersCount: existingMarkers.length
+              });
+
+              console.log('[SYNC] 강제 마커 업데이트 시작...', currentPlayingDroppingId);
+
+              if (window.ReactNativeWebView) {
+                window.ReactNativeWebView.postMessage(JSON.stringify({
+                  type: 'debug',
+                  message: '마커 업데이트 시작: ' + currentPlayingDroppingId
+                }));
+              }
+
+              updateAllMarkersForCurrentSong(currentPlayingDroppingId);
+
+              if (currentPlayingDroppingId) {
+                focusOnCurrentlyPlayingMusic(currentPlayingDroppingId);
               }
             } else if (data.type === 'initLocation') {
               const lat = Number(data.payload?.latitude);
               const lng = Number(data.payload?.longitude);
 
               if (!isNaN(lat) && !isNaN(lng) && mapReady && map) {
-                console.log('🗺️ 지도 초기 위치 설정:', lat, lng);
                 const newPosition = new google.maps.LatLng(lat, lng);
                 map.setCenter(newPosition);
                 map.setZoom(${MAP_ZOOM});
@@ -388,10 +637,9 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
 
               if (!isNaN(lat) && !isNaN(lng)) {
                 updateLocation(lat, lng);
-                // 내 위치 마커도 업데이트
                 if (myLocationMarker) {
                   myLocationMarker.setPosition(new google.maps.LatLng(lat, lng));
-                  console.log('📍 내 위치 마커 업데이트:', lat, lng);
+                  console.log('내 위치 마커 업데이트:', lat, lng);
                 }
               }
             }
@@ -463,9 +711,9 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
           <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
         </View>
       )}
-      onLoadStart={() => console.log('🗺️ Map WebView 로딩 시작')}
-      onLoadEnd={() => console.log('🗺️ Map WebView 로딩 완료')}
-      onError={(error) => console.error('🗺️ Map WebView 에러:', error.nativeEvent)}
+      onLoadStart={() => console.log('Map WebView 로딩 시작')}
+      onLoadEnd={() => console.log('Map WebView 로딩 완료')}
+      onError={(error) => console.error('Map WebView 에러:', error.nativeEvent)}
     />
   );
 }
@@ -482,5 +730,8 @@ export default React.memo(GoogleMapView, (prevProps, nextProps) => {
       return !next || prev.droppingId !== next.droppingId;
     });
 
-  return !locationChanged && !droppingsChanged;
+  const currentDroppingChanged =
+    String(prevProps.currentPlayingDroppingId ?? '') !== String(nextProps.currentPlayingDroppingId ?? '');
+
+  return !locationChanged && !droppingsChanged && !currentDroppingChanged;
 });

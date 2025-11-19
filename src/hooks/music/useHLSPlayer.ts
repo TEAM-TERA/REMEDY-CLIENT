@@ -3,6 +3,7 @@ import { Image } from 'react-native';
 import TrackPlayer, { Event, State, useTrackPlayerEvents, TrackType} from 'react-native-track-player';
 import axiosInstance from '../../modules/auth/api/axiosInstance';
 import Config from 'react-native-config';
+import { usePlayerStore } from '../../stores/playerStore';
 
 interface MusicPlayerState {
   isPlaying: boolean;
@@ -25,6 +26,7 @@ export function useHLSPlayer(songId?: string) {
   });
 
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const { setCurrentId } = usePlayerStore(); // playerStore에 접근
 
   type TrackEvent =
     | { type: 'playback-state'; state: number }
@@ -46,6 +48,14 @@ export function useHLSPlayer(songId?: string) {
     
     if (event.type === 'playback-error') {
       setState(prev => ({ ...prev, error: '재생 에러가 발생했습니다' }));
+      const timestamp = new Date().toISOString();
+      console.log('❌ [SYNC] Playback error - clearing currentId:', {
+        timestamp,
+        previousGlobalId: globalCurrentSongId,
+        error: event
+      });
+      globalCurrentSongId = undefined;
+      setCurrentId(null); // 에러 시 현재 재생 음악 정보 초기화
     }
   });
 
@@ -264,7 +274,16 @@ export function useHLSPlayer(songId?: string) {
       if (__DEV__) {
         console.log('🎵 Loading new song:', songId);
       }
+      const timestamp = new Date().toISOString();
+      console.log('🎵 [SYNC] useHLSPlayer 새로운 곡 로딩:', {
+        timestamp,
+        songId,
+        songIdType: typeof songId,
+        previousGlobalId: globalCurrentSongId
+      });
+
       globalCurrentSongId = songId;
+      setCurrentId(songId); // playerStore에도 현재 재생 중인 음악 ID 저장
 
       try {
         const songInfoResponse = await fetch(`${axiosInstance.defaults.baseURL}/songs/${songId}`);

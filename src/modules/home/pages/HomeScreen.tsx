@@ -1,4 +1,4 @@
-import { View } from "react-native";
+import { View, Alert } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
 import { BACKGROUND_COLORS } from "../../../constants/colors";
@@ -11,6 +11,9 @@ import { ConfirmModal } from "../../../components";
 import useLocation from "../../../hooks/useLocation";
 import { useDroppings } from "../../drop/hooks/useDroppings";
 import { ensureSetup, loadAndPlayPreview, pause } from "../../../utils/spotifyPreviewPlayer";
+import { usePlayerStore } from "../../../stores/playerStore";
+import { useMemo } from "react";
+import type { Dropping } from "../types/musicList";
 
 function HomeScreen() {
   const [headerHeight, setHeaderHeight] = useState(68);
@@ -20,11 +23,11 @@ function HomeScreen() {
   const { currentDistance, timeComponents, currentTime } = useRunningTracker(isRunning);
   const { location } = useLocation();
   const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
+  const { currentId } = usePlayerStore();
 
-  // 위치 정보 로깅
   useEffect(() => {
-    console.log('🗺️ HomeScreen - Current location:', currentLocation);
-    console.log('📍 Using location:', location ? '실제 GPS 위치' : '기본 위치 (서울시청)');
+    console.log('HomeScreen - Current location:', currentLocation);
+    console.log('Using location:', location ? '실제 GPS 위치' : '기본 위치 (서울시청)');
   }, [location, currentLocation]);
 
   const { data: droppings } = useDroppings(
@@ -32,13 +35,30 @@ function HomeScreen() {
     currentLocation.latitude
   );
 
-  // 드랍핑 데이터 로깅
+  const currentDroppingId = useMemo(() => {
+    if (!currentId || !Array.isArray(droppings)) return null;
+    const found = droppings.find((d: Dropping) => String(d.songId) === String(currentId));
+    return found ? found.droppingId : null;
+  }, [currentId, droppings]);
+
   useEffect(() => {
-    console.log('🎵 HomeScreen - 드랍핑 데이터 확인:', droppings?.length || 0, '개');
+    console.log('HomeScreen - 드랍핑 데이터 확인:', droppings?.length || 0, '개');
     if (droppings && droppings.length > 0) {
-      console.log('🎵 첫 번째 드랍핑:', droppings[0]);
+      console.log('첫 번째 드랍핑:', droppings[0]);
+      console.log('모든 드랍핑 songId 목록:', droppings.map((d: Dropping) => ({ droppingId: d.droppingId, songId: d.songId })));
     }
   }, [droppings]);
+
+  useEffect(() => {
+    const timestamp = new Date().toISOString();
+    console.log('[DEBUG] HomeScreen - 현재 재생 중인 음악 ID 변경:', {
+      timestamp,
+      currentId,
+      type: typeof currentId,
+      isNull: currentId === null,
+      isUndefined: currentId === undefined
+    });
+  }, [currentId]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }}>
@@ -82,7 +102,11 @@ function HomeScreen() {
               />
             )}
             <View style={{ flex: 1 }}>
-                <GoogleMapView droppings={Array.isArray(droppings) ? droppings : []} currentLocation={currentLocation}/>
+                <GoogleMapView
+                    droppings={Array.isArray(droppings) ? droppings : []}
+                    currentLocation={currentLocation}
+                    currentPlayingDroppingId={currentDroppingId as any}
+                />
             </View>
             <MusicWheel droppings={Array.isArray(droppings) ? droppings : []}/>
         </View>

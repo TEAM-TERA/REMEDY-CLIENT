@@ -6,6 +6,7 @@ type PlayerState = {
   queue: string[];
   currentId: string | null;
   setQueue: (ids: string[]) => void;
+  setCurrentId: (id: string | null) => void;
   playIfDifferent: (songId: string, meta?: { title?: string; artist?: string; artwork?: string }) => Promise<void>;
   playNext: () => Promise<void>;
 };
@@ -14,6 +15,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   queue: [],
   currentId: null,
   setQueue: (ids) => set({ queue: ids }),
+  setCurrentId: (id) => {
+    console.log('🔄 [STORE] playerStore.setCurrentId 호출됨:', {
+      newId: id,
+      type: typeof id,
+      timestamp: new Date().toISOString()
+    });
+    set({ currentId: id });
+  },
   playIfDifferent: async (songId, meta) => {
     const { currentId } = get();
     if (currentId === songId) {
