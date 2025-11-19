@@ -95,7 +95,6 @@ function MusicScreen({ route }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <Header onBackPress={() => navigation.goBack()}/> */}
       <KeyboardAwareScrollView
         ref={scrollViewRef}
         contentContainerStyle={{ flexGrow: 1 }}
