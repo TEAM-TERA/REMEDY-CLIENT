@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { ActivityIndicator, Alert, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useNavigation } from '@react-navigation/native';
 import { PRIMARY_COLORS } from '../../constants/colors';
@@ -24,6 +24,17 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
       webviewRef.current.postMessage(message);
     }
   }, [droppings, isMapReady]);
+
+  // 지도 초기화 시 현재 위치로 이동
+  useEffect(() => {
+    if (isMapReady && webviewRef.current && currentLocation) {
+      const message = JSON.stringify({
+        type: 'initLocation',
+        payload: { latitude: currentLocation.latitude, longitude: currentLocation.longitude },
+      });
+      webviewRef.current.postMessage(message);
+    }
+  }, [isMapReady, currentLocation]);
 
   useEffect(() => {
     if (!isMapReady || !webviewRef.current || !currentLocation) return;
@@ -84,18 +95,19 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
     <html>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="format-detection" content="telephone=no">
+        <meta http-equiv="Permissions-Policy" content="geolocation=*">
         <style>
           html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; }
         </style>
         <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=geometry"></script>
         <script>
           var map;
-          var myLocationMarker;
-          var userCircle;
           var mapReady = false;
           var existingMarkers = [];
           var messageQueue = [];
           var lastCenter = null;
+          var myLocationMarker;
           
           function initMap() {
             const center = { lat: 37.5665, lng: 126.9780 };
@@ -103,30 +115,28 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
             map = new google.maps.Map(document.getElementById('map'), {
               center,
               zoom: ${MAP_ZOOM},
+              minZoom: 6,  // 대한민국 전체 수준 (6~7 정도가 적당)
+              maxZoom: 20, // 최대 확대 레벨
+              restriction: {
+                latLngBounds: new google.maps.LatLngBounds(
+                    new google.maps.LatLng(33.0, 124.5),  // 남서쪽 (제주도 남서쪽)
+                    new google.maps.LatLng(38.7, 131.5)   // 북동쪽 (독도 북동쪽)
+                  ),
+                  strictBounds: true
+                },
               styles: ${JSON.stringify(MAP_STYLE)},
-              disableDefaultUI: true,
+              disableDefaultUI: false,
+              mapTypeControl: false,
+              streetViewControl: false,
+              rotateControl: false,
+              scaleControl: false,
+              fullscreenControl: false,
+              zoomControl: true,
+              myLocationEnabled: true,
               gestureHandling: 'greedy'
             });
 
-            myLocationMarker = new google.maps.Marker({
-              position: center,
-              map: map,
-              title: '내 위치',
-              icon: { url: "${MARKER_STYLES.MY_LOCATION}", scaledSize: new google.maps.Size(40, 40), anchor: new google.maps.Point(20, 20) },
-              zIndex: 0
-            });
-
-            userCircle = new google.maps.Circle({
-              strokeColor: "#FFFFFF",
-              strokeOpacity: 0,
-              strokeWeight: 0,
-              fillColor: "${PRIMARY_COLORS.DEFAULT}",
-              fillOpacity: 0.2,
-              map,
-              center,
-              radius: ${MAP_RADIUS},
-              zIndex: 0
-            });
+            // Google Maps 기본 내 위치 기능만 사용
 
             google.maps.event.addListenerOnce(map, 'idle', function() {
               mapReady = true;
@@ -138,6 +148,29 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
           function clearDroppings() {
             existingMarkers.forEach(marker => marker.setMap(null));
             existingMarkers = [];
+          }
+
+          function createMyLocationMarker(lat, lng) {
+            if (myLocationMarker) {
+              myLocationMarker.setMap(null);
+            }
+
+            myLocationMarker = new google.maps.Marker({
+              position: { lat: lat, lng: lng },
+              map: map,
+              icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 8,
+                fillColor: '#F3124E',
+                fillOpacity: 1,
+                strokeColor: '#ffffff',
+                strokeWeight: 1
+              },
+              zIndex: 1000,
+              title: '내 위치'
+            });
+
+            console.log('📍 내 위치 마커 생성:', lat, lng);
           }
 
           function addDroppings(drops) {
@@ -253,26 +286,19 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
 
           function updateLocation(lat, lng) {
             if (!mapReady || !map) return;
-            
+
             const newPosition = new google.maps.LatLng(lat, lng);
-            
-            if (lastCenter && 
-                Math.abs(lastCenter.lat - lat) < 0.00001 && 
+
+            if (lastCenter &&
+                Math.abs(lastCenter.lat - lat) < 0.00001 &&
                 Math.abs(lastCenter.lng - lng) < 0.00001) {
               return;
             }
-            
+
             lastCenter = { lat, lng };
-            
+
+            // 지도 중심을 부드럽게 이동 (Google Maps 기본 기능에 맡기고 중심만 업데이트)
             map.panTo(newPosition);
-            
-            if (myLocationMarker) {
-              myLocationMarker.setPosition(newPosition);
-            }
-            
-            if (userCircle) {
-              userCircle.setCenter(newPosition);
-            }
 
             existingMarkers.forEach(function(marker) {
               const markerPos = marker.getPosition();
@@ -345,12 +371,28 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
               if (mapReady && map && data.payload && data.payload.length > 0) {
                 addDroppings(data.payload);
               }
+            } else if (data.type === 'initLocation') {
+              const lat = Number(data.payload?.latitude);
+              const lng = Number(data.payload?.longitude);
+
+              if (!isNaN(lat) && !isNaN(lng) && mapReady && map) {
+                console.log('🗺️ 지도 초기 위치 설정:', lat, lng);
+                const newPosition = new google.maps.LatLng(lat, lng);
+                map.setCenter(newPosition);
+                map.setZoom(${MAP_ZOOM});
+                createMyLocationMarker(lat, lng);
+              }
             } else if (data.type === 'updateLocation') {
               const lat = Number(data.payload?.latitude);
               const lng = Number(data.payload?.longitude);
-              
+
               if (!isNaN(lat) && !isNaN(lng)) {
                 updateLocation(lat, lng);
+                // 내 위치 마커도 업데이트
+                if (myLocationMarker) {
+                  myLocationMarker.setPosition(new google.maps.LatLng(lat, lng));
+                  console.log('📍 내 위치 마커 업데이트:', lat, lng);
+                }
               }
             }
           }
@@ -398,25 +440,33 @@ function GoogleMapView({ droppings, currentLocation }: GoogleMapViewProps) {
   `, [GOOGLE_MAPS_API_KEY, MAP_ZOOM, MAP_STYLE, MARKER_STYLES.MY_LOCATION, PRIMARY_COLORS.DEFAULT, MAP_RADIUS]);
 
   return (
-    <>
-      {!currentLocation && (
-        <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
+    <WebView
+      style={{ flex: 1 }}
+      ref={webviewRef}
+      originWhitelist={['*']}
+      source={{ html, baseUrl: 'https://remedy.test' }}
+      javaScriptEnabled={true}
+      domStorageEnabled={true}
+      allowFileAccess={true}
+      allowUniversalAccessFromFileURLs={true}
+      mixedContentMode="always"
+      geolocationEnabled={true}
+      scrollEnabled={false}
+      onMessage={handleMessage}
+      startInLoadingState={true}
+      allowsInlineMediaPlayback={true}
+      mediaPlaybackRequiresUserAction={false}
+      bounces={false}
+      decelerationRate="normal"
+      renderLoading={() => (
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a29' }}>
+          <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
+        </View>
       )}
-      <WebView
-        style={{ flex: 1 }}
-        ref={webviewRef}
-        originWhitelist={['*']}
-        source={{ html, baseUrl: 'https://remedy.test' }}
-        javaScriptEnabled={true}
-        domStorageEnabled={true}
-        allowFileAccess={true}
-        allowUniversalAccessFromFileURLs={true}
-        mixedContentMode="always"
-        geolocationEnabled={true}
-        scrollEnabled={false}
-        onMessage={handleMessage}
-      />
-    </>
+      onLoadStart={() => console.log('🗺️ Map WebView 로딩 시작')}
+      onLoadEnd={() => console.log('🗺️ Map WebView 로딩 완료')}
+      onError={(error) => console.error('🗺️ Map WebView 에러:', error.nativeEvent)}
+    />
   );
 }
 

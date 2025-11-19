@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BACKGROUND_COLORS } from "../../../constants/colors";
 import HeaderBar from "../components/HeaderBar";
 import GoogleMapView from "../../../components/map/GoogleMapView";
@@ -21,10 +21,24 @@ function HomeScreen() {
   const { location } = useLocation();
   const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
 
+  // 위치 정보 로깅
+  useEffect(() => {
+    console.log('🗺️ HomeScreen - Current location:', currentLocation);
+    console.log('📍 Using location:', location ? '실제 GPS 위치' : '기본 위치 (서울시청)');
+  }, [location, currentLocation]);
+
   const { data: droppings } = useDroppings(
     currentLocation.longitude,
     currentLocation.latitude
   );
+
+  // 드랍핑 데이터 로깅
+  useEffect(() => {
+    console.log('🎵 HomeScreen - 드랍핑 데이터 확인:', droppings?.length || 0, '개');
+    if (droppings && droppings.length > 0) {
+      console.log('🎵 첫 번째 드랍핑:', droppings[0]);
+    }
+  }, [droppings]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }}>

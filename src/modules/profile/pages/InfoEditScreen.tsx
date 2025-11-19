@@ -42,11 +42,9 @@ function InfoEditScreen() {
     };
 
     const handleDatePress = () => {
-        // TODO: DatePicker 모달 열기
     };
 
     const handleSubmit = () => {
-        // TODO: 정보 수정 API 호출
         navigation.goBack();
     };
 
