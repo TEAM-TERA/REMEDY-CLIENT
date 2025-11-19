@@ -12,6 +12,9 @@ interface MusicPlayerState {
   error: string | null;
 }
 
+// 모든 hook 인스턴스가 공유하는 현재 재생중인 곡 ID
+let globalCurrentSongId: string | undefined = undefined;
+
 export function useHLSPlayer(songId?: string) {
   const [state, setState] = useState<MusicPlayerState>({
     isPlaying: false,
@@ -198,6 +201,44 @@ export function useHLSPlayer(songId?: string) {
   useEffect(() => {
     const loadSong = async () => {
       if (!songId) return;
+
+      if (globalCurrentSongId === songId) {
+        console.log('⏭️ Same song already loaded, syncing state:', songId);
+
+        // 이미 재생중인 곡이면 현재 상태를 동기화
+        try {
+          const progress = await TrackPlayer.getProgress();
+          const playbackState = await TrackPlayer.getPlaybackState();
+
+          setState(prev => ({
+            ...prev,
+            currentTime: progress.position,
+            duration: progress.duration || 0,
+            isPlaying: playbackState.state === State.Playing,
+            isLoading: false,
+            error: null,
+          }));
+
+          // 진행 상태 업데이트 인터벌 시작
+          if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current);
+          }
+          progressIntervalRef.current = setInterval(updateProgress, 1000);
+
+          console.log('✅ Synced to playing song:', {
+            position: progress.position,
+            duration: progress.duration,
+            state: playbackState.state
+          });
+        } catch (error) {
+          console.error('Failed to sync player state:', error);
+        }
+
+        return;
+      }
+
+      console.log('🎵 Loading new song:', songId);
+      globalCurrentSongId = songId;
 
       try {
         const songInfoResponse = await fetch(`${axiosInstance.defaults.baseURL}/songs/${songId}`);

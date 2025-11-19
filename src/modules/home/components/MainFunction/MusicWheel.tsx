@@ -7,12 +7,11 @@ import MusicNode from './MusicNode';
 import { VisibleNode } from '../../types/musicList';
 import { navigate } from '../../../../navigation';
 import DropButton from './DropButton';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import { getSongInfo } from '../../../drop/api/dropApi';
-import { usePlayerStore } from '../../../../stores/playerStore';
-import TrackPlayer, { Event } from 'react-native-track-player';
+import { useHLSPlayer } from '../../../../hooks/music/useHLSPlayer';
 
-const SWIPE_THRESHOLD = 80;
+const SWIPE_THRESHOLD = 30;
 const INVERT_DIRECTION = false;
 const sign = INVERT_DIRECTION ? -1 : 1;
 const ANGLE_PER_ITEM = 45;
@@ -27,57 +26,48 @@ function MusicWheel({ droppings }: MusicWheelProps) {
   const totalSongs = droppings?.length || 0;
   const rotation = useSharedValue(0);
   const startRotation = useSharedValue(0);
-  const setQueue = usePlayerStore(s => s.setQueue);
-  const playIfDifferent = usePlayerStore(s => s.playIfDifferent);
-  const playNext = usePlayerStore(s => s.playNext);
+
+  const [visualMainIndex, setVisualMainIndex] = useState<number>(0);
+  const [isSwiping, setIsSwiping] = useState<boolean>(false);
+
+  const actualMainDataIndex = isSwiping ? currentIndex : ((currentIndex + visualMainIndex) % totalSongs);
+  const currentSongId = droppings?.[actualMainDataIndex]?.songId;
+  const musicPlayer = useHLSPlayer(currentSongId);
 
   useEffect(() => {
+    console.log('🎡 MusicWheel mounted, droppings count:', droppings?.length);
     rotation.value = 0;
   }, [rotation]);
 
-  const song1Query = useQuery({
-    queryKey: ['songInfo', droppings?.[0]?.songId],
-    queryFn: () => getSongInfo(droppings[0].songId),
-    enabled: !!(droppings?.[0]?.songId),
-  });
-  
-  const song2Query = useQuery({
-    queryKey: ['songInfo', droppings?.[1]?.songId],
-    queryFn: () => getSongInfo(droppings[1].songId),
-    enabled: !!(droppings?.[1]?.songId),
-  });
+  useEffect(() => {
+    console.log('📊 Droppings changed, count:', droppings?.length);
+    console.log('📊 Current index:', currentIndex);
+    console.log('👁️ Visual main index:', visualMainIndex);
+    console.log('✋ Is swiping:', isSwiping);
+    console.log('🎯 Actual main data index:', actualMainDataIndex);
+    console.log('🎵 Current song ID:', currentSongId);
+  }, [droppings, currentIndex, visualMainIndex, isSwiping, actualMainDataIndex, currentSongId]);
 
-  const song3Query = useQuery({
-    queryKey: ['songInfo', droppings?.[2]?.songId],
-    queryFn: () => getSongInfo(droppings[2].songId),
-    enabled: !!(droppings?.[2]?.songId),
-  });
+  const visibleSongIds = React.useMemo(() => {
+    if (!droppings || droppings.length === 0) return [];
+    const ids = [];
+    for (let i = 0; i < Math.min(TOTAL_NODES, totalSongs); i++) {
+      const dataIndex = (currentIndex + i) % totalSongs;
+      if (droppings[dataIndex]?.songId) {
+        ids.push(droppings[dataIndex].songId);
+      }
+    }
+    return ids;
+  }, [droppings, currentIndex, totalSongs]);
 
-  const song4Query = useQuery({
-    queryKey: ['songInfo', droppings?.[3]?.songId],
-    queryFn: () => getSongInfo(droppings[3].songId),
-    enabled: !!(droppings?.[3]?.songId),
+  const songQueries = useQueries({
+    queries: visibleSongIds.map(songId => ({
+      queryKey: ['songInfo', songId],
+      queryFn: () => getSongInfo(songId),
+      enabled: !!songId,
+      staleTime: 5 * 60 * 1000,
+    })),
   });
-
-  const song5Query = useQuery({
-    queryKey: ['songInfo', droppings?.[4]?.songId],
-    queryFn: () => getSongInfo(droppings[4].songId),
-    enabled: !!(droppings?.[4]?.songId),
-  });
-
-  const song6Query = useQuery({
-    queryKey: ['songInfo', droppings?.[5]?.songId],
-    queryFn: () => getSongInfo(droppings[5].songId),
-    enabled: !!(droppings?.[5]?.songId),
-  });
-
-  const song7Query = useQuery({
-    queryKey: ['songInfo', droppings?.[6]?.songId],
-    queryFn: () => getSongInfo(droppings[6].songId),
-    enabled: !!(droppings?.[6]?.songId),
-  });
-
-  const songQueries = [song1Query, song2Query, song3Query, song4Query, song5Query, song6Query, song7Query];
 
   const handlerPressDrop = ()=>{
     navigate('Drop');
@@ -103,6 +93,17 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     return closestIndex;
   });
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const currentMainNode = mainNodeIndex.value;
+      if (currentMainNode !== visualMainIndex) {
+        setVisualMainIndex(currentMainNode);
+      }
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [visualMainIndex, mainNodeIndex]);
+
   const getVisibleNodes = () => {
     const nodes: VisibleNode[] = [];
     if (!droppings || droppings.length === 0) {
@@ -114,14 +115,15 @@ function MusicWheel({ droppings }: MusicWheelProps) {
 
       if (droppings[dataIndex]) {
         const dropping = droppings[dataIndex];
+        const isMainNode = nodeIndex === 0;
+
         let songInfo = null;
-        if (songQueries[dataIndex]?.data) {
-          songInfo = songQueries[dataIndex].data;
+        const queryIndex = visibleSongIds.indexOf(dropping.songId);
+        if (queryIndex !== -1 && songQueries[queryIndex]?.data) {
+          songInfo = songQueries[queryIndex].data;
         }
 
         const baseAngle = nodeIndex * ANGLE_PER_ITEM - 100;
-
-        const isMainNode = nodeIndex === 0;
 
         nodes.push({
           position: {
@@ -142,58 +144,32 @@ function MusicWheel({ droppings }: MusicWheelProps) {
   };
 
   const updateIndex = (direction: string) => {
-    if (direction === 'prev') {
-      setCurrentIndex((prev: number) => (prev - 1 + totalSongs) % totalSongs);
-    } else {
-      setCurrentIndex((prev: number) => (prev + 1) % totalSongs);
-    }
+    console.log('🔄 updateIndex called, direction:', direction, 'visualMainIndex:', visualMainIndex);
+
+    setCurrentIndex((prev: number) => {
+      const newIndex = (prev + visualMainIndex + totalSongs) % totalSongs;
+      console.log('📍 Setting currentIndex from', prev, 'to', newIndex);
+      return newIndex;
+    });
+
+    setVisualMainIndex(0);
   };
 
-  // Keep queue synced with droppings
-  useEffect(() => {
-    if (droppings && droppings.length > 0) {
-      setQueue(droppings.map(d => d.songId).filter(Boolean));
-    }
-  }, [droppings, setQueue]);
-
-  // Auto play when wheel selects a new main item
-  useEffect(() => {
-    if (!droppings || droppings.length === 0) return;
-    const current = droppings[currentIndex % droppings.length];
-    if (!current?.songId) return;
-    // Try to pass minimal meta if loaded
-    const q = songQueries.find(q => q?.data?.id === current.songId);
-    playIfDifferent(current.songId, {
-      title: q?.data?.title || current.title,
-      artist: q?.data?.artist || current.singer,
-      artwork: current.albumImageUrl,
-    });
-  }, [currentIndex, droppings]);
-
-  // Auto play next when current finishes
-  useEffect(() => {
-    const sub = TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async () => {
-      await playNext();
-    });
-    return () => { try { sub.remove(); } catch {} };
-  }, [playNext]);
 
   const pan = Gesture.Pan()
     .onBegin(() => {
         'worklet';
         startRotation.value = rotation.value;
+        runOnJS(setIsSwiping)(true);
     })
     .onUpdate(event => {
         'worklet';
-        // 드래그 거리에 비례하여 rotation 값 업데이트 (적당한 반응)
         const rawRotation = startRotation.value + sign * event.translationX * 0.8;
 
-        // 가장 가까운 스냅 포인트와의 거리 계산
         const nearestStep = Math.round(rawRotation / ANGLE_PER_ITEM);
         const nearestRotation = nearestStep * ANGLE_PER_ITEM;
         const distanceToSnap = Math.abs(rawRotation - nearestRotation);
 
-        // 스냅 포인트에 가까울수록 자기 정렬 효과 적용 (약하게)
         const snapInfluence = Math.max(0, 1 - (distanceToSnap / (ANGLE_PER_ITEM * 0.4)));
         const alignedRotation = rawRotation + (nearestRotation - rawRotation) * snapInfluence * 0.1;
 
@@ -202,35 +178,30 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     .onEnd(event => {
         'worklet';
         const drag = sign * event.translationX;
-        const velocity = Math.abs(event.velocityX);
 
-        // 더 확실한 스와이프 의도 감지: 거리와 속도 모두 고려
-        const isDefiniteSwipe = Math.abs(drag) > SWIPE_THRESHOLD && velocity > 300;
+        const isDefiniteSwipe = Math.abs(drag) > SWIPE_THRESHOLD;
 
         if (isDefiniteSwipe) {
-            // 현재 rotation에서 가장 가까운 정확한 각도 위치 계산
-            const currentStep = Math.round(rotation.value / ANGLE_PER_ITEM);
             const direction = drag > 0 ? 1 : -1;
-            const targetStep = currentStep + direction;
-            const targetRotation = targetStep * ANGLE_PER_ITEM;
 
-            // 부드러운 스냅 애니메이션
-            rotation.value = withSpring(targetRotation, {
-                damping: 100,    // 더 부드러운 감쇠
-                stiffness: 50, // 적당한 탄성
-                mass: 1,        // 자연스러운 질량감
+            rotation.value = withSpring(0, {
+                damping: 100,
+                stiffness: 50,
+                mass: 1,
+            }, () => {
+                'worklet';
+                runOnJS(setIsSwiping)(false);
             });
 
             runOnJS(updateIndex)(drag > 0 ? 'next' : 'prev');
         } else {
-            // 가장 가까운 정확한 각도로 부드럽게 스냅
-            const nearestStep = Math.round(rotation.value / ANGLE_PER_ITEM);
-            const nearestRotation = nearestStep * ANGLE_PER_ITEM;
-
-            rotation.value = withSpring(nearestRotation, {
-                damping: 150,    // 빠른 복귀용 감쇠
-                stiffness: 200, // 적당한 탄성
-                mass: 1,      // 가벼운 질량감
+            rotation.value = withSpring(0, {
+                damping: 150,
+                stiffness: 200,
+                mass: 1,
+            }, () => {
+                'worklet';
+                runOnJS(setIsSwiping)(false);
             });
         }
     });

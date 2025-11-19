@@ -64,12 +64,6 @@ function DropScreen() {
       );
     }, []);
 
-    useEffect(() => {
-      console.log('hlsPath', hlsPath);
-      if (hlsPath) {
-        musicPlayer.loadMusic(songId, hlsPath, imgUrl || serverImageUrl);
-      }
-    }, [songId, imgUrl, hlsPath]);
   
     const handleCreateDropping = () => {
       if (!userToken) {

@@ -16,11 +16,19 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   setQueue: (ids) => set({ queue: ids }),
   playIfDifferent: async (songId, meta) => {
     const { currentId } = get();
-    if (currentId === songId) return;
+    if (currentId === songId) {
+      console.log('⏭️ Same song already playing, skipping:', songId);
+      return;
+    }
     const streamBase = Config.MUSIC_STREAM_BASE_URL || Config.MUSIC_API_BASE_URL;
     const streamUrl = `${streamBase}/hls/${songId}/playlist.m3u8`;
+    console.log('🎵 Attempting to play:', songId);
+    console.log('🔗 Stream URL:', streamUrl);
+    console.log('📝 Meta:', meta);
     try {
       await TrackPlayer.reset();
+      console.log('✅ TrackPlayer reset');
+
       await TrackPlayer.add({
         id: songId,
         url: streamUrl,
@@ -29,9 +37,18 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         artwork: meta?.artwork,
         type: TrackType.HLS,
       });
+      console.log('✅ Track added to player');
+
       await TrackPlayer.play();
+      console.log('✅ Play command sent');
+
+      const state = await TrackPlayer.getPlaybackState();
+      console.log('🎮 Playback state after play:', state);
+
       set({ currentId: songId });
+      console.log('✅ Current ID set to:', songId);
     } catch (e) {
+      console.error('❌ Failed to play song:', e);
     }
   },
   playNext: async () => {

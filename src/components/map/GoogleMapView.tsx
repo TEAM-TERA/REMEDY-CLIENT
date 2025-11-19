@@ -404,7 +404,6 @@ export default function GoogleMapView({ droppings, currentLocation }: GoogleMapV
                 }
               }
             } catch (e) {
-              // Silent error
             }
           }
         }}
