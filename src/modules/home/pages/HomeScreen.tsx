@@ -1,29 +1,27 @@
-import { View, Alert } from "react-native";
+import { View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BACKGROUND_COLORS } from "../../../constants/colors";
 import HeaderBar from "../components/HeaderBar";
 import GoogleMapView from "../../../components/map/GoogleMapView";
 import MusicWheel from "../components/MainFunction/MusicWheel";
-import RunningStats from "../components/Running/RunningStats";
-import useRunningTracker from "../hooks/useRunningTracker";
-import { ConfirmModal } from "../../../components";
 import useLocation from "../../../hooks/useLocation";
 import { useDroppings } from "../../drop/hooks/useDroppings";
-import { ensureSetup, loadAndPlayPreview, pause } from "../../../utils/spotifyPreviewPlayer";
 import { usePlayerStore } from "../../../stores/playerStore";
 import { useMemo } from "react";
 import type { Dropping } from "../types/musicList";
+import NowPlayingCard from "../../../components/player/NowPlayingCard";
+import { getSongInfo, getDroppingById } from "../../drop/api/dropApi";
+import { getDropLikeCount } from "../../music/api/likeApi";
+import { getCommentsByDroppingId } from "../../music/api/commentApi";
 
 function HomeScreen() {
-  const [headerHeight, setHeaderHeight] = useState(68);
-  const [isRunning, setIsRunning] = useState(false);
-  const [runModalVisible, setRunModalVisible] = useState(false);
-  const [runModalMessage, setRunModalMessage] = useState("");
-  const { currentDistance, timeComponents, currentTime } = useRunningTracker(isRunning);
   const { location } = useLocation();
   const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
   const { currentId } = usePlayerStore();
+
+  const [showNowPlayingCard, setShowNowPlayingCard] = useState(false);
+  const [currentSongData, setCurrentSongData] = useState<any>(null);
 
   useEffect(() => {
     console.log('HomeScreen - Current location:', currentLocation);
@@ -60,66 +58,97 @@ function HomeScreen() {
     });
   }, [currentId]);
 
+  // 현재 재생 중인 곡 정보 가져오기
+  useEffect(() => {
+    if (currentId && currentDroppingId) {
+      const fetchCurrentSongData = async () => {
+        try {
+          console.log('현재 재생 중인 곡 정보 가져오기 시작:', { currentId, currentDroppingId });
+
+          // 드랍핑 정보 가져오기
+          const droppingData = await getDroppingById(currentDroppingId);
+          console.log('드랍핑 데이터:', droppingData);
+
+          // 곡 정보 가져오기
+          let songData = null;
+          if (droppingData?.songId) {
+            try {
+              songData = await getSongInfo(droppingData.songId);
+              console.log('곡 데이터:', songData);
+            } catch (songError) {
+              console.warn('곡 정보 가져오기 실패:', songError);
+            }
+          }
+
+          // 좋아요 수 가져오기
+          let likeCount = 0;
+          try {
+            const likeData = await getDropLikeCount(currentDroppingId);
+            likeCount = likeData.likeCount || 0;
+            console.log('좋아요 수:', likeCount);
+          } catch (likeError) {
+            console.warn('좋아요 수 가져오기 실패:', likeError);
+          }
+
+          // 댓글 수 가져오기
+          let commentCount = 0;
+          try {
+            const comments = await getCommentsByDroppingId(currentDroppingId);
+            commentCount = Array.isArray(comments) ? comments.length : 0;
+            console.log('댓글 수:', commentCount);
+          } catch (commentError) {
+            console.warn('댓글 수 가져오기 실패:', commentError);
+          }
+
+          // 통합 데이터 설정
+          const combinedData = {
+            title: songData?.title || droppingData?.content || '재생 중인 곡',
+            artist: songData?.artist || '알 수 없는 아티스트',
+            albumImagePath: songData?.albumImagePath,
+            content: droppingData?.content,
+            address: droppingData?.address,
+            likeCount: likeCount,
+            commentCount: commentCount,
+          };
+
+          setCurrentSongData(combinedData);
+          setShowNowPlayingCard(true);
+
+        } catch (error) {
+          console.error('현재 재생 중인 곡 정보 가져오기 실패:', error);
+        }
+      };
+
+      fetchCurrentSongData();
+    } else {
+      // 재생 중인 곡이 없으면 카드 닫기
+      setShowNowPlayingCard(false);
+      setCurrentSongData(null);
+    }
+  }, [currentId, currentDroppingId]);
+
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }}>
+    <View style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }}>
         <View style={{ flex: 1, position: 'relative' }}>
-            <HeaderBar setIsRunning={async (next:boolean)=>{
-                if (isRunning && !next) {
-                  const hours = timeComponents.hours;
-                  const minutes = timeComponents.minutes;
-                  const seconds = timeComponents.seconds;
-                  setRunModalMessage(`달린 시간: ${hours}:${minutes}:${seconds}\n달린 거리: ${currentDistance.toFixed(2)} km`);
-                  setRunModalVisible(true);
-                  try { await pause(); } catch {}
-                }
-                if (!isRunning && next) {
-                  const list = Array.isArray(droppings) ? droppings : [];
-                  if (list.length > 0) {
-                    const near = list[0];
-                    const idx = Math.floor(Math.random() * list.length);
-                    const pick = list[idx];
-                    try {
-                      await ensureSetup();
-                      await loadAndPlayPreview({
-                        id: String(pick.songId || pick.droppingId),
-                        title: pick.title || '드랍핑 음악',
-                        artist: pick.artist || '알 수 없는 아티스트',
-                        artwork: undefined,
-                        previewUrl: pick.previewUrl || pick.preview_url || ''
-                      });
-                    } catch (e) {
-                    }
-                  }
-                }
-                setIsRunning(next);
-              }} onLayout={setHeaderHeight} isRunning={isRunning}/>
-            {isRunning && (
-              <RunningStats 
-                isRunning={isRunning} 
-                headerHeight={headerHeight}
-                currentDistance={currentDistance}
-                timeComponents={timeComponents}
-              />
-            )}
-            <View style={{ flex: 1 }}>
-                <GoogleMapView
-                    droppings={Array.isArray(droppings) ? droppings : []}
-                    currentLocation={currentLocation}
-                    currentPlayingDroppingId={currentDroppingId as any}
-                />
-            </View>
+            <GoogleMapView
+                droppings={Array.isArray(droppings) ? droppings : []}
+                currentLocation={currentLocation}
+                currentPlayingDroppingId={currentDroppingId as any}
+            />
+            <SafeAreaView style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+                <HeaderBar />
+            </SafeAreaView>
+
             <MusicWheel droppings={Array.isArray(droppings) ? droppings : []}/>
+
+            {/* 현재 재생 중인 곡 정보 카드 */}
+            <NowPlayingCard
+                visible={showNowPlayingCard}
+                onClose={() => setShowNowPlayingCard(false)}
+                droppingData={currentSongData}
+            />
         </View>
-        <ConfirmModal
-          visible={runModalVisible}
-          title="러닝 종료"
-          message={runModalMessage}
-          cancelText="취소"
-          confirmText="확인"
-          onCancel={() => setRunModalVisible(false)}
-          onConfirm={() => setRunModalVisible(false)}
-        />
-    </SafeAreaView>
+    </View>
 
   );
 }

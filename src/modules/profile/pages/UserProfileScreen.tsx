@@ -23,7 +23,7 @@ function UserProfileScreen() {
     const defaultProfileImg = require('../../../assets/images/profileImage.png');
 
     const { data: myDrops = [], isLoading: dropLoading } = useMyDrop();
-    const { data: myLikes = [], isLoading: likeLoading } = useMyLikes();
+    const { data: myLikes = [], isLoading: likeLoading, error: likeError } = useMyLikes();
 
     const { data: me, isLoading, isError, refetch, isFetching } = useMyProfile();
 
@@ -31,6 +31,17 @@ function UserProfileScreen() {
     const [songImages, setSongImages] = useState<Record<string, string>>({});
     const [likeDroppings, setLikeDroppings] = useState<Record<string, any>>({});
     const [likeDroppingsLoading, setLikeDroppingsLoading] = useState(false);
+
+    // 좋아요 에러 디버깅
+    useEffect(() => {
+        console.log('=== 좋아요 데이터 상태 ===');
+        console.log('myLikes:', myLikes);
+        console.log('likeLoading:', likeLoading);
+        console.log('likeError:', likeError);
+        if (likeError) {
+            console.error('좋아요 목록 API 에러:', likeError);
+        }
+    }, [myLikes, likeLoading, likeError]);
 
     useEffect(() => {
         const loadSongInfo = async () => {
@@ -75,7 +86,16 @@ function UserProfileScreen() {
                 return;
             }
 
-            const likes = myLikes;
+            // myLikes가 객체 배열인 경우를 처리
+            const likes = myLikes.map(like => {
+                if (typeof like === 'string') {
+                    return like;
+                } else if (typeof like === 'object' && like !== null) {
+                    return like.droppingId || like.id || String(like);
+                } else {
+                    return String(like);
+                }
+            }).filter(Boolean);
 
             setLikeDroppingsLoading(true);
             try {
@@ -85,23 +105,50 @@ function UserProfileScreen() {
                         const dropping = await getDroppingById(droppingId);
                         console.log(`드랍핑 정보:`, dropping);
 
+                        if (!dropping) {
+                            console.warn(`드랍핑 ${droppingId} 데이터가 null입니다`);
+                            return [droppingId, {
+                                droppingId,
+                                content: "삭제된 드랍핑",
+                                address: "위치 정보 없음",
+                                songId: null,
+                                error: "드랍핑을 찾을 수 없습니다"
+                            }];
+                        }
+
                         if (dropping?.songId) {
-                            const songInfo = await getSongInfo(dropping.songId);
-                            console.log(`곡 정보:`, songInfo);
-                            return [droppingId, { ...dropping, songInfo }];
+                            try {
+                                const songInfo = await getSongInfo(dropping.songId);
+                                console.log(`곡 정보:`, songInfo);
+                                return [droppingId, { ...dropping, songInfo }];
+                            } catch (songError) {
+                                console.warn(`곡 정보 로드 실패 ${dropping.songId}:`, songError);
+                                return [droppingId, {
+                                    ...dropping,
+                                    songInfo: {
+                                        title: "곡 정보를 불러올 수 없습니다",
+                                        albumImagePath: null
+                                    }
+                                }];
+                            }
                         }
                         return [droppingId, dropping];
                     } catch (error) {
                         console.error(`드랍핑 ${droppingId} 로드 실패:`, error);
-                        return [droppingId, null];
+                        return [droppingId, {
+                            droppingId,
+                            content: "네트워크 오류",
+                            address: "위치 정보 없음",
+                            songId: null,
+                            error: error?.message || "알 수 없는 오류"
+                        }];
                     }
                 }));
 
                 const map: Record<string, any> = {};
                 results.forEach(([id, data]) => {
-                    if (data !== null) {
-                        map[id as string] = data;
-                    }
+                    // null이 아닌 모든 데이터를 포함 (에러 정보가 있는 것도 포함)
+                    map[id as string] = data;
                 });
                 console.log('좋아요 드랍핑 최종 데이터:', map);
                 setLikeDroppings(map);
@@ -148,6 +195,17 @@ function UserProfileScreen() {
                         droppingId: droppingId,
                         memo: "데이터를 불러올 수 없습니다",
                         location: "위치 정보 없음",
+                        imageSource: undefined,
+                        hasHeart: true,
+                    };
+                }
+
+                // 에러가 있는 경우
+                if (dropping.error) {
+                    return {
+                        droppingId: droppingId,
+                        memo: dropping.content || dropping.error,
+                        location: dropping.address || "위치 정보 없음",
                         imageSource: undefined,
                         hasHeart: true,
                     };
@@ -282,6 +340,15 @@ function UserProfileScreen() {
                                     좋아요 목록을 불러오고 있습니다...
                                 </Text>
                             </View>
+                        ) : (activeTab === "like" && likeError) ? (
+                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: verticalScale(40) }}>
+                                <Text style={{ color: TEXT_COLORS.CAPTION, marginBottom: verticalScale(16) }}>
+                                    좋아요 목록을 불러올 수 없습니다
+                                </Text>
+                                <Text style={{ color: TEXT_COLORS.CAPTION, marginBottom: verticalScale(16), fontSize: 12 }}>
+                                    {likeError?.message || '네트워크 오류가 발생했습니다'}
+                                </Text>
+                            </View>
                         ) : currentData.length === 0 ? (
                             <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: verticalScale(40) }}>
                                 <Text style={{ color: TEXT_COLORS.CAPTION }}>
@@ -291,9 +358,9 @@ function UserProfileScreen() {
                         ) : (
                             (currentData || [])
                                 .filter((item) => item && item.droppingId) // null/undefined 아이템 필터링
-                                .map((item) => (
+                                .map((item, index) => (
                                     <DropItem
-                                        key={item.droppingId}
+                                        key={`${item.droppingId}-${index}`}
                                         memo={item.memo || "제목 없음"}
                                         location={item.location || "위치 정보 없음"}
                                         imageSource={item.imageSource}

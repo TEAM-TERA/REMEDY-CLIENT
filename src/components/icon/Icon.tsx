@@ -23,6 +23,7 @@ import NameTagSvg from './icons/NameTagSvg';
 import PlayerSvg from './icons/PlayerSVG';
 import ToggleOffSvg from './icons/ToggleOffSvg';
 import ToggleOnSvg from './icons/ToggleOnSvg';
+import ListSvg from './icons/ListSvg';
 
 const icons = {
     edit: EditSvg,
@@ -47,7 +48,8 @@ const icons = {
     nameTag: NameTagSvg,
     player: PlayerSvg,
     toggleOff: ToggleOffSvg,
-    toggleOn: ToggleOnSvg, 
+    toggleOn: ToggleOnSvg,
+    list: ListSvg,
 };
 
 export type IconName = keyof typeof icons;

@@ -11,7 +11,7 @@ import { useMusicComments } from '../hooks/useMusicComments';
 import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import { useDropLikeCount } from '../hooks/useLike';
 import { useToggleLike } from '../hooks/useLike';
-import { useMyLikes } from '../hooks/useLike';
+import { useMyLikes } from '../../profile/hooks/useMyLike';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
 import { useBackgroundAudioPermission } from '../../../hooks/useBackgroundAudioPermission';
 import { useQuery } from '@tanstack/react-query';

@@ -1,77 +1,36 @@
-import { View, Text, Image, TouchableOpacity,SafeAreaView, Pressable, Alert } from "react-native";
+import { View, Text, TouchableOpacity, Image } from "react-native";
 import { styles } from "../../styles/HeaderBar/Headerbar";
-import Profile from "./Profile";
-import { scale } from "../../../../utils/scalers";
-import { TYPOGRAPHY } from "../../../../constants/typography";
-import { useNavigation } from "@react-navigation/native";
 import Icon from "../../../../components/icon/Icon";
 import { useMyProfile } from "../../../profile/hooks/useMyProfile";
-import MarqueeText from "../../../../components/marquee/MarqueeText";
+import { TEXT_COLORS } from "../../../../constants/colors";
+import { useNavigation } from "@react-navigation/native";
 
-interface HeaderBarProps {
-  onLayout?: (height: number) => void;
-  setIsRunning?: (isRunning: boolean) => void;
-  isRunning?: boolean;
-}
-
-function HeaderBar({ onLayout, setIsRunning, isRunning }: HeaderBarProps) {
-
-  const navigation = useNavigation();
+function HeaderBar(): React.JSX.Element {
   const { data: userProfile } = useMyProfile();
-  const pressHandlerProfile = ()=>{
-    navigation.navigate("Profile");
-  }
-  const pressHandlerRunning = ()=>{
-    const next = !isRunning;
-    if (!next) {
-      // 러닝 종료 시점
-    }
-    setIsRunning?.(next);
-  }
+  const navigation = useNavigation();
+
   return (
-    <SafeAreaView>
-    <View 
-      style={styles.container}
-      onLayout={(event) => {
-        const { height } = event.nativeEvent.layout;
-        onLayout?.(height);
-      }}
-    >
-      <View style={styles.leftSection}>
-        <Profile />
-        <Pressable
-          onPress={pressHandlerProfile}
-          >
-          <View style={{ marginLeft: scale(0.75) }}>
-            <MarqueeText
-              text={userProfile?.username || '로그인'}
-              textStyle={styles.userName}
-              thresholdChars={10}
-              spacing={100}
-              speed={0.35}
-            />
-            <View style={styles.badge}>
-              <Text style={[styles.badgeText, TYPOGRAPHY.CAPTION_2]}>모험가</Text>
-            </View>
-          </View>
-        </Pressable>
-      </View>
-      <View style = {styles.iconsContainer}>
-        <View>
-          <Icon name="music" width={24} height={24} />
-        </View>
-        <View style={styles.iconWrap}>
-          <Icon name="target" width={24} height={24} onPress={() => navigation.navigate('Challenge' as never)} />
-        </View>
-        <View style={styles.iconWrap}>
-          <Icon name="paint" width={24} height={24} onPress={() => navigation.navigate('Customize' as never)}/>
-        </View>
-        <View style={styles.iconWrap}>
-          <Icon name="running" width={24} height={24} onPress={pressHandlerRunning} isPress={isRunning} pressname="turnRunning"/>
-        </View>
-      </View>
+    <View style={styles.container}>
+      <TouchableOpacity
+        style={styles.leftSection}
+        onPress={() => navigation.navigate('Profile' as never)}
+      >
+        {userProfile?.profileImageUrl ? (
+          <Image
+            source={{ uri: userProfile.profileImageUrl }}
+            style={styles.profileImage}
+          />
+        ) : (
+          <View style={styles.defaultProfileImage} />
+        )}
+        <Text style={styles.userName}>
+          {userProfile?.username || 'User 1'}
+        </Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.rightButton}>
+        <Icon name="list" width={20} height={20} color={TEXT_COLORS.DEFAULT} />
+      </TouchableOpacity>
     </View>
-    </SafeAreaView>
   );
 }
 

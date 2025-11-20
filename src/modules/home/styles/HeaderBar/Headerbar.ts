@@ -9,21 +9,57 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     width: "100%",
-    height: scale(68),
-    paddingHorizontal: scale(1),
-    padding: scale(16),
-    backgroundColor: BACKGROUND_COLORS.BACKGROUND
+    height: scale(60),
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(12),
+    backgroundColor: "transparent"
   },
   leftSection: {
     flexDirection: "row",
-    gap: scale(8),
     alignItems: "center",
-    marginLeft: scale(12)
+    backgroundColor: BACKGROUND_COLORS.BACKGROUND,
+    borderRadius: scale(12),
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(8),
+    gap: scale(12)
+  },
+  userIndicator: {
+    width: scale(12),
+    height: scale(12),
+    borderRadius: scale(6),
+    backgroundColor: "#FF4444"
+  },
+  profileImage: {
+    width: scale(32),
+    height: scale(32),
+    borderRadius: scale(16),
+    backgroundColor: "#F0F0F0"
+  },
+  defaultProfileImage: {
+    width: scale(32),
+    height: scale(32),
+    borderRadius: scale(16),
+    backgroundColor: "#FF4444"
   },
   userName: {
     color: TEXT_COLORS.DEFAULT,
-    marginBottom: scale(0.2),
-    ...TYPOGRAPHY.HEADLINE_3
+    ...TYPOGRAPHY.HEADLINE_3,
+  },
+  centerButton: {
+    backgroundColor: BACKGROUND_COLORS.BACKGROUND,
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(8),
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  rightButton: {
+    backgroundColor: BACKGROUND_COLORS.BACKGROUND,
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(12),
+    justifyContent: "center",
+    alignItems: "center"
   },
   badge: {
     borderRadius: scale(16),
