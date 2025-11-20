@@ -705,7 +705,7 @@ function GoogleMapView({ droppings, currentLocation, currentPlayingDroppingId }:
       allowsInlineMediaPlayback={true}
       mediaPlaybackRequiresUserAction={false}
       bounces={false}
-      decelerationRate="normal"
+      decelerationRate={0.998}
       renderLoading={() => (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#1a1a29' }}>
           <ActivityIndicator size="large" color={PRIMARY_COLORS.DEFAULT} />
