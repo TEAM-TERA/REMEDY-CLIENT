@@ -85,9 +85,7 @@ function UserProfileScreen() {
                 setLikeDroppingsLoading(false);
                 return;
             }
-
-            // myLikes가 객체 배열인 경우를 처리
-            const likes = myLikes.map(like => {
+            const likes = (myLikes as any[]).map(like => {
                 if (typeof like === 'string') {
                     return like;
                 } else if (typeof like === 'object' && like !== null) {
@@ -133,21 +131,20 @@ function UserProfileScreen() {
                             }
                         }
                         return [droppingId, dropping];
-                    } catch (error) {
+                    } catch (error: unknown) {
                         console.error(`드랍핑 ${droppingId} 로드 실패:`, error);
                         return [droppingId, {
                             droppingId,
                             content: "네트워크 오류",
                             address: "위치 정보 없음",
                             songId: null,
-                            error: error?.message || "알 수 없는 오류"
+                            error: (error instanceof Error ? error.message : (typeof error === 'string' ? error : "알 수 없는 오류"))
                         }];
                     }
                 }));
 
                 const map: Record<string, any> = {};
                 results.forEach(([id, data]) => {
-                    // null이 아닌 모든 데이터를 포함 (에러 정보가 있는 것도 포함)
                     map[id as string] = data;
                 });
                 console.log('좋아요 드랍핑 최종 데이터:', map);
@@ -164,7 +161,7 @@ function UserProfileScreen() {
     const currentData: DropItemData[] =
     activeTab === "drop"
         ? (myDrops || [])
-            .filter((d: any) => d && d.droppingId) // null/undefined 아이템 필터링
+            .filter((d: any) => d && d.droppingId)
             .map((d: any) => ({
                 droppingId: d.droppingId,
                 memo: songTitles[d.songId] || d.songId || "알 수 없는 곡",
@@ -173,12 +170,11 @@ function UserProfileScreen() {
                 hasHeart: false,
             }))
         : (myLikes || [])
-            .filter((droppingId: string) => droppingId) // null/undefined 아이템 필터링
+            .filter((droppingId: string) => droppingId)
             .map((droppingId: string) => {
                 const dropping = likeDroppings[droppingId];
                 const songInfo = dropping?.songInfo;
 
-                // 로딩 중이거나 데이터가 없는 경우 처리
                 if (likeDroppingsLoading && !dropping) {
                     return {
                         droppingId: droppingId,
@@ -189,7 +185,6 @@ function UserProfileScreen() {
                     };
                 }
 
-                // 데이터가 없는 경우
                 if (!dropping) {
                     return {
                         droppingId: droppingId,
@@ -200,7 +195,6 @@ function UserProfileScreen() {
                     };
                 }
 
-                // 에러가 있는 경우
                 if (dropping.error) {
                     return {
                         droppingId: droppingId,
@@ -232,7 +226,6 @@ function UserProfileScreen() {
         refetch();
     }
     
-    // 로딩 상태 처리
     if(isLoading || (dropLoading && !myDrops) || (likeLoading && !myLikes)){
         return (
             <SafeAreaView style={styles.safeAreaView}>
@@ -244,7 +237,6 @@ function UserProfileScreen() {
         );
     }
 
-    // 에러 상태 처리
     if (isError) {
         return (
           <SafeAreaView style={styles.safeAreaView}>
@@ -357,7 +349,7 @@ function UserProfileScreen() {
                             </View>
                         ) : (
                             (currentData || [])
-                                .filter((item) => item && item.droppingId) // null/undefined 아이템 필터링
+                                .filter((item) => item && item.droppingId)
                                 .map((item, index) => (
                                     <DropItem
                                         key={`${item.droppingId}-${index}`}

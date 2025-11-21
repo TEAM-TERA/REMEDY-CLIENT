@@ -19,7 +19,7 @@ interface NowPlayingCardProps {
   onClose: () => void;
 }
 
-const NowPlayingCard: React.FC<NowPlayingCardProps> = ({
+const NowPlayingCard: React.FC<NowPlayingCardProps> = React.memo(({
   visible,
   droppingData,
   onClose
@@ -72,7 +72,7 @@ const NowPlayingCard: React.FC<NowPlayingCardProps> = ({
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

@@ -720,8 +720,8 @@ function GoogleMapView({ droppings, currentLocation, currentPlayingDroppingId }:
 
 export default React.memo(GoogleMapView, (prevProps, nextProps) => {
   const locationChanged = prevProps.currentLocation && nextProps.currentLocation
-    ? Math.abs(prevProps.currentLocation.latitude - nextProps.currentLocation.latitude) > 0.000001 ||
-      Math.abs(prevProps.currentLocation.longitude - nextProps.currentLocation.longitude) > 0.000001
+    ? Math.abs(prevProps.currentLocation.latitude - nextProps.currentLocation.latitude) > 0.0001 ||
+      Math.abs(prevProps.currentLocation.longitude - nextProps.currentLocation.longitude) > 0.0001
     : prevProps.currentLocation !== nextProps.currentLocation;
 
   const droppingsChanged = prevProps.droppings.length !== nextProps.droppings.length ||

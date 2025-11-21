@@ -1,3 +1,4 @@
+import React from "react";
 import { View, Text, TouchableOpacity, Image } from "react-native";
 import { styles } from "../../styles/HeaderBar/Headerbar";
 import Icon from "../../../../components/icon/Icon";
@@ -5,7 +6,7 @@ import { useMyProfile } from "../../../profile/hooks/useMyProfile";
 import { TEXT_COLORS } from "../../../../constants/colors";
 import { useNavigation } from "@react-navigation/native";
 
-function HeaderBar(): React.JSX.Element {
+const HeaderBar = React.memo(function HeaderBar(): React.JSX.Element {
   const { data: userProfile } = useMyProfile();
   const navigation = useNavigation();
 
@@ -32,6 +33,6 @@ function HeaderBar(): React.JSX.Element {
       </TouchableOpacity>
     </View>
   );
-}
+});
 
 export default HeaderBar;

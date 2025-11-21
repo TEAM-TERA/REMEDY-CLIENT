@@ -17,7 +17,9 @@ import { getCommentsByDroppingId } from "../../music/api/commentApi";
 
 function HomeScreen() {
   const { location } = useLocation();
-  const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
+  const currentLocation = useMemo(() =>
+    location ?? { latitude: 37.5665, longitude: 126.9780 }
+  , [location]);
   const { currentId } = usePlayerStore();
 
   const [showNowPlayingCard, setShowNowPlayingCard] = useState(false);
@@ -31,6 +33,11 @@ function HomeScreen() {
   const { data: droppings } = useDroppings(
     currentLocation.longitude,
     currentLocation.latitude
+  );
+
+  const safeDroppings = useMemo(() =>
+    Array.isArray(droppings) ? droppings : [],
+    [droppings]
   );
 
   const currentDroppingId = useMemo(() => {
@@ -131,7 +138,7 @@ function HomeScreen() {
     <View style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }}>
         <View style={{ flex: 1, position: 'relative' }}>
             <GoogleMapView
-                droppings={Array.isArray(droppings) ? droppings : []}
+                droppings={safeDroppings}
                 currentLocation={currentLocation}
                 currentPlayingDroppingId={currentDroppingId as any}
             />
@@ -139,7 +146,7 @@ function HomeScreen() {
                 <HeaderBar />
             </SafeAreaView>
 
-            <MusicWheel droppings={Array.isArray(droppings) ? droppings : []}/>
+            <MusicWheel droppings={safeDroppings}/>
 
             {/* 현재 재생 중인 곡 정보 카드 */}
             <NowPlayingCard

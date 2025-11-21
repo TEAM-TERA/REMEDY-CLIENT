@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useSharedValue, withSpring, useDerivedValue, useAnimatedReaction } from 'react-native-reanimated';
@@ -11,7 +11,7 @@ import { useQuery, useQueries } from '@tanstack/react-query';
 import { getSongInfo } from '../../../drop/api/dropApi';
 import { useHLSPlayer } from '../../../../hooks/music/useHLSPlayer';
 
-const SWIPE_THRESHOLD = 30;
+const SWIPE_THRESHOLD = 60;
 const INVERT_DIRECTION = false;
 const sign = INVERT_DIRECTION ? -1 : 1;
 const ANGLE_PER_ITEM = 45;
@@ -21,18 +21,16 @@ interface MusicWheelProps {
   droppings: any[];
 }
 
-function MusicWheel({ droppings }: MusicWheelProps) {
+const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const safeDroppings = Array.isArray(droppings) ? droppings : [];
   const totalSongs = safeDroppings.length;
   const rotation = useSharedValue(0);
+  const baseRotation = useSharedValue(0);
   const startRotation = useSharedValue(0);
 
-  const [visualMainIndex, setVisualMainIndex] = useState<number>(0);
   const [isSwiping, setIsSwiping] = useState<boolean>(false);
-
-  const actualMainDataIndex = totalSongs > 0 ? (isSwiping ? currentIndex : ((currentIndex + visualMainIndex) % totalSongs)) : 0;
-  const currentSongId = safeDroppings[actualMainDataIndex]?.songId;
+  const [currentSongId, setCurrentSongId] = useState<string | undefined>(undefined);
   const musicPlayer = useHLSPlayer(currentSongId);
 
   useEffect(() => {
@@ -40,18 +38,17 @@ function MusicWheel({ droppings }: MusicWheelProps) {
       console.log('🎡 MusicWheel mounted, droppings count:', safeDroppings.length);
     }
     rotation.value = 0;
-  }, [rotation]);
+    baseRotation.value = 0;
+  }, [rotation, baseRotation]);
 
   useEffect(() => {
     if (__DEV__) {
-      console.log('📊 Droppings changed, count:', safeDroppings.length);
-      console.log('📊 Current index:', currentIndex);
-      console.log('👁️ Visual main index:', visualMainIndex);
-      console.log('✋ Is swiping:', isSwiping);
-      console.log('🎯 Actual main data index:', actualMainDataIndex);
-      console.log('🎵 Current song ID:', currentSongId);
+      console.log('Droppings changed, count:', safeDroppings.length);
+      console.log('Current index:', currentIndex);
+      console.log('Is swiping:', isSwiping);
+      console.log('Current song ID:', currentSongId);
     }
-  }, [safeDroppings, currentIndex, visualMainIndex, isSwiping, actualMainDataIndex, currentSongId]);
+  }, [safeDroppings, currentIndex, isSwiping, currentSongId]);
 
   const visibleSongIds = React.useMemo(() => {
     if (totalSongs === 0) return [];
@@ -84,10 +81,11 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     let minDistance = Infinity;
 
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
-      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 60;
-      const currentAngle = baseAngle + rotation.value;
+      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 90;
+      const totalRotation = baseRotation.value + rotation.value;
+      const currentAngle = baseAngle + totalRotation;
       const normalizedAngle = ((currentAngle + 180) % 360) - 180;
-      const distanceFromMain = Math.abs(normalizedAngle - (-60));
+      const distanceFromMain = Math.abs(normalizedAngle - (-90));
 
       if (distanceFromMain < minDistance) {
         minDistance = distanceFromMain;
@@ -98,16 +96,18 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     return closestIndex;
   });
 
-  // setInterval 대신 useAnimatedReaction 사용 (성능 최적화)
-  useAnimatedReaction(
-    () => mainNodeIndex.value,
-    (currentValue, previousValue) => {
-      if (currentValue !== previousValue) {
-        runOnJS(setVisualMainIndex)(currentValue);
-      }
-    },
-    []
-  );
+  const actualMainDataIndex = useMemo(() => {
+    if (totalSongs === 0) return 0;
+    return currentIndex % totalSongs;
+  }, [currentIndex, totalSongs]);
+
+  useEffect(() => {
+    if (safeDroppings && safeDroppings[actualMainDataIndex]) {
+      setCurrentSongId(safeDroppings[actualMainDataIndex].songId);
+    } else {
+      setCurrentSongId(undefined);
+    }
+  }, [actualMainDataIndex, safeDroppings]);
 
   const visibleNodes = React.useMemo(() => {
     const nodes: VisibleNode[] = [];
@@ -128,7 +128,7 @@ function MusicWheel({ droppings }: MusicWheelProps) {
           songInfo = songQueries[queryIndex].data;
         }
 
-        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 100;
+        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 90;
 
         nodes.push({
           position: {
@@ -148,71 +148,59 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     return nodes;
   }, [safeDroppings, currentIndex, totalSongs, visibleSongIds, songQueries]);
 
-  const updateIndex = React.useCallback((direction: string) => {
-    if (__DEV__) {
-      console.log('🔄 updateIndex called, direction:', direction, 'visualMainIndex:', visualMainIndex);
-    }
-
-    if (totalSongs > 0) {
-      setCurrentIndex((prev: number) => {
-        const newIndex = (prev + visualMainIndex + totalSongs) % totalSongs;
-        if (__DEV__) {
-          console.log('📍 Setting currentIndex from', prev, 'to', newIndex);
-        }
-        return newIndex;
-      });
-    }
-
-    setVisualMainIndex(0);
-  }, [visualMainIndex, totalSongs]);
-
-
   const pan = Gesture.Pan()
     .onBegin(() => {
         'worklet';
-        startRotation.value = rotation.value;
+        startRotation.value = baseRotation.value;
         runOnJS(setIsSwiping)(true);
     })
     .onUpdate(event => {
         'worklet';
-        const rawRotation = startRotation.value + sign * event.translationX * 0.8;
-
-        const nearestStep = Math.round(rawRotation / ANGLE_PER_ITEM);
-        const nearestRotation = nearestStep * ANGLE_PER_ITEM;
-        const distanceToSnap = Math.abs(rawRotation - nearestRotation);
-
-        const snapInfluence = Math.max(0, 1 - (distanceToSnap / (ANGLE_PER_ITEM * 0.4)));
-        const alignedRotation = rawRotation + (nearestRotation - rawRotation) * snapInfluence * 0.1;
-
-        rotation.value = alignedRotation;
+        const currentRotation = startRotation.value + sign * event.translationX * 0.8;
+        rotation.value = currentRotation - baseRotation.value;
     })
     .onEnd(event => {
         'worklet';
         const drag = sign * event.translationX;
+        const totalRotation = startRotation.value + drag * 0.8;
 
         const isDefiniteSwipe = Math.abs(drag) > SWIPE_THRESHOLD;
 
         if (isDefiniteSwipe) {
             const direction = drag > 0 ? 1 : -1;
+            const currentStep = Math.round(baseRotation.value / ANGLE_PER_ITEM);
+            const targetStep = currentStep + direction;
+            const targetRotation = targetStep * ANGLE_PER_ITEM;
 
-            rotation.value = withSpring(0, {
-                damping: 100,
-                stiffness: 50,
-                mass: 1,
-            }, () => {
+            const animationTarget = targetRotation - baseRotation.value;
+            rotation.value = withSpring(animationTarget, {
+                damping: 20,
+                stiffness: 150,
+                mass: 1.2,
+            }, (finished) => {
                 'worklet';
-                runOnJS(setIsSwiping)(false);
+                if (finished) {
+                    baseRotation.value = targetRotation;
+                    rotation.value = 0;
+                    runOnJS(setIsSwiping)(false);
+                }
             });
-
-            runOnJS(updateIndex)(drag > 0 ? 'next' : 'prev');
         } else {
-            rotation.value = withSpring(0, {
-                damping: 150,
+            const nearestStep = Math.round(totalRotation / ANGLE_PER_ITEM);
+            const targetRotation = nearestStep * ANGLE_PER_ITEM;
+            const animationTarget = targetRotation - baseRotation.value;
+
+            rotation.value = withSpring(animationTarget, {
+                damping: 25,
                 stiffness: 200,
-                mass: 1,
-            }, () => {
+                mass: 1.0,
+            }, (finished) => {
                 'worklet';
-                runOnJS(setIsSwiping)(false);
+                if (finished) {
+                    baseRotation.value = targetRotation;
+                    rotation.value = 0;
+                    runOnJS(setIsSwiping)(false);
+                }
             });
         }
     });
@@ -239,6 +227,7 @@ function MusicWheel({ droppings }: MusicWheelProps) {
               index={index}
               baseAngle={node.position.angle}
               rotation={rotation}
+              baseRotation={baseRotation}
               mainNodeIndex={mainNodeIndex}
               nodeIndex={node.slotIndex}
             />
@@ -250,6 +239,15 @@ function MusicWheel({ droppings }: MusicWheelProps) {
       </Animated.View>
     </GestureDetector>
   );
-}
+}, (prevProps, nextProps) => {
+  if (prevProps.droppings.length !== nextProps.droppings.length) {
+    return false;
+  }
+
+  return prevProps.droppings.every((prev, index) => {
+    const next = nextProps.droppings[index];
+    return next && prev.droppingId === next.droppingId && prev.songId === next.songId;
+  });
+});
 
 export default MusicWheel;
