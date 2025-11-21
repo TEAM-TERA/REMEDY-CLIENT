@@ -14,7 +14,7 @@ import Button from '../../../components/button/Button';
 import { useMyProfile } from '../hooks/useMyProfile';
 import { useMyDrop } from '../hooks/useMyDrop';
 import { useMyLikes } from '../hooks/useMyLike';
-import { getSongInfo, getDroppingById } from '../../drop/api/dropApi';
+import { getSongInfo } from '../../drop/api/dropApi';
 import { scale, verticalScale } from '../../../utils/scalers';
 
 function UserProfileScreen() {
@@ -29,8 +29,6 @@ function UserProfileScreen() {
 
     const [songTitles, setSongTitles] = useState<Record<string, string>>({});
     const [songImages, setSongImages] = useState<Record<string, string>>({});
-    const [likeDroppings, setLikeDroppings] = useState<Record<string, any>>({});
-    const [likeDroppingsLoading, setLikeDroppingsLoading] = useState(false);
 
     // 좋아요 에러 디버깅
     useEffect(() => {
@@ -78,85 +76,6 @@ function UserProfileScreen() {
         loadSongInfo();
     }, [myDrops]);
 
-    useEffect(() => {
-        const loadLikeDroppings = async () => {
-            if (!myLikes || !Array.isArray(myLikes) || myLikes.length === 0) {
-                setLikeDroppings({});
-                setLikeDroppingsLoading(false);
-                return;
-            }
-            const likes = (myLikes as any[]).map(like => {
-                if (typeof like === 'string') {
-                    return like;
-                } else if (typeof like === 'object' && like !== null) {
-                    return like.droppingId || like.id || String(like);
-                } else {
-                    return String(like);
-                }
-            }).filter(Boolean);
-
-            setLikeDroppingsLoading(true);
-            try {
-                const results = await Promise.all(likes.map(async (droppingId: string) => {
-                    try {
-                        console.log(`좋아요 드랍핑 로드 중: ${droppingId}`);
-                        const dropping = await getDroppingById(droppingId);
-                        console.log(`드랍핑 정보:`, dropping);
-
-                        if (!dropping) {
-                            console.warn(`드랍핑 ${droppingId} 데이터가 null입니다`);
-                            return [droppingId, {
-                                droppingId,
-                                content: "삭제된 드랍핑",
-                                address: "위치 정보 없음",
-                                songId: null,
-                                error: "드랍핑을 찾을 수 없습니다"
-                            }];
-                        }
-
-                        if (dropping?.songId) {
-                            try {
-                                const songInfo = await getSongInfo(dropping.songId);
-                                console.log(`곡 정보:`, songInfo);
-                                return [droppingId, { ...dropping, songInfo }];
-                            } catch (songError) {
-                                console.warn(`곡 정보 로드 실패 ${dropping.songId}:`, songError);
-                                return [droppingId, {
-                                    ...dropping,
-                                    songInfo: {
-                                        title: "곡 정보를 불러올 수 없습니다",
-                                        albumImagePath: null
-                                    }
-                                }];
-                            }
-                        }
-                        return [droppingId, dropping];
-                    } catch (error: unknown) {
-                        console.error(`드랍핑 ${droppingId} 로드 실패:`, error);
-                        return [droppingId, {
-                            droppingId,
-                            content: "네트워크 오류",
-                            address: "위치 정보 없음",
-                            songId: null,
-                            error: (error instanceof Error ? error.message : (typeof error === 'string' ? error : "알 수 없는 오류"))
-                        }];
-                    }
-                }));
-
-                const map: Record<string, any> = {};
-                results.forEach(([id, data]) => {
-                    map[id as string] = data;
-                });
-                console.log('좋아요 드랍핑 최종 데이터:', map);
-                setLikeDroppings(map);
-            } catch (error) {
-                console.error('좋아요 드랍핑 로드 실패:', error);
-            } finally {
-                setLikeDroppingsLoading(false);
-            }
-        };
-        loadLikeDroppings();
-    }, [myLikes]);
 
     const currentData: DropItemData[] =
     activeTab === "drop"
@@ -170,49 +89,14 @@ function UserProfileScreen() {
                 hasHeart: false,
             }))
         : (myLikes || [])
-            .filter((droppingId: string) => droppingId)
-            .map((droppingId: string) => {
-                const dropping = likeDroppings[droppingId];
-                const songInfo = dropping?.songInfo;
-
-                if (likeDroppingsLoading && !dropping) {
-                    return {
-                        droppingId: droppingId,
-                        memo: "로딩 중...",
-                        location: "위치 정보 로딩 중...",
-                        imageSource: undefined,
-                        hasHeart: true,
-                    };
-                }
-
-                if (!dropping) {
-                    return {
-                        droppingId: droppingId,
-                        memo: "데이터를 불러올 수 없습니다",
-                        location: "위치 정보 없음",
-                        imageSource: undefined,
-                        hasHeart: true,
-                    };
-                }
-
-                if (dropping.error) {
-                    return {
-                        droppingId: droppingId,
-                        memo: dropping.content || dropping.error,
-                        location: dropping.address || "위치 정보 없음",
-                        imageSource: undefined,
-                        hasHeart: true,
-                    };
-                }
-
-                return {
-                    droppingId: droppingId,
-                    memo: songInfo?.title || dropping?.content || "좋아요한 곡",
-                    location: dropping?.address || "위치 정보 없음",
-                    imageSource: songInfo?.albumImagePath ? { uri: songInfo.albumImagePath } : undefined,
-                    hasHeart: true,
-                };
-            });
+            .filter((like: any) => like && like.droppingId)
+            .map((like: any) => ({
+                droppingId: like.droppingId,
+                memo: like.songTitle || "알 수 없는 곡",
+                location: like.address || "위치 정보 없음",
+                imageSource: like.albumImageUrl ? { uri: like.albumImageUrl } : undefined,
+                hasHeart: true,
+            }));
 
     const handleEditPress = () => {
         navigation.navigate('NameEdit');
@@ -325,14 +209,7 @@ function UserProfileScreen() {
                         keyboardShouldPersistTaps="handled"
                         nestedScrollEnabled
                     >
-                        {activeTab === 'like' && likeDroppingsLoading && currentData.length === 0 ? (
-                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: verticalScale(40) }}>
-                                <ActivityIndicator />
-                                <Text style={{ marginTop: verticalScale(8), color: TEXT_COLORS.CAPTION }}>
-                                    좋아요 목록을 불러오고 있습니다...
-                                </Text>
-                            </View>
-                        ) : (activeTab === "like" && likeError) ? (
+                        {(activeTab === "like" && likeError) ? (
                             <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: verticalScale(40) }}>
                                 <Text style={{ color: TEXT_COLORS.CAPTION, marginBottom: verticalScale(16) }}>
                                     좋아요 목록을 불러올 수 없습니다
