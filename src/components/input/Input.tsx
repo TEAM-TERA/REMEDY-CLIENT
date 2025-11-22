@@ -1,9 +1,17 @@
 import { View, TextInput, Platform, Text } from "react-native";
+import { useState } from "react";
 import { InputProps } from "../../types/Input";
 import { styles } from "./styles";
 import { TEXT_COLORS } from "../../constants/colors";
+import Icon from "../icon/Icon";
 
 function Input({placeholder, value, onChangeText, width, containerWidth, keyboardType, error, secureTextEntry, helperText, onFocus, onBlur} : InputProps){
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+    const togglePasswordVisibility = () => {
+        setIsPasswordVisible(!isPasswordVisible);
+    };
+
     return(
         <View style={styles.wrapper}>
             <View style = {[
@@ -22,11 +30,20 @@ function Input({placeholder, value, onChangeText, width, containerWidth, keyboar
                     Platform.OS === 'android' ? { paddingVertical: 0, textAlignVertical: 'center' as const } : null
                 ]}
                 placeholder = {placeholder}
-                placeholderTextColor={Platform.OS === 'android' ? '#9CA3AF' : TEXT_COLORS.CAPTION}
+                placeholderTextColor={TEXT_COLORS.CAPTION_1}
                 keyboardType={keyboardType}
                 autoCapitalize="none"
                 autoCorrect={false}
-                secureTextEntry={secureTextEntry}/>
+                secureTextEntry={secureTextEntry && !isPasswordVisible}/>
+                {secureTextEntry && (
+                    <Icon 
+                        name={isPasswordVisible ? "eyeOn" : "eyeOff"}
+                        onPress={togglePasswordVisibility}
+                        width={20}
+                        height={20}
+                        color={TEXT_COLORS.CAPTION_1}
+                    />
+                )}
             </View>
             {error ? (
                 <Text style={styles.errorText}>{error}</Text>
