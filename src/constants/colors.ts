@@ -36,9 +36,21 @@ export const UI_COLORS = {
 }
 
 export const TEXT_COLORS = {
-    DEFAULT : "#FFFFFF",
+    DEFAULT : "#B9B9D5",
     CAPTION : "#434356",
+    CAPTION_1 : "#47476B",
+    CAPTION_2 : "#30304B",
     CAPTION_LIGHTER : "#656581",
     CAPTION_RED : "#75575F",
     CAPTION_BLUE : "#575C75",
+    BUTTON : "#E9E2E3",
+}
+
+export const FORM_COLORS = {
+    STROKE : "#1F1F33",
+    INPUT_1 : "#1B1B2D",
+    INPUT_2 : "#181825",
+    BACKGROUND_1 : "#212131",
+    BACKGROUND_2 : "#1C1C2B",
+    BACKGROUND_3 : "#161622",
 }

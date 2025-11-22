@@ -1,17 +1,28 @@
 import { StyleSheet } from 'react-native';
 import { scale } from '../../../utils/scalers';
-import { PRIMARY_COLORS, TEXT_COLORS, UI_COLORS, BACKGROUND_COLORS } from '../../../constants/colors';
+import { PRIMARY_COLORS, TEXT_COLORS, UI_COLORS, BACKGROUND_COLORS, FORM_COLORS } from '../../../constants/colors';
 
 export const styles = StyleSheet.create({
   container: {
+    display: 'flex',
+    width: '100%',
     flex: 1,
+    padding : scale(16),
+    gap: scale(24),
     backgroundColor: BACKGROUND_COLORS.BACKGROUND,
   },
+  innerContainer: {
+    flex : 1,
+    width : "100%",
+    paddingVertical : scale(36),
+    paddingHorizontal : scale(12),
+    gap: scale(24),
+    borderRadius : scale(20),
+    backgroundColor : FORM_COLORS.BACKGROUND_3,
+  },
   formContainer: {
-    paddingHorizontal: scale(24),
-    paddingTop: scale(40),
-    paddingBottom: scale(40),
-    gap: scale(20),
+    padding: scale(12),
+    gap: scale(24),
   },
   genderContainer: {
     marginTop: scale(8),
@@ -38,10 +49,10 @@ export const styles = StyleSheet.create({
     borderColor: UI_COLORS.BACKGROUND,
   },
   genderButtonTextActive: {
-    color: TEXT_COLORS.DEFAULT,
+    color: TEXT_COLORS.BUTTON,
   },
   genderButtonTextInactive: {
-    color: TEXT_COLORS.DEFAULT,
+    color: TEXT_COLORS.BUTTON,
   },
   signUpButton: {
     marginTop: scale(32),

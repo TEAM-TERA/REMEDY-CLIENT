@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/LogoutScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import Button from "../../../components/button/Button";
-import HeaderNav from "../components/HeaderNav/HeaderNav";
+import { HeaderNav } from "../../../components";
 import { AuthContext } from "../auth-context";
 import { useAppNavigation } from "../../../hooks/navigation/useAppNavigation";
 
