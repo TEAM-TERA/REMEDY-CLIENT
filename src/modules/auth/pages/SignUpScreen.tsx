@@ -9,6 +9,7 @@ import Button from "../../../components/button/Button";
 import HeaderNav from "../components/HeaderNav/HeaderNav";
 import { useAuthNavigation } from "../../../hooks/navigation/useAuthNavigation";
 import { signUpApi } from "../api/authApi";
+import UserSvg from "../../../components/icon/icons/UserSvg";
 
 function SignUpScreen() {
   const navigation = useAuthNavigation();
@@ -41,12 +42,11 @@ function SignUpScreen() {
         
       case 'password':
         if (!value) return "비밀번호를 입력해주세요";
-        if (value.length < 6) return "비밀번호는 최소 6자 이상이어야 합니다";
-        if (value.length < 8) return "보안을 위해 8자 이상을 권장합니다";
+        if (value.length < 8) return "비밀번호는 최소 8자 이상이어야 합니다";
         return "";
         
       case 'confirmPassword':
-        if (!value) return "비밀번호 확인을 입력해주세요";
+        if (!value) return "비밀번호를 한 번 더 입력해주세요";
         if (value !== formData.password) return "비밀번호가 일치하지 않습니다";
         return "";
         
@@ -216,107 +216,109 @@ function SignUpScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderNav title="회원가입" />
-      <TouchableWithoutFeedback onPress={dismissKeyboard}>
-        <KeyboardAwareScrollView
-          contentContainerStyle={styles.formContainer}
-          keyboardShouldPersistTaps="handled"
-          enableOnAndroid={true}
-          enableAutomaticScroll={Platform.OS === 'ios'}
-          extraScrollHeight={0}
-          extraHeight={0}
-        >
-          <Input
-            placeholder="이름"
-            value={formData.name}
-            onChangeText={(value) => handleInputChange("name", value)}
-            onFocus={() => handleFocus("name")}
-            onBlur={() => handleBlur("name")}
-            error={touched.name ? errors.name : undefined}
-            helperText={!errors.name && !formData.name ? "2자 이상의 이름을 입력해주세요" : undefined}
-          />
+      <HeaderNav title="회원가입" variant="withIcon" centerIcon={<UserSvg />} />
+      <View style={styles.innerContainer}>
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+          <KeyboardAwareScrollView
+            contentContainerStyle={styles.formContainer}
+            keyboardShouldPersistTaps="handled"
+            enableOnAndroid={true}
+            enableAutomaticScroll={Platform.OS === 'ios'}
+            extraScrollHeight={0}
+            extraHeight={0}
+            showsVerticalScrollIndicator={false}
+          >
+            <Input
+              placeholder="이름"
+              value={formData.name}
+              onChangeText={(value) => handleInputChange("name", value)}
+              onFocus={() => handleFocus("name")}
+              onBlur={() => handleBlur("name")}
+              error={touched.name ? errors.name : undefined}
+              helperText={!errors.name && !formData.name ? "2자 이상의 이름을 입력해주세요" : undefined}
+            />
           
-          <Input
-            placeholder="이메일"
-            value={formData.email}
-            onChangeText={(value) => handleInputChange("email", value)}
-            onFocus={() => handleFocus("email")}
-            onBlur={() => handleBlur("email")}
-            keyboardType="email-address"
-            error={touched.email ? errors.email : undefined}
-            helperText={!errors.email && !formData.email ? "로그인에 사용할 이메일을 입력해주세요" : undefined}
-          />
+            <Input
+              placeholder="이메일"
+              value={formData.email}
+              onChangeText={(value) => handleInputChange("email", value)}
+              onFocus={() => handleFocus("email")}
+              onBlur={() => handleBlur("email")}
+              keyboardType="email-address"
+              error={touched.email ? errors.email : undefined}
+              helperText={!errors.email && !formData.email ? "로그인에 사용할 이메일을 입력해주세요" : undefined}
+            />
           
-          <Input
-            placeholder="비밀번호"
-            value={formData.password}
-            onChangeText={(value) => handleInputChange("password", value)}
-            onFocus={() => handleFocus("password")}
-            onBlur={() => handleBlur("password")}
-            secureTextEntry
-            error={touched.password ? errors.password : undefined}
-            helperText={!errors.password && !formData.password ? "최소 6자 이상 (8자 이상 권장)" : undefined}
-          />
+            <Input
+              placeholder="비밀번호"
+              value={formData.password}
+              onChangeText={(value) => handleInputChange("password", value)}
+              onFocus={() => handleFocus("password")}
+              onBlur={() => handleBlur("password")}
+              secureTextEntry
+              error={touched.password ? errors.password : undefined}
+              helperText={!errors.password && !formData.password ? "8~20자로 입력해주세요" : undefined}
+            />
           
-          <Input
-            placeholder="비밀번호 확인"
-            value={formData.confirmPassword}
-            onChangeText={(value) => handleInputChange("confirmPassword", value)}
-            onFocus={() => handleFocus("confirmPassword")}
-            onBlur={() => handleBlur("confirmPassword")}
-            secureTextEntry
-            error={touched.confirmPassword ? errors.confirmPassword : undefined}
-            helperText={!errors.confirmPassword && !formData.confirmPassword ? "비밀번호를 한 번 더 입력해주세요" : undefined}
-          />
+            <Input
+              placeholder="비밀번호 확인"
+              value={formData.confirmPassword}
+              onChangeText={(value) => handleInputChange("confirmPassword", value)}
+              onFocus={() => handleFocus("confirmPassword")}
+              onBlur={() => handleBlur("confirmPassword")}
+              secureTextEntry
+              error={touched.confirmPassword ? errors.confirmPassword : undefined}
+              helperText={!errors.confirmPassword && !formData.confirmPassword ? "비밀번호를 한 번 더 입력해주세요" : undefined}
+            />
           
-          <Input
-            placeholder="생년월일 (YYYY-MM-DD)"
-            value={formData.birthDate}
-            onChangeText={(value) => handleInputChange("birthDate", value)}
-            onFocus={() => handleFocus("birthDate")}
-            onBlur={() => handleBlur("birthDate")}
-            keyboardType="numeric"
-            error={touched.birthDate ? errors.birthDate : undefined}
-            helperText={!errors.birthDate && !formData.birthDate ? "예: 1990-01-01" : undefined}
-          />
+            <Input
+              placeholder="생년월일 (YYYY-MM-DD)"
+              value={formData.birthDate}
+              onChangeText={(value) => handleInputChange("birthDate", value)}
+              onFocus={() => handleFocus("birthDate")}
+              onBlur={() => handleBlur("birthDate")}
+              keyboardType="numeric"
+              error={touched.birthDate ? errors.birthDate : undefined}
+              helperText={!errors.birthDate && !formData.birthDate ? "예: 1990-01-01" : undefined}
+            />
 
-          <View style={styles.genderContainer}>
-          <Text style={[styles.genderLabel, TYPOGRAPHY.BODY_1]}>성별</Text>
-          <View style={styles.genderButtons}>
-            <Button
-              title="남성"
-              onPress={() => handleGenderSelect("male")}
-              style={[
-                styles.genderButton,
-                TYPOGRAPHY.BUTTON_TEXT,
-                formData.gender === "male" ? styles.genderButtonActive : styles.genderButtonInactive
-              ]}
-              textStyle={formData.gender === "male" ? styles.genderButtonTextActive : styles.genderButtonTextInactive}
-            />
-            <Button
-              title="여성"
-              onPress={() => handleGenderSelect("female")}
-              style={[
-                styles.genderButton,
-                TYPOGRAPHY.BUTTON_TEXT,
-                formData.gender === "female" ? styles.genderButtonActive : styles.genderButtonInactive
-              ]}
-              textStyle={formData.gender === "female" ? styles.genderButtonTextActive : styles.genderButtonTextInactive}
-            />
+            <View style={styles.genderContainer}>
+            <View style={styles.genderButtons}>
+              <Button
+                title="남성"
+                onPress={() => handleGenderSelect("male")}
+                style={[
+                  styles.genderButton,
+                  TYPOGRAPHY.BUTTON_TEXT,
+                  formData.gender === "male" ? styles.genderButtonActive : styles.genderButtonInactive
+                ]}
+                textStyle={formData.gender === "male" ? styles.genderButtonTextActive : styles.genderButtonTextInactive}
+              />
+              <Button
+                title="여성"
+                onPress={() => handleGenderSelect("female")}
+                style={[
+                  styles.genderButton,
+                  TYPOGRAPHY.BUTTON_TEXT,
+                  formData.gender === "female" ? styles.genderButtonActive : styles.genderButtonInactive
+                ]}
+                textStyle={formData.gender === "female" ? styles.genderButtonTextActive : styles.genderButtonTextInactive}
+              />
+            </View>
           </View>
-        </View>
 
-        <Button
-          title={isLoading ? "가입 중..." : "회원가입"}
-          onPress={handleSignUp}
-          disabled={isLoading}
-          style={[
-            styles.signUpButton, 
-            TYPOGRAPHY.BUTTON_TEXT,
-          ]}
-        />
-        </KeyboardAwareScrollView>
-      </TouchableWithoutFeedback>
+          <Button
+            title={isLoading ? "가입 중..." : "회원가입"}
+            onPress={handleSignUp}
+            disabled={isLoading}
+            style={[
+              styles.signUpButton, 
+              TYPOGRAPHY.BUTTON_TEXT,
+            ]}
+          />
+          </KeyboardAwareScrollView>
+        </TouchableWithoutFeedback>
+      </View>
     </SafeAreaView>
   );
 }
