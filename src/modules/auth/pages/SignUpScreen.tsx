@@ -43,6 +43,7 @@ function SignUpScreen() {
       case 'password':
         if (!value) return "비밀번호를 입력해주세요";
         if (value.length < 8) return "비밀번호는 최소 8자 이상이어야 합니다";
+        if (value.length > 20) return "비밀번호는 최대 20자까지 입력 가능합니다";
         return "";
         
       case 'confirmPassword':
@@ -83,8 +84,11 @@ function SignUpScreen() {
   };
 
   const handleInputChange = (field: string, value: string) => {
+    let finalValue = value;
+    
     if (field === "birthDate") {
       const formatted = normalizeBirthDateInput(value);
+      finalValue = formatted;
       setFormData(prev => ({ ...prev, birthDate: formatted }));
     } else {
       setFormData(prev => ({ ...prev, [field]: value }));
@@ -96,8 +100,8 @@ function SignUpScreen() {
     }
     
     // 실시간 유효성 검사 (터치된 필드만)
-    if (touched[field] || value) {
-      const error = validateField(field, value);
+    if (touched[field] || finalValue) {
+      const error = validateField(field, finalValue);
       setErrors(prev => ({ ...prev, [field]: error }));
     }
     
@@ -171,7 +175,6 @@ function SignUpScreen() {
         birthDate: formData.birthDate.trim(),
         gender: formData.gender === "male",
       };
-      console.log("[SignUp] payload:", payload);
       await signUpApi(payload);
       
       Alert.alert(
@@ -190,7 +193,6 @@ function SignUpScreen() {
         error?.response?.data?.error ||
         error?.response?.data?.detail ||
         error?.message;
-      console.log("[SignUp] failed:", error?.response?.data || error);
       
       let userFriendlyMessage = "회원가입에 실패했습니다.";
       
