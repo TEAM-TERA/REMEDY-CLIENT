@@ -1,3 +1,4 @@
+import React, { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { styles } from "./styles";
 import { TYPOGRAPHY } from "../../../../constants/typography";
@@ -8,8 +9,8 @@ import Icon from "../../../../components/icon/Icon";
 type HeaderNavProps = {
     title: string;
     variant?: 'default' | 'withIcon';
-    centerIcon?: React.ReactNode;
-    rightComponent?: React.ReactNode;
+    centerIcon?: ReactNode;
+    rightComponent?: ReactNode;
 };
 
 function HeaderNav({title, variant = 'default', centerIcon, rightComponent}: HeaderNavProps){
