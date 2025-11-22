@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import HeaderNav from '../components/HeaderNav/HeaderNav';
 import Button from '../../../components/button/Button';
@@ -8,6 +8,7 @@ import { styles } from '../styles/TermsScreen';
 import { PRIMARY_COLORS } from '../../../constants/colors';
 import TermsItem from '../components/TermsItem/TermsItem';
 import { TERMS, TermId } from '../../../constants/terms';
+import UserSvg from '../../../components/icon/icons/UserSvg';
 
 function TermsScreen() {
   const navigation = useAuthNavigation();
@@ -50,24 +51,24 @@ function TermsScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <HeaderNav title="이용약관 & 동의" />
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {TERMS.map(term => (
-          <TermsItem
-            key={term.id}
-            title={term.title}
-            required={term.required}
-            expanded={expanded[term.id]}
-            onToggleExpand={() => toggleExpand(term.id)}
-            checked={checked[term.id]}
-            onToggleChecked={() => toggleChecked(term.id)}
-            contentLines={term.contentLines}
-            showRequiredNotice={term.required}
-          />
-        ))}
-      </ScrollView>
-
-      <View style={styles.bottom}>
+      <HeaderNav title="이용약관 & 동의" variant="withIcon" centerIcon={<UserSvg />}/>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        <View style={styles.termsList}>
+          {TERMS.map(term => (
+            <TermsItem
+              key={term.id}
+              title={term.title}
+              required={term.required}
+              expanded={expanded[term.id]}
+              onToggleExpand={() => toggleExpand(term.id)}
+              checked={checked[term.id]}
+              onToggleChecked={() => toggleChecked(term.id)}
+              contentLines={term.contentLines}
+              showRequiredNotice={term.required}
+            />
+          ))}
+        </View>
+        
         <Button
           title="다음"
           onPress={handleNext}
@@ -77,7 +78,7 @@ function TermsScreen() {
             { opacity: allRequiredChecked ? 1 : 0.5, backgroundColor: PRIMARY_COLORS.DEFAULT },
           ]}
         />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
