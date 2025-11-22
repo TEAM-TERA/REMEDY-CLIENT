@@ -69,6 +69,8 @@ interface Props {
     fill?: string;
     isPress?: boolean;
     onPress?: () => void;
+    accessibilityLabel?: string;
+    accessibilityHint?: string;
 }
 
 const Icon: React.FC<Props> = ({
@@ -76,6 +78,8 @@ const Icon: React.FC<Props> = ({
     onPress,
     pressname = name,
     isPress = false,
+    accessibilityLabel,
+    accessibilityHint,
     ...props
 }) => {
     const SvgIcon = icons[name];
@@ -83,13 +87,23 @@ const Icon: React.FC<Props> = ({
         if (isPress) {
             const SvgIconPress = icons[pressname];
             return (
-                <TouchableOpacity onPress={onPress}>
+                <TouchableOpacity 
+                    onPress={onPress}
+                    accessibilityLabel={accessibilityLabel}
+                    accessibilityHint={accessibilityHint}
+                    accessibilityRole="button"
+                >
                     <SvgIconPress {...props} />
                 </TouchableOpacity>
             );
         }
         return (
-            <TouchableOpacity onPress={onPress}>
+            <TouchableOpacity 
+                onPress={onPress}
+                accessibilityLabel={accessibilityLabel}
+                accessibilityHint={accessibilityHint}
+                accessibilityRole="button"
+            >
                 <SvgIcon {...props} />
             </TouchableOpacity>
         );

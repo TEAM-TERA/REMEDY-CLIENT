@@ -4,6 +4,7 @@ import { InputProps } from "../../types/Input";
 import { styles } from "./styles";
 import { TEXT_COLORS } from "../../constants/colors";
 import Icon from "../icon/Icon";
+import { scale } from "../../utils/scalers";
 
 function Input({placeholder, value, onChangeText, width, containerWidth, keyboardType, error, secureTextEntry, helperText, onFocus, onBlur} : InputProps){
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -39,9 +40,11 @@ function Input({placeholder, value, onChangeText, width, containerWidth, keyboar
                     <Icon 
                         name={isPasswordVisible ? "eyeOn" : "eyeOff"}
                         onPress={togglePasswordVisibility}
-                        width={20}
-                        height={20}
+                        width={scale(20)}
+                        height={scale(20)}
                         color={TEXT_COLORS.CAPTION_1}
+                        accessibilityLabel={isPasswordVisible ? "비밀번호 숨기기" : "비밀번호 보기"}
+                        accessibilityHint="비밀번호 표시 여부를 전환합니다"
                     />
                 )}
             </View>
