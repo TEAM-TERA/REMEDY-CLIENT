@@ -23,6 +23,10 @@ import NameTagSvg from './icons/NameTagSvg';
 import PlayerSvg from './icons/PlayerSVG';
 import ToggleOffSvg from './icons/ToggleOffSvg';
 import ToggleOnSvg from './icons/ToggleOnSvg';
+import UserSvg from './icons/UserSvg';
+import DangerSvg from './icons/DangerSvg';
+import EyeOnSvg from './icons/EyeOnSvg';
+import EyeOffSvg from './icons/EyeOffSvg';
 
 const icons = {
     edit: EditSvg,
@@ -48,6 +52,10 @@ const icons = {
     player: PlayerSvg,
     toggleOff: ToggleOffSvg,
     toggleOn: ToggleOnSvg, 
+    user: UserSvg,
+    danger: DangerSvg,
+    eyeOn: EyeOnSvg,
+    eyeOff: EyeOffSvg,
 };
 
 export type IconName = keyof typeof icons;
