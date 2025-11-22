@@ -39,9 +39,9 @@ const useLocation = () => {
               },
               {
                 enableHighAccuracy,
-                timeout: 15000,
-                maximumAge: 0,
-                forceRequestLocation: true,
+                timeout: 8000, // 15초에서 8초로 단축
+                maximumAge: 60000, // 1분간 캐시된 위치 허용
+                forceRequestLocation: false, // 캐시된 위치 사용 허용
                 showLocationDialog: true,
               }
             );

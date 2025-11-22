@@ -82,6 +82,18 @@ function DropScreen() {
         return;
       }
 
+      // 주소가 로딩 메시지인지 확인
+      if (!location || location.trim() === "" ||
+          location.includes("가져오는 중") ||
+          location.includes("로딩") ||
+          location.includes("...")) {
+        setModalTitle('위치 오류');
+        setModalMessage('위치 정보를 가져오는 중입니다. 잠시 후 다시 시도해주세요.');
+        confirmActionRef.current = null;
+        setModalVisible(true);
+        return;
+      }
+
       if (!songId) {
         setModalTitle('음악 오류');
         setModalMessage('음악 정보를 찾을 수 없습니다.');

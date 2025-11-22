@@ -4,4 +4,5 @@ export type MusicProps = {
     onPress? : ()=>void;
     imgUrl? : string;
     hlsPath? : string;
+    disabled? : boolean;
 };
