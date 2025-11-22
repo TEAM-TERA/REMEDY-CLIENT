@@ -87,45 +87,34 @@ function DropSearchScreen(){
 
     const handleGoBack = useCallback(() => navigation.goBack(), [navigation]);
 
-    const isGloballyDisabled = useMemo(() => {
-        return addressLoading || !currentAddress || currentAddress.trim() === "" ||
-            currentAddress.includes("가져오는 중") || currentAddress.includes("로딩") || currentAddress.includes("...");
+    // 위치 정보가 로딩 중이거나 없어도 기본 위치로 설정하여 음악 선택 허용
+    const finalAddress = useMemo(() => {
+        if (addressLoading || !currentAddress || currentAddress.trim() === "" ||
+            currentAddress.includes("가져오는 중") || currentAddress.includes("로딩") || currentAddress.includes("...")) {
+            return "대한민국"; // 기본 위치 사용
+        }
+        return currentAddress;
     }, [addressLoading, currentAddress]);
 
     const handleItemPress = useCallback((item: SongSearchItem) => {
-        if (isGloballyDisabled) {
-            return;
-        }
-
         navigation.navigate("DropDetail", {
             musicTitle: item.title,
             singer: item.artist,
             musicTime: item.duration,
             songId: item.id,
             imgUrl: item.albumImagePath,
-            hlsPath: item.hlsPath,
-            location: currentAddress,
+            location: finalAddress,
         });
-    }, [navigation, currentAddress, isGloballyDisabled]);
+    }, [navigation, finalAddress]);
 
     const renderItem = useCallback(({ item }: { item: SongSearchItem }) => {
         const onPress = () => handleItemPress(item);
-        return <MusicItem item={item} onPress={onPress} disabled={isGloballyDisabled} />;
-    }, [handleItemPress, isGloballyDisabled]);
+        return <MusicItem item={item} onPress={onPress} disabled={false} />;
+    }, [handleItemPress]);
 
     const keyExtractor = useCallback((item: SongSearchItem) => item.id, []);
 
     const ListEmptyComponent = useMemo(() => {
-        if (addressLoading) {
-            return (
-                <View style={{ padding: 20, alignItems: 'center' }}>
-                    <Text style={{ color: '#FFF', marginBottom: 8 }}>위치 정보를 가져오는 중...</Text>
-                    <Text style={{ color: '#888', fontSize: 12, textAlign: 'center' }}>
-                        위치 정보를 가져온 후 음악을 선택할 수 있습니다
-                    </Text>
-                </View>
-            );
-        }
         if (isLoading) {
             return <Text>로딩중...</Text>;
         }
@@ -133,7 +122,7 @@ function DropSearchScreen(){
             return <Text style={{ color: 'red' }}>에러: {error.message}</Text>;
         }
         return <Text>음악 목록이 없습니다.</Text>;
-    }, [isLoading, error, addressLoading]);
+    }, [isLoading, error]);
 
     return(
         <SafeAreaView style = {styles.container}>

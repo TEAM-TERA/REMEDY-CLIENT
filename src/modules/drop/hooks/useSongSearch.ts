@@ -6,7 +6,6 @@ export interface SongSearchItem {
     title: string;
     artist: string;
     duration: number;
-    hlsPath: string;
     albumImagePath: string;
 }
 

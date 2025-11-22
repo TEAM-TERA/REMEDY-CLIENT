@@ -13,7 +13,6 @@ interface MusicPlayerState {
   error: string | null;
 }
 
-// 모든 hook 인스턴스가 공유하는 현재 재생중인 곡 ID
 let globalCurrentSongId: string | undefined = undefined;
 
 export function useHLSPlayer(songId?: string) {
@@ -26,7 +25,7 @@ export function useHLSPlayer(songId?: string) {
   });
 
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const { setCurrentId } = usePlayerStore(); // playerStore에 접근
+  const { setCurrentId } = usePlayerStore();
 
   type TrackEvent =
     | { type: 'playback-state'; state: number }
@@ -49,13 +48,13 @@ export function useHLSPlayer(songId?: string) {
     if (event.type === 'playback-error') {
       setState(prev => ({ ...prev, error: '재생 에러가 발생했습니다' }));
       const timestamp = new Date().toISOString();
-      console.log('❌ [SYNC] Playback error - clearing currentId:', {
+      console.log('[SYNC] Playback error - clearing currentId:', {
         timestamp,
         previousGlobalId: globalCurrentSongId,
         error: event
       });
       globalCurrentSongId = undefined;
-      setCurrentId(null); // 에러 시 현재 재생 음악 정보 초기화
+      setCurrentId(null);
     }
   });
 
@@ -76,19 +75,18 @@ export function useHLSPlayer(songId?: string) {
 
 
 
-  const loadMusic = async (songId?: string, hlsPath?: string, imgUrl?: string) => {
+  const loadMusic = async (songId?: string, imgUrl?: string) => {
     setState(prev => ({ ...prev, isLoading: true, error: null }));
 
     try {
       await TrackPlayer.reset();
 
-      if (!hlsPath || hlsPath.trim() === '' || hlsPath === 'undefined') {
-        console.warn('⚠️ Invalid hlsPath, using default:', hlsPath);
-        hlsPath = `hls/${songId}/playlist.m3u8`;
+      if (!songId) {
+        throw new Error('Song ID가 필요합니다');
       }
 
       const streamBase = Config.MUSIC_API_BASE_URL;
-      const hlsStreamUrl = `${streamBase}/${hlsPath}`;
+      const hlsStreamUrl = `${streamBase}/hls/${songId}/playlist.m3u8`;
 
       try {
         const m3u8Response = await fetch(hlsStreamUrl);
@@ -112,7 +110,7 @@ export function useHLSPlayer(songId?: string) {
         if (firstSegment) {
           const segmentUrl = firstSegment.startsWith('http')
             ? firstSegment
-            : `${hlsStreamUrl.substring(0, hlsStreamUrl.lastIndexOf('/'))}/${firstSegment.trim()}`;
+            : `${streamBase}/hls/${songId}/${firstSegment.trim()}`;
 
           if (__DEV__) {
             console.log('First Segment URL:', segmentUrl);
@@ -235,7 +233,6 @@ export function useHLSPlayer(songId?: string) {
           console.log('⏭️ Same song already loaded, syncing state:', songId);
         }
 
-        // 이미 재생중인 곡이면 현재 상태를 동기화
         try {
           const progress = await TrackPlayer.getProgress();
           const playbackState = await TrackPlayer.getPlaybackState();
@@ -249,7 +246,6 @@ export function useHLSPlayer(songId?: string) {
             error: null,
           }));
 
-          // 진행 상태 업데이트 인터벌 시작
           if (progressIntervalRef.current) {
             clearInterval(progressIntervalRef.current);
           }
@@ -283,25 +279,22 @@ export function useHLSPlayer(songId?: string) {
       });
 
       globalCurrentSongId = songId;
-      setCurrentId(songId); // playerStore에도 현재 재생 중인 음악 ID 저장
+      setCurrentId(songId);
 
       try {
         const songInfoResponse = await fetch(`${axiosInstance.defaults.baseURL}/songs/${songId}`);
         if (songInfoResponse.ok) {
           const songInfo = await songInfoResponse.json();
-          const hlsPath = songInfo.hlsPath || `hls/${songId}/playlist.m3u8`;
           const imgUrl = songInfo.albumImagePath;
-          await loadMusic(songId, hlsPath, imgUrl);
+          await loadMusic(songId, imgUrl);
         } else {
-          const hlsPath = `hls/${songId}/playlist.m3u8`;
-          await loadMusic(songId, hlsPath);
+          await loadMusic(songId);
         }
       } catch (error) {
         if (__DEV__) {
           console.error('곡 정보 조회 실패:', error);
         }
-        const hlsPath = `hls/${songId}/playlist.m3u8`;
-        await loadMusic(songId, hlsPath);
+        await loadMusic(songId);
       }
     };
 
