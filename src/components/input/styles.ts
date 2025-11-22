@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { scale } from "../../utils/scalers";
-import { TEXT_COLORS, UI_COLORS } from "../../constants/colors";
+import { TEXT_COLORS, UI_COLORS, FORM_COLORS, PRIMARY_COLORS } from "../../constants/colors";
 
 export const styles = StyleSheet.create({
     wrapper: {
@@ -8,18 +8,19 @@ export const styles = StyleSheet.create({
     },
     container : {
         display : "flex",
+        flexDirection: "row",
+        alignItems: "center",
         height : scale(46),
         padding : scale(12),
-        justifyContent : "center",
         gap : scale(8),
         alignSelf : "stretch",
         borderRadius : scale(8),
-        backgroundColor : UI_COLORS.BACKGROUND,
+        backgroundColor : FORM_COLORS.INPUT_1,
         borderWidth: 1,
         borderColor: 'transparent',
     },
     containerError: {
-        borderColor: '#EF4444',
+        borderColor: PRIMARY_COLORS.DEFAULT,
         borderWidth: 1,
     },
     text : {
@@ -27,7 +28,7 @@ export const styles = StyleSheet.create({
         textAlign : "left"
     },
     errorText: {
-        color: '#EF4444',
+        color: PRIMARY_COLORS.DEFAULT,
         fontSize: scale(12),
         marginTop: scale(4),
         marginLeft: scale(4),
