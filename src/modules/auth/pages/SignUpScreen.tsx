@@ -225,9 +225,9 @@ function SignUpScreen() {
             contentContainerStyle={styles.formContainer}
             keyboardShouldPersistTaps="handled"
             enableOnAndroid={true}
-            enableAutomaticScroll={Platform.OS === 'ios'}
-            extraScrollHeight={0}
-            extraHeight={0}
+            enableAutomaticScroll={true}
+            extraScrollHeight={100}
+            extraHeight={100}
             showsVerticalScrollIndicator={false}
           >
             <Input
