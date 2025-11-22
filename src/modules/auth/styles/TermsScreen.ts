@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { BACKGROUND_COLORS, FORM_COLORS, TEXT_COLORS, UI_COLORS } from '../../../constants/colors';
+import { BACKGROUND_COLORS, FORM_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import { scale } from '../../../utils/scalers';
 
 export const styles = StyleSheet.create({
