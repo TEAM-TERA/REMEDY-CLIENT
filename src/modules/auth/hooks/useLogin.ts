@@ -13,7 +13,7 @@ export function useLogin() {
       loginApi(email, password),
     onSuccess: async (accessToken) => {
       await AsyncStorage.setItem('userToken', accessToken);
-      axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+      axiosInstance.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
       await qc.prefetchQuery({
         queryKey: profileKeys.me(),
         queryFn: getMyProfile,
