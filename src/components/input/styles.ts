@@ -27,6 +27,17 @@ export const styles = StyleSheet.create({
         color : TEXT_COLORS.DEFAULT,
         textAlign : "left"
     },
+    textFlex: {
+        flex: 1,
+    },
+    textAndroid: {
+        paddingVertical: 0,
+        textAlignVertical: 'center',
+    },
+    containerCentered: {
+        alignSelf: 'center',
+        borderRadius: 8,
+    },
     errorText: {
         color: PRIMARY_COLORS.DEFAULT,
         fontSize: scale(12),

@@ -13,23 +13,28 @@ function Input({placeholder, value, onChangeText, width, containerWidth, keyboar
         setIsPasswordVisible(!isPasswordVisible);
     };
 
+    const containerStyle = [
+        styles.container,
+        containerWidth !== undefined && styles.containerCentered,
+        containerWidth !== undefined && { width: containerWidth },
+        error && styles.containerError,
+    ];
+
+    const textInputStyle = [
+        styles.text,
+        width !== undefined ? { width } : styles.textFlex,
+        Platform.OS === 'android' && styles.textAndroid,
+    ];
+
     return(
         <View style={styles.wrapper}>
-            <View style = {[
-                styles.container, 
-                containerWidth !== undefined ? { width: containerWidth, alignSelf: 'center', borderRadius: 8 } : null,
-                error ? styles.containerError : null,
-            ]}>
+            <View style={containerStyle}>
                 <TextInput
                 value = {value}
                 onChangeText = {onChangeText}
                 onFocus={onFocus}
                 onBlur={onBlur}
-                style = {[
-                    styles.text,
-                    width !== undefined ? { width } : { flex: 1 },
-                    Platform.OS === 'android' ? { paddingVertical: 0, textAlignVertical: 'center' as const } : null
-                ]}
+                style={textInputStyle}
                 placeholder = {placeholder}
                 placeholderTextColor={TEXT_COLORS.CAPTION_1}
                 keyboardType={keyboardType}
