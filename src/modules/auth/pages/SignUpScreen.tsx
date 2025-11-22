@@ -6,7 +6,7 @@ import { styles } from "../styles/SignUpScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import Input from "../../../components/input/Input";
 import Button from "../../../components/button/Button";
-import HeaderNav from "../components/HeaderNav/HeaderNav";
+import { HeaderNav } from "../../../components";
 import { useAuthNavigation } from "../../../hooks/navigation/useAuthNavigation";
 import { signUpApi } from "../api/authApi";
 import UserSvg from "../../../components/icon/icons/UserSvg";

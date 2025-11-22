@@ -5,7 +5,7 @@ import { styles } from "../styles/LoginScreen";
 import { TYPOGRAPHY } from "../../../constants/typography";
 import Input from "../../../components/input/Input";
 import Button from "../../../components/button/Button";
-import HeaderNav from "../components/HeaderNav/HeaderNav";
+import { HeaderNav } from "../../../components";
 import { AuthContext } from "../auth-context";
 import { useLogin } from "../hooks/useLogin";
 import { useAuthNavigation } from "../../../hooks/navigation/useAuthNavigation";

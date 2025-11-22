@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import HeaderNav from '../components/HeaderNav/HeaderNav';
+import { HeaderNav } from '../../../components';
 import Button from '../../../components/button/Button';
 import { useAuthNavigation } from '../../../hooks/navigation/useAuthNavigation';
 import { styles } from '../styles/TermsScreen';
