@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, Alert, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { View, Alert, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { styles } from "../styles/SignUpScreen";
