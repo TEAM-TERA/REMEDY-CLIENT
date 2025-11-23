@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { BACKGROUND_COLORS } from "../../../constants/colors";
 import HeaderBar from "../components/HeaderBar";
 import GoogleMapView from "../../../components/map/GoogleMapView";
@@ -10,19 +10,16 @@ import { useDroppings } from "../../drop/hooks/useDroppings";
 import { usePlayerStore } from "../../../stores/playerStore";
 import { useMemo } from "react";
 import type { Dropping } from "../types/musicList";
-import NowPlayingCard from "../../../components/player/NowPlayingCard";
 import { getSongInfo, getDroppingById } from "../../drop/api/dropApi";
 import { getDropLikeCount } from "../../music/api/likeApi";
 import { getCommentsByDroppingId } from "../../music/api/commentApi";
 
 function HomeScreen() {
   const { location } = useLocation();
-  const currentLocation = useMemo(() =>
-    location ?? { latitude: 37.5665, longitude: 126.9780 }
-  , [location]);
+  const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
   const { currentId } = usePlayerStore();
+  const mapRef = useRef<any>(null);
 
-  const [showNowPlayingCard, setShowNowPlayingCard] = useState(false);
   const [currentSongData, setCurrentSongData] = useState<any>(null);
 
   useEffect(() => {
@@ -33,11 +30,6 @@ function HomeScreen() {
   const { data: droppings } = useDroppings(
     currentLocation.longitude,
     currentLocation.latitude
-  );
-
-  const safeDroppings = useMemo(() =>
-    Array.isArray(droppings) ? droppings : [],
-    [droppings]
   );
 
   const currentDroppingId = useMemo(() => {
@@ -65,18 +57,31 @@ function HomeScreen() {
     });
   }, [currentId]);
 
-  // 현재 재생 중인 곡 정보 가져오기
+  // WebView에 곡 데이터 전송
+  useEffect(() => {
+    if (mapRef.current && currentSongData) {
+      const message = JSON.stringify({
+        type: 'showNowPlayingCard',
+        songData: currentSongData
+      });
+      mapRef.current.postMessage(message);
+    } else if (mapRef.current && !currentSongData) {
+      const message = JSON.stringify({
+        type: 'hideNowPlayingCard'
+      });
+      mapRef.current.postMessage(message);
+    }
+  }, [currentSongData]);
+
   useEffect(() => {
     if (currentId && currentDroppingId) {
       const fetchCurrentSongData = async () => {
         try {
           console.log('현재 재생 중인 곡 정보 가져오기 시작:', { currentId, currentDroppingId });
 
-          // 드랍핑 정보 가져오기
           const droppingData = await getDroppingById(currentDroppingId);
           console.log('드랍핑 데이터:', droppingData);
 
-          // 곡 정보 가져오기
           let songData = null;
           if (droppingData?.songId) {
             try {
@@ -87,7 +92,6 @@ function HomeScreen() {
             }
           }
 
-          // 좋아요 수 가져오기
           let likeCount = 0;
           try {
             const likeData = await getDropLikeCount(currentDroppingId);
@@ -97,7 +101,6 @@ function HomeScreen() {
             console.warn('좋아요 수 가져오기 실패:', likeError);
           }
 
-          // 댓글 수 가져오기
           let commentCount = 0;
           try {
             const comments = await getCommentsByDroppingId(currentDroppingId);
@@ -107,7 +110,6 @@ function HomeScreen() {
             console.warn('댓글 수 가져오기 실패:', commentError);
           }
 
-          // 통합 데이터 설정
           const combinedData = {
             title: songData?.title || droppingData?.content || '재생 중인 곡',
             artist: songData?.artist || '알 수 없는 아티스트',
@@ -119,7 +121,6 @@ function HomeScreen() {
           };
 
           setCurrentSongData(combinedData);
-          setShowNowPlayingCard(true);
 
         } catch (error) {
           console.error('현재 재생 중인 곡 정보 가져오기 실패:', error);
@@ -128,8 +129,6 @@ function HomeScreen() {
 
       fetchCurrentSongData();
     } else {
-      // 재생 중인 곡이 없으면 카드 닫기
-      setShowNowPlayingCard(false);
       setCurrentSongData(null);
     }
   }, [currentId, currentDroppingId]);
@@ -138,7 +137,8 @@ function HomeScreen() {
     <View style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }}>
         <View style={{ flex: 1, position: 'relative' }}>
             <GoogleMapView
-                droppings={safeDroppings}
+                ref={mapRef}
+                droppings={Array.isArray(droppings) ? droppings : []}
                 currentLocation={currentLocation}
                 currentPlayingDroppingId={currentDroppingId as any}
             />
@@ -146,14 +146,7 @@ function HomeScreen() {
                 <HeaderBar />
             </SafeAreaView>
 
-            <MusicWheel droppings={safeDroppings}/>
-
-            {/* 현재 재생 중인 곡 정보 카드 */}
-            <NowPlayingCard
-                visible={showNowPlayingCard}
-                onClose={() => setShowNowPlayingCard(false)}
-                droppingData={currentSongData}
-            />
+            <MusicWheel droppings={Array.isArray(droppings) ? droppings : []}/>
         </View>
     </View>
 

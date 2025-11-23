@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo, forwardRef, useImperativeHandle } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { useNavigation } from '@react-navigation/native';
@@ -13,11 +13,20 @@ interface GoogleMapViewProps {
   currentPlayingDroppingId?: string | number;
 }
 
-function GoogleMapView({ droppings, currentLocation, currentPlayingDroppingId }: GoogleMapViewProps) {
+const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentLocation, currentPlayingDroppingId }, ref) => {
   const webviewRef = useRef<WebView>(null);
   const navigation = useNavigation();
   const [isMapReady, setIsMapReady] = useState(false);
   const previousLocation = useRef<{ latitude: number, longitude: number } | null>(null);
+
+  // ref를 통해 postMessage 메소드 노출
+  useImperativeHandle(ref, () => ({
+    postMessage: (message: string) => {
+      if (webviewRef.current) {
+        webviewRef.current.postMessage(message);
+      }
+    }
+  }));
 
   useEffect(() => {
   }, [currentPlayingDroppingId]);
@@ -150,6 +159,8 @@ function GoogleMapView({ droppings, currentLocation, currentPlayingDroppingId }:
           var lastCenter = null;
           var myLocationMarker;
           var currentPlayingDroppingId = null;
+          var nowPlayingCardElement = null;
+          var currentSongData = null;
           
           function initMap() {
             const center = { lat: 37.5665, lng: 126.9780 };
@@ -482,6 +493,158 @@ function GoogleMapView({ droppings, currentLocation, currentPlayingDroppingId }:
             updateAllMarkersForCurrentSong(currentPlayingSongId);
           }
 
+          function createNowPlayingCard(marker, songData) {
+            if (nowPlayingCardElement) {
+              nowPlayingCardElement.remove();
+            }
+
+            const cardDiv = document.createElement('div');
+            cardDiv.style.cssText = \`
+              position: absolute;
+              background: rgba(0, 0, 0, 0.8);
+              border-radius: 12px;
+              padding: 16px;
+              color: white;
+              font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+              width: 280px;
+              z-index: 1000;
+              pointer-events: auto;
+            \`;
+
+            // 곡 정보
+            const title = songData.title || '재생 중인 곡';
+            const artist = songData.artist || '알 수 없는 아티스트';
+            const likeCount = songData.likeCount || 12;
+
+            // CD 모양 앨범 이미지 SVG
+            const clipId = 'albumClip' + Date.now();
+            const cdAlbumSvg = \`
+              <svg width="60" height="60" viewBox="0 0 108 108">
+                <!-- 외부 CD 배경 -->
+                <rect x="0" y="0" width="108" height="108" rx="20" fill="#212131"/>
+
+                <!-- 앨범 이미지 마스크 -->
+                <defs>
+                  <clipPath id="\${clipId}">
+                    <circle cx="54" cy="54" r="50"/>
+                  </clipPath>
+                </defs>
+
+                <!-- 앨범 이미지 -->
+                <g clip-path="url(#\${clipId})">
+                  \${songData.albumImagePath ?
+                    \`<image x="4" y="4" width="100" height="100" href="\${songData.albumImagePath}" preserveAspectRatio="xMidYMid slice"/>\` :
+                    \`<rect x="4" y="4" width="100" height="100" fill="#333"/>
+                     <text x="54" y="60" text-anchor="middle" fill="#656581" font-size="20">♪</text>\`
+                  }
+                </g>
+
+                <!-- CD 효과 오버레이 -->
+                <path d="M54.3083 3C84.6867 3.00019 109.208 27.5217 109.208 57.9004C109.208 88.279 84.6866 112.8 54.3083 112.8C23.9299 112.8 -0.59183 88.2791 -0.59204 57.9004C-0.59204 27.5216 23.9297 3 54.3083 3ZM54.7 48.2002C49.4542 48.2002 45.2 52.4544 45.2 57.7002C45.2001 62.9459 49.4543 67.2002 54.7 67.2002C59.9456 67.2002 64.1998 62.9459 64.2 57.7002C64.2 52.4544 59.9457 48.2002 54.7 48.2002Z" fill="rgba(19, 3, 9, 0.2)"/>
+
+                <!-- 중앙 홀 -->
+                <circle cx="54" cy="54" r="9" fill="#212131"/>
+              </svg>
+            \`;
+
+            // 하트 아이콘 SVG
+            const heartIcon = \`
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 14s6-4.5 6-8.5C14 3.5 12.5 2 10.5 2 9.5 2 8.5 2.5 8 3.5 7.5 2.5 6.5 2 5.5 2 3.5 2 2 3.5 2 5.5 2 9.5 8 14 8 14z" fill="#FF4444"/>
+              </svg>
+            \`;
+
+            // 다운로드 아이콘 SVG
+            const downloadIcon = \`
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M14 10V12.6667C14 13.0203 13.8595 13.3594 13.6095 13.6095C13.3594 13.8595 13.0203 14 12.6667 14H3.33333C2.97971 14 2.64057 13.8595 2.39052 13.6095C2.14048 13.3594 2 13.0203 2 12.6667V10M4.66667 6.66667L8 10M8 10L11.3333 6.66667M8 10V2" stroke="#EF9210" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            \`;
+
+            cardDiv.innerHTML = \`
+              <div style="display: flex; align-items: flex-start; gap: 12px; position: relative;">
+                <!-- CD 모양 앨범 이미지 -->
+                <div style="flex-shrink: 0;">
+                  \${cdAlbumSvg}
+                </div>
+
+                <!-- 곡 정보 + 아이콘들 -->
+                <div style="flex: 1; min-width: 0;">
+                  <!-- 곡 제목 -->
+                  <div style="font-weight: bold; font-size: 24px; line-height: 32px; color: #FF4444; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    \${title}
+                  </div>
+
+                  <!-- 가수명 -->
+                  <div style="font-size: 14px; line-height: 16px; color: rgba(255,255,255,0.6); margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    by \${artist}
+                  </div>
+
+                  <!-- 아이콘들 (가로 배치) -->
+                  <div style="display: flex; align-items: center; gap: 16px;">
+                    <!-- 좋아요 -->
+                    <div style="display: flex; align-items: center; gap: 4px; cursor: pointer;">
+                      \${heartIcon}
+                      <span style="font-size: 16px; color: #FF4444; font-weight: bold;">\${likeCount}</span>
+                    </div>
+
+                    <!-- 다운로드 -->
+                    <div style="cursor: pointer;">
+                      \${downloadIcon}
+                    </div>
+                  </div>
+                </div>
+
+
+                <!-- 닫기 버튼 (우상단) -->
+                <div style="position: absolute; top: -8px; right: -8px; width: 24px; height: 24px; border-radius: 12px; background: rgba(255, 255, 255, 0.2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 12px; font-weight: bold;" onclick="hideNowPlayingCard()">
+                  ✕
+                </div>
+              </div>
+            \`;
+
+
+            // 마커 위치에 카드 배치
+            const position = marker.getPosition();
+            const projection = map.getProjection();
+            const overlayView = new google.maps.OverlayView();
+
+            overlayView.onAdd = function() {
+              this.getPanes().overlayLayer.appendChild(cardDiv);
+              nowPlayingCardElement = cardDiv;
+
+              // 초기 위치 설정
+              this.draw = function() {
+                const pixelPosition = this.getProjection().fromLatLngToDivPixel(position);
+                if (pixelPosition && cardDiv) {
+                  cardDiv.style.left = (pixelPosition.x - 140) + 'px'; // 카드 너비의 절반만큼 왼쪽으로
+                  cardDiv.style.top = (pixelPosition.y - 160) + 'px'; // 카드를 핀 위쪽에 더 멀리 배치
+                }
+              };
+            };
+
+            overlayView.onRemove = function() {
+              if (cardDiv && cardDiv.parentNode) {
+                cardDiv.parentNode.removeChild(cardDiv);
+              }
+              nowPlayingCardElement = null;
+            };
+
+            overlayView.setMap(map);
+
+            // 전역에서 참조할 수 있도록 저장
+            window.currentOverlayView = overlayView;
+          }
+
+          function hideNowPlayingCard() {
+            if (window.currentOverlayView) {
+              window.currentOverlayView.setMap(null);
+              window.currentOverlayView = null;
+            }
+            nowPlayingCardElement = null;
+          }
+
           function updateLocation(lat, lng) {
             if (!mapReady || !map) return;
 
@@ -567,8 +730,25 @@ function GoogleMapView({ droppings, currentLocation, currentPlayingDroppingId }:
             });
           }
 
+          function showNowPlayingCard(droppingId, songData) {
+            const targetMarker = existingMarkers.find(marker =>
+              marker.droppingData && String(marker.droppingData.droppingId) === String(droppingId)
+            );
+
+            if (targetMarker && songData) {
+              createNowPlayingCard(targetMarker, songData);
+            }
+          }
+
           function processMessage(data) {
-            if (data.type === 'droppings') {
+            if (data.type === 'showNowPlayingCard') {
+              currentSongData = data.songData;
+              if (currentPlayingDroppingId && currentSongData) {
+                showNowPlayingCard(currentPlayingDroppingId, currentSongData);
+              }
+            } else if (data.type === 'hideNowPlayingCard') {
+              hideNowPlayingCard();
+            } else if (data.type === 'droppings') {
               const previousPlayingDroppingId = currentPlayingDroppingId;
               currentPlayingDroppingId = data.currentPlayingDroppingId;
               console.log('WebView - 현재 재생 중인 드랍핑 ID:', currentPlayingDroppingId);
@@ -587,6 +767,13 @@ function GoogleMapView({ droppings, currentLocation, currentPlayingDroppingId }:
               if (previousPlayingDroppingId !== currentPlayingDroppingId) {
                 console.log('재생 드랍핑 변경됨:', previousPlayingDroppingId, '->', currentPlayingDroppingId);
                 updateAllMarkersForCurrentSong(currentPlayingDroppingId);
+
+                // 새로운 곡이 재생되면 카드 표시
+                if (currentPlayingDroppingId && currentSongData) {
+                  showNowPlayingCard(currentPlayingDroppingId, currentSongData);
+                } else {
+                  hideNowPlayingCard();
+                }
               }
             } else if (data.type === 'updateCurrentDropping') {
               if (window.ReactNativeWebView) {
@@ -716,7 +903,7 @@ function GoogleMapView({ droppings, currentLocation, currentPlayingDroppingId }:
       onError={(error) => console.error('Map WebView 에러:', error.nativeEvent)}
     />
   );
-}
+});
 
 export default React.memo(GoogleMapView, (prevProps, nextProps) => {
   const locationChanged = prevProps.currentLocation && nextProps.currentLocation

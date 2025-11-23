@@ -30,7 +30,6 @@ function UserProfileScreen() {
     const [songTitles, setSongTitles] = useState<Record<string, string>>({});
     const [songImages, setSongImages] = useState<Record<string, string>>({});
 
-    // 데이터 디버깅
     useEffect(() => {
         console.log('=== 드랍 데이터 상태 ===');
         console.log('myDrops:', myDrops);
@@ -95,7 +94,6 @@ function UserProfileScreen() {
     const dropsArray = Array.isArray(myDrops) ? myDrops : [];
     const likesArray = Array.isArray(myLikes) ? myLikes : [];
 
-    // 필터링 전 데이터 확인
     console.log('=== currentData 계산 ===');
     console.log('activeTab:', activeTab);
     console.log('dropsArray 길이:', dropsArray.length);
