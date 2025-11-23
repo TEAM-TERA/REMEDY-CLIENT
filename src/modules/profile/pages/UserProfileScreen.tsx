@@ -79,7 +79,7 @@ function UserProfileScreen() {
 
     const currentData: DropItemData[] =
     activeTab === "drop"
-        ? (myDrops || [])
+        ? (Array.isArray(myDrops) ? myDrops : [])
             .filter((d: any) => d && d.droppingId)
             .map((d: any) => ({
                 droppingId: d.droppingId,
@@ -88,7 +88,7 @@ function UserProfileScreen() {
                 imageSource: songImages[d.songId] ? { uri: songImages[d.songId] } : undefined,
                 hasHeart: false,
             }))
-        : (myLikes || [])
+        : (Array.isArray(myLikes) ? myLikes : [])
             .filter((like: any) => like && like.droppingId)
             .map((like: any) => ({
                 droppingId: like.droppingId,
