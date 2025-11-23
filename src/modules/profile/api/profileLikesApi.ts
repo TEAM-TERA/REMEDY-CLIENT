@@ -2,9 +2,9 @@ import axiosInstance from "../../auth/api/axiosInstance";
 
 export interface LikedDropping {
   droppingId: string;
-  songId: string;
-  songTitle: string;
-  albumImageUrl: string;
+  droppingType: string;
+  title: string;
+  imageUrl: string;
   address: string;
 }
 

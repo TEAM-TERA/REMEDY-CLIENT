@@ -30,12 +30,27 @@ function UserProfileScreen() {
     const [songTitles, setSongTitles] = useState<Record<string, string>>({});
     const [songImages, setSongImages] = useState<Record<string, string>>({});
 
-    // 좋아요 에러 디버깅
+    // 데이터 디버깅
+    useEffect(() => {
+        console.log('=== 드랍 데이터 상태 ===');
+        console.log('myDrops:', myDrops);
+        console.log('dropLoading:', dropLoading);
+        console.log('myDrops 타입:', typeof myDrops);
+        console.log('myDrops 배열인가?:', Array.isArray(myDrops));
+        console.log('myDrops 길이:', myDrops ? myDrops.length : 'undefined');
+    }, [myDrops, dropLoading]);
+
     useEffect(() => {
         console.log('=== 좋아요 데이터 상태 ===');
         console.log('myLikes:', myLikes);
         console.log('likeLoading:', likeLoading);
         console.log('likeError:', likeError);
+        console.log('myLikes 타입:', typeof myLikes);
+        console.log('myLikes 배열인가?:', Array.isArray(myLikes));
+        console.log('myLikes 길이:', myLikes ? myLikes.length : 'undefined');
+        if (myLikes && myLikes.length > 0) {
+            console.log('첫 번째 좋아요 아이템:', myLikes[0]);
+        }
         if (likeError) {
             console.error('좋아요 목록 API 에러:', likeError);
         }
@@ -77,10 +92,26 @@ function UserProfileScreen() {
     }, [myDrops]);
 
 
+    const dropsArray = Array.isArray(myDrops) ? myDrops : [];
+    const likesArray = Array.isArray(myLikes) ? myLikes : [];
+
+    // 필터링 전 데이터 확인
+    console.log('=== currentData 계산 ===');
+    console.log('activeTab:', activeTab);
+    console.log('dropsArray 길이:', dropsArray.length);
+    console.log('dropsArray 내용:', dropsArray);
+
+    const filteredDrops = dropsArray.filter((d: any) => d && d.droppingId);
+    console.log('필터링된 dropsArray 길이:', filteredDrops.length);
+    console.log('필터링된 dropsArray 내용:', filteredDrops);
+
+    const filteredLikes = likesArray.filter((like: any) => like && like.droppingId);
+    console.log('필터링된 likesArray 길이:', filteredLikes.length);
+    console.log('필터링된 likesArray 내용:', filteredLikes);
+
     const currentData: DropItemData[] =
     activeTab === "drop"
-        ? (Array.isArray(myDrops) ? myDrops : [])
-            .filter((d: any) => d && d.droppingId)
+        ? filteredDrops
             .map((d: any) => ({
                 droppingId: d.droppingId,
                 memo: songTitles[d.songId] || d.songId || "알 수 없는 곡",
@@ -88,15 +119,25 @@ function UserProfileScreen() {
                 imageSource: songImages[d.songId] ? { uri: songImages[d.songId] } : undefined,
                 hasHeart: false,
             }))
-        : (Array.isArray(myLikes) ? myLikes : [])
-            .filter((like: any) => like && like.droppingId)
-            .map((like: any) => ({
-                droppingId: like.droppingId,
-                memo: like.songTitle || "알 수 없는 곡",
-                location: like.address || "위치 정보 없음",
-                imageSource: like.albumImageUrl ? { uri: like.albumImageUrl } : undefined,
-                hasHeart: true,
-            }));
+        : filteredLikes
+            .map((like: any) => {
+                console.log('좋아요 아이템 매핑:', {
+                    droppingId: like.droppingId,
+                    title: like.title,
+                    imageUrl: like.imageUrl,
+                    address: like.address
+                });
+                return {
+                    droppingId: like.droppingId,
+                    memo: like.title || "알 수 없는 곡",
+                    location: like.address || "위치 정보 없음",
+                    imageSource: like.imageUrl ? { uri: like.imageUrl } : undefined,
+                    hasHeart: true,
+                };
+            });
+
+    console.log('최종 currentData 길이:', currentData.length);
+    console.log('최종 currentData 내용:', currentData);
 
     const handleEditPress = () => {
         navigation.navigate('NameEdit');
