@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
@@ -7,12 +7,11 @@ import Icon from '../../../components/icon/Icon';
 import { PRIMARY_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import CdPlayer from '../../../components/cdPlayer/CdPlayer';
 import PlayBar from '../../../components/playBar/PlayBar';
-// import Header from '../../profile/components/Header';
 import { useMusicComments } from '../hooks/useMusicComments';
 import { useCreateMusicComment } from '../hooks/useCreateMusicComment';
 import { useDropLikeCount } from '../hooks/useLike';
 import { useToggleLike } from '../hooks/useLike';
-import { useMyLikes } from '../hooks/useLike';
+import { useMyLikes } from '../../profile/hooks/useMyLike';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
 import { useBackgroundAudioPermission } from '../../../hooks/useBackgroundAudioPermission';
 import { useQuery } from '@tanstack/react-query';
@@ -44,10 +43,11 @@ function MusicScreen({ route }: Props) {
   const [comment, setComment] = useState('');
   const scrollViewRef = useRef<any>(null);
   const commentInputRef = useRef<TextInput>(null);
-
-  const serverImageUrl = Image.resolveAssetSource(require('../../../assets/images/normal_music.png')).uri;
   const musicPlayer = useHLSPlayer(songId);
-  const { hasPermission, requestBackgroundAudioPermission } = useBackgroundAudioPermission();
+  
+  
+  
+  const { requestBackgroundAudioPermission } = useBackgroundAudioPermission();
 
   const { data: songInfo } = useQuery({
     queryKey: ['songInfo', songId],
@@ -75,27 +75,26 @@ function MusicScreen({ route }: Props) {
     }
   }, [songId, hasRequestedPermission, requestBackgroundAudioPermission]);
 
-  const handlePost = () => {
+  const handlePost = React.useCallback(() => {
     const text = comment.trim();
     if (!text) return;
     createComment.mutate(text, {
       onSuccess: () => setComment(''),
     });
-  };
+  }, [comment, createComment]);
 
-  const handleTogglePlay = () => {
+  const handleTogglePlay = React.useCallback(() => {
     musicPlayer.togglePlay();
-  };
+  }, [musicPlayer]);
 
-  const handleSeek = (time: number) => {
+  const handleSeek = React.useCallback((time: number) => {
     musicPlayer.seekTo(time);
-  };
+  }, [musicPlayer]);
 
   const commentCount = comments?.length ?? 0;
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <Header onBackPress={() => navigation.goBack()}/> */}
       <KeyboardAwareScrollView
         ref={scrollViewRef}
         contentContainerStyle={{ flexGrow: 1 }}
@@ -109,7 +108,7 @@ function MusicScreen({ route }: Props) {
         enableResetScrollToCoords={false}
       >
         <View style={styles.innerContainer}>
-          <CdPlayer imageUrl={songInfo?.albumImagePath} />
+          <CdPlayer imageUrl={songInfo?.albumImagePath} isPlaying={musicPlayer.isPlaying} />
 
           <View style={styles.content}>
             <View style={styles.infoRow}>
@@ -164,9 +163,15 @@ function MusicScreen({ route }: Props) {
             />
           </View>
 
-          {((message || droppingInfo?.content) || location) && (
+          {((message || droppingInfo?.content) || location || droppingInfo?.username) && (
             <View style={styles.inner}>
               <View style={styles.messageBox}>
+                {droppingInfo?.username && (
+                  <View style={styles.commentItemInfo}>
+                    <View style={[styles.userDot, { backgroundColor: '#7C4DFF' }]} />
+                    <Text style={styles.userName}>{droppingInfo.username}</Text>
+                  </View>
+                )}
                 {(message || droppingInfo?.content) ? (
                   <Text style={styles.messageText}>{message || droppingInfo?.content}</Text>
                 ) : null}
@@ -244,7 +249,7 @@ function MusicScreen({ route }: Props) {
                 <View style={styles.commentItemWrapper}>
                   <View style={styles.commentItemInfo}>
                     <View style={[styles.userDot, { backgroundColor: '#7C4DFF' }]} />
-                    <Text style={styles.userName}>익명</Text>
+                    <Text style={styles.userName}>{item.username || '익명'}</Text>
                   </View>
                   <Text style={styles.commentItemText}>{item.content}</Text>
                 </View>

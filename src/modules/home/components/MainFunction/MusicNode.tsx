@@ -16,31 +16,44 @@ interface MusicNodeProps {
     index: number;
     baseAngle: number;
     rotation: SharedValue<number>;
+    baseRotation: SharedValue<number>;
     mainNodeIndex: DerivedValue<number>;
     nodeIndex: number;
 }
 
-function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, mainNodeIndex, nodeIndex }: MusicNodeProps) {
+const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, baseRotation, mainNodeIndex, nodeIndex }: MusicNodeProps) {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     // 모든 노드가 같은 반지름의 원 위에 배치
     const radius = scale(120);
 
+    const imageSource = React.useMemo(() => {
+        if (data.songInfo?.albumImagePath && data.songInfo.albumImagePath.trim() !== "") {
+            return { uri: data.songInfo.albumImagePath };
+        }
+        return require('../../../../assets/images/profileImage.png');
+    }, [data.songInfo?.albumImagePath]);
+
     const animatedStyle = useAnimatedStyle(() => {
         'worklet';
 
-        // baseAngle + rotation 값을 더해서 동적으로 회전
-        const currentAngle = baseAngle + rotation.value;
+        // baseAngle + 누적 회전값(baseRotation) + 현재 제스처 회전값(rotation)을 더해서 동적으로 회전
+        // undefined 체크를 통해 안전하게 처리
+        const baseRotationValue = baseRotation?.value ?? 0;
+        const rotationValue = rotation?.value ?? 0;
+        const totalRotation = baseRotationValue + rotationValue;
+        const currentAngle = baseAngle + totalRotation;
         const angleInRadians = (currentAngle * Math.PI) / 180;
 
         // 현재 각도를 -180 ~ 180 범위로 정규화
         const normalizedAngle = ((currentAngle + 180) % 360) - 180;
 
-        // 메인 위치(-60°) 기준으로 투명도와 스케일 계산 (더 정확한 범위)
-        const distanceFromMain = Math.abs(normalizedAngle - (-60));
+        // 메인 위치(-90°) 기준으로 투명도와 스케일 계산 (더 정확한 범위)
+        const distanceFromMain = Math.abs(normalizedAngle - (-90));
 
         // 현재 이 노드가 메인 노드인지 동적으로 확인
-        const isCurrentlyMain = mainNodeIndex.value === nodeIndex;
+        const mainNodeIndexValue = mainNodeIndex?.value ?? 0;
+        const isCurrentlyMain = mainNodeIndexValue === nodeIndex;
 
         // 전체 노드들의 기본 가시성 (60도 범위)
         const isVisible = distanceFromMain < 60;
@@ -71,7 +84,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
         };
     });
 
-    const handlePress = () => {
+    const handlePress = React.useCallback(() => {
         navigation.navigate('Music', {
           droppingId: data.dropping.droppingId,
           songId: data.dropping.songId,
@@ -80,7 +93,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
           location: data.dropping.address,
           message: data.dropping.content,
         });
-    };
+    }, [navigation, data.dropping.droppingId, data.dropping.songId, data.dropping.address, data.dropping.content, data.songInfo?.title, data.songInfo?.artist]);
 
 
     return (
@@ -90,7 +103,7 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
                 style={styles.container}
             >
                 <Image
-                    source={data.songInfo?.albumImagePath && data.songInfo.albumImagePath.trim() !== "" ? { uri: data.songInfo.albumImagePath } : require('../../../../assets/images/profileImage.png')}
+                    source={imageSource}
                     style={styles.musicImg}
                 />
                 <Text style={styles.musicTitle}>
@@ -102,6 +115,18 @@ function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, 
             </TouchableOpacity>
         </Animated.View>
     );
-}
+}, (prevProps, nextProps) => {
+    // rotation과 mainNodeIndex는 SharedValue/DerivedValue이므로 참조 비교로 충분
+    // 실제 값 변경은 worklet 내부에서 처리됨
+    return (
+        prevProps.data.dropping.droppingId === nextProps.data.dropping.droppingId &&
+        prevProps.data.dropping.songId === nextProps.data.dropping.songId &&
+        prevProps.baseAngle === nextProps.baseAngle &&
+        prevProps.nodeIndex === nextProps.nodeIndex &&
+        prevProps.data.songInfo?.albumImagePath === nextProps.data.songInfo?.albumImagePath &&
+        prevProps.data.songInfo?.title === nextProps.data.songInfo?.title &&
+        prevProps.data.songInfo?.artist === nextProps.data.songInfo?.artist
+    );
+});
 
 export default MusicNode;

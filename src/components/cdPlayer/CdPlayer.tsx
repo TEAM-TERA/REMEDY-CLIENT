@@ -1,26 +1,41 @@
 import { View } from 'react-native';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, memo, useState, useCallback } from 'react';
+import { useSharedValue, withRepeat, withTiming, cancelAnimation, useAnimatedReaction, runOnJS } from 'react-native-reanimated';
 import { styles } from './styles';
 import DiscSvg from './DiscSvg';
 
 interface CdPlayerProps {
     imageUrl?: string;
+    isPlaying?: boolean;
 }
 
-function CdPlayer({ imageUrl }: CdPlayerProps) {
+function CdPlayer({ imageUrl, isPlaying = true }: CdPlayerProps) {
+    const rotation = useSharedValue(0);
     const [tilt, setTilt] = useState(0);
-    const reqRef = useRef<number | null>(null);
+
+    const updateTilt = useCallback((value: number) => {
+        setTilt(value);
+    }, []);
 
     useEffect(() => {
-        const animate = () => {
-            setTilt(prev => (prev + 1) % 360);
-            reqRef.current = requestAnimationFrame(animate);
-        };
-        reqRef.current = requestAnimationFrame(animate);
-        return () => {
-            if (reqRef.current) cancelAnimationFrame(reqRef.current);
-        };
-    }, []);
+        if (isPlaying) {
+            rotation.value = withRepeat(
+                withTiming(360, { duration: 3000 }),
+                -1,
+                false
+            );
+        } else {
+            cancelAnimation(rotation);
+        }
+    }, [isPlaying, rotation]);
+
+    useAnimatedReaction(
+        () => rotation.value,
+        (value) => {
+            runOnJS(updateTilt)(value);
+        },
+        []
+    );
 
     return (
         <View style={styles.container}>
@@ -29,4 +44,4 @@ function CdPlayer({ imageUrl }: CdPlayerProps) {
     );
 }
 
-export default CdPlayer;
+export default memo(CdPlayer);
