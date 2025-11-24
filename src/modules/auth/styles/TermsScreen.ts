@@ -1,22 +1,27 @@
 import { StyleSheet } from 'react-native';
-import { BACKGROUND_COLORS, TEXT_COLORS, UI_COLORS } from '../../../constants/colors';
+import { BACKGROUND_COLORS, FORM_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import { scale } from '../../../utils/scalers';
 
 export const styles = StyleSheet.create({
   container: {
+    display: 'flex',
+    width: '100%',
     flex: 1,
+    gap: scale(24),
+    padding: scale(16),
     backgroundColor: BACKGROUND_COLORS.BACKGROUND,
   },
   scrollContent: {
-    padding: scale(20),
-    paddingBottom: scale(120),
+    paddingBottom: scale(20),
+    gap: scale(24),
+  },
+  termsList: {
+    padding: scale(12),
     gap: scale(16),
   },
   card: {
-    backgroundColor: UI_COLORS.BACKGROUND,
+    backgroundColor: FORM_COLORS.BACKGROUND_2,
     borderRadius: scale(12),
-    borderWidth: 1,
-    borderColor: '#2E2E40',
     paddingVertical: scale(12),
   },
   cardHeader: {
@@ -43,18 +48,18 @@ export const styles = StyleSheet.create({
     borderColor: '#F23F6F',
   },
   checkCircleOff: {
-    backgroundColor: '#1F1F2B',
-    borderColor: '#3A3A52',
+    backgroundColor: FORM_COLORS.BACKGROUND_2,
+    borderColor: TEXT_COLORS.CAPTION_2,
   },
   headerTitle: {
     color: TEXT_COLORS.DEFAULT,
   },
   expandIcon: {
-    color: TEXT_COLORS.CAPTION_LIGHTER,
+    color: TEXT_COLORS.CAPTION_2,
   },
   divider: {
-    height: 1,
-    backgroundColor: '#2E2E40',
+    height: 2,
+    backgroundColor: TEXT_COLORS.CAPTION_1,
     marginHorizontal: scale(16),
     marginVertical: scale(8),
   },
@@ -83,18 +88,11 @@ export const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#3A3A52',
   },
-  bottom: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    padding: scale(16),
-    backgroundColor: BACKGROUND_COLORS.BACKGROUND,
-    borderTopWidth: 1,
-    borderTopColor: '#2E2E40',
-  },
   nextButton: {
     borderRadius: scale(12),
+    paddingVertical: scale(12),
+    paddingHorizontal: scale(24),
+    marginHorizontal: scale(12),
   },
 });
 

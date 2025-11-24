@@ -23,6 +23,10 @@ import NameTagSvg from './icons/NameTagSvg';
 import PlayerSvg from './icons/PlayerSVG';
 import ToggleOffSvg from './icons/ToggleOffSvg';
 import ToggleOnSvg from './icons/ToggleOnSvg';
+import UserSvg from './icons/UserSvg';
+import DangerSvg from './icons/DangerSvg';
+import EyeOnSvg from './icons/EyeOnSvg';
+import EyeOffSvg from './icons/EyeOffSvg';
 import ListSvg from './icons/ListSvg';
 
 const icons = {
@@ -48,6 +52,11 @@ const icons = {
     nameTag: NameTagSvg,
     player: PlayerSvg,
     toggleOff: ToggleOffSvg,
+    toggleOn: ToggleOnSvg, 
+    user: UserSvg,
+    danger: DangerSvg,
+    eyeOn: EyeOnSvg,
+    eyeOff: EyeOffSvg,
     toggleOn: ToggleOnSvg,
     list: ListSvg,
 };
@@ -63,6 +72,8 @@ interface Props {
     fill?: string;
     isPress?: boolean;
     onPress?: () => void;
+    accessibilityLabel?: string;
+    accessibilityHint?: string;
 }
 
 const Icon: React.FC<Props> = ({
@@ -70,6 +81,8 @@ const Icon: React.FC<Props> = ({
     onPress,
     pressname = name,
     isPress = false,
+    accessibilityLabel,
+    accessibilityHint,
     ...props
 }) => {
     const SvgIcon = icons[name];
@@ -77,13 +90,23 @@ const Icon: React.FC<Props> = ({
         if (isPress) {
             const SvgIconPress = icons[pressname];
             return (
-                <TouchableOpacity onPress={onPress}>
+                <TouchableOpacity 
+                    onPress={onPress}
+                    accessibilityLabel={accessibilityLabel}
+                    accessibilityHint={accessibilityHint}
+                    accessibilityRole="button"
+                >
                     <SvgIconPress {...props} />
                 </TouchableOpacity>
             );
         }
         return (
-            <TouchableOpacity onPress={onPress}>
+            <TouchableOpacity 
+                onPress={onPress}
+                accessibilityLabel={accessibilityLabel}
+                accessibilityHint={accessibilityHint}
+                accessibilityRole="button"
+            >
                 <SvgIcon {...props} />
             </TouchableOpacity>
         );

@@ -71,8 +71,6 @@ export const TERMS: TermDefinition[] = [
     title: '개인정보 수집 및 이용 동의',
     required: true,
     contentLines: [
-      '① 개인정보 수집 및 이용 동의서 (필수)',
-      '',
       '1. 수집하는 개인정보 항목',
       '- 이름, 이메일, 비밀번호, 생년월일, 성별',
       '',
@@ -92,8 +90,6 @@ export const TERMS: TermDefinition[] = [
       '- 개인정보처리자 : 테라(REMEDY 개발팀)',
       '- 개인정보 보호 책임자 : 서정현',
       '- 문의 이메일 : seoj080829@gmail.com',
-      '',
-      '□ 위 내용에 동의합니다. (필수)',
     ],
   },
   {
@@ -101,8 +97,6 @@ export const TERMS: TermDefinition[] = [
     title: '위치정보 이용약관 동의',
     required: false,
     contentLines: [
-      '② 위치정보 이용약관 동의서 (선택)',
-      '',
       '1. 위치정보의 수집 및 이용 목적',
       '- 사용자가 지정한 위치를 기반으로 음악을 공유하거나 위치 기반 추천 기능을 제공하기 위함',
       '',
@@ -115,8 +109,6 @@ export const TERMS: TermDefinition[] = [
       '',
       '4. 이용자의 권리 및 거부',
       '- 이용자는 위치정보 제공에 동의하지 않을 수 있으며, 이 경우 위치 기반 기능(지도 내 음악 공유 등)의 이용이 제한될 수 있습니다.',
-      '',
-      '□ 위 내용에 동의합니다. (선택)',
     ],
   },
   {
@@ -124,8 +116,6 @@ export const TERMS: TermDefinition[] = [
     title: '마케팅/광고 수신 동의',
     required: false,
     contentLines: [
-      '③ 마케팅 정보 수신 동의서 (선택)',
-      '',
       '1. 수집 및 이용 목적',
       '- 서비스 관련 소식, 이벤트, 업데이트 안내 등 마케팅 정보 제공',
       '',
@@ -138,8 +128,6 @@ export const TERMS: TermDefinition[] = [
       '',
       '4. 동의 거부 시 불이익 안내',
       '- 동의를 거부하셔도 REMEDY의 일반 서비스 이용에는 제한이 없습니다.',
-      '',
-      '□ 위 내용에 동의합니다. (선택)',
     ],
   },
 ];

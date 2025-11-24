@@ -15,6 +15,6 @@ export const styles = StyleSheet.create({
         backgroundColor : PRIMARY_COLORS.DEFAULT
     },
     text : {
-        color : TEXT_COLORS.DEFAULT
+        color : TEXT_COLORS.BUTTON
     }
 })

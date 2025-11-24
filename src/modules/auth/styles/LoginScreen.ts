@@ -1,6 +1,6 @@
 import { StyleSheet } from "react-native";
 import { scale } from "../../../utils/scalers";
-import { TEXT_COLORS, BACKGROUND_COLORS } from "../../../constants/colors";
+import { TEXT_COLORS, BACKGROUND_COLORS, FORM_COLORS, PRIMARY_COLORS } from "../../../constants/colors";
 
 export const styles = StyleSheet.create({
   container : {
@@ -12,6 +12,15 @@ export const styles = StyleSheet.create({
     alignItems : "flex-start",
     gap : scale(24),
     backgroundColor : BACKGROUND_COLORS.BACKGROUND
+  },
+  innerContainer : {
+    flex : 1,
+    width : "100%",
+    paddingVertical : scale(64),
+    paddingHorizontal : scale(12),
+    gap: scale(24),
+    borderRadius : scale(20),
+    backgroundColor : FORM_COLORS.BACKGROUND_3,
   },
   textContainer : {
     marginLeft : "auto",
@@ -25,13 +34,13 @@ export const styles = StyleSheet.create({
     flexDirection : "row"
   },
   text : {
-    color : TEXT_COLORS.DEFAULT
+    color : TEXT_COLORS.DEFAULT,
   },
   inputContainer : {
     marginLeft : "auto",
     marginRight : "auto",
     display : "flex",
-    width : scale(343),
+    width : "100%",
     padding : scale(12),
     flexDirection : "column",
     justifyContent : "center",
@@ -42,7 +51,7 @@ export const styles = StyleSheet.create({
     marginLeft : "auto",
     marginRight : "auto",
     display : "flex",
-    width : scale(343),
+    width : "100%",
     padding : scale(12),
     flexDirection : "column",
     justifyContent : "center",
@@ -53,5 +62,30 @@ export const styles = StyleSheet.create({
     color : "#FF3B30",
     textAlign : "center",
     marginTop : scale(8)
+  },
+  logo : {
+    alignSelf : "center",
+  },
+  socialLoginContainer : {
+    flexDirection : "row",
+    justifyContent : "center",
+    alignItems : "center",
+    gap : scale(48),
+  },
+  socialButton : {
+    width : scale(48),
+    height : scale(48),
+    justifyContent : "center",
+    alignItems : "center",
+  },
+  loginErrorContainer : {
+    flexDirection : "row",
+    alignItems : "center",
+    gap : scale(4),
+    alignSelf : "center",
+  },
+  loginErrorText : {
+    color : PRIMARY_COLORS.DEFAULT,
+    textAlign : "center",
   }
 });
