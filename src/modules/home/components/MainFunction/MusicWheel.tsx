@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useSharedValue, withSpring, useDerivedValue } from 'react-native-reanimated';
@@ -7,12 +7,12 @@ import MusicNode from './MusicNode';
 import { VisibleNode } from '../../types/musicList';
 import { navigate } from '../../../../navigation';
 import DropButton from './DropButton';
-import { useQuery } from '@tanstack/react-query';
+import { useQueries } from '@tanstack/react-query';
 import { getSongInfo } from '../../../drop/api/dropApi';
+import { useHLSPlayer } from '../../../../hooks/music/useHLSPlayer';
 import { usePlayerStore } from '../../../../stores/playerStore';
-import TrackPlayer, { Event } from 'react-native-track-player';
 
-const SWIPE_THRESHOLD = 80;
+const SWIPE_THRESHOLD = 60;
 const INVERT_DIRECTION = false;
 const sign = INVERT_DIRECTION ? -1 : 1;
 const ANGLE_PER_ITEM = 45;
@@ -22,66 +22,76 @@ interface MusicWheelProps {
   droppings: any[];
 }
 
-function MusicWheel({ droppings }: MusicWheelProps) {
+const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps) {
   const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const totalSongs = droppings?.length || 0;
+  const safeDroppings = Array.isArray(droppings) ? droppings : [];
+  const totalSongs = safeDroppings.length;
   const rotation = useSharedValue(0);
+  const baseRotation = useSharedValue(0);
   const startRotation = useSharedValue(0);
-  const setQueue = usePlayerStore(s => s.setQueue);
-  const playIfDifferent = usePlayerStore(s => s.playIfDifferent);
-  const playNext = usePlayerStore(s => s.playNext);
+
+  const [isSwiping, setIsSwiping] = useState<boolean>(false);
+  const [currentSongId, setCurrentSongId] = useState<string | undefined>(undefined);
+  const musicPlayer = useHLSPlayer(currentSongId);
+  const { setCurrentId } = usePlayerStore();
+  const didInitRef = useRef(false);
+
+  const updateIndexAndSong = React.useCallback((newIndex: number) => {
+    if (totalSongs === 0) return;
+    const normalized = ((newIndex % totalSongs) + totalSongs) % totalSongs;
+    setCurrentIndex(normalized);
+    const nextSongId = safeDroppings[normalized]?.songId;
+    setCurrentSongId(nextSongId);
+    if (nextSongId) {
+      setCurrentId(nextSongId);
+    }
+  }, [safeDroppings, totalSongs, setCurrentId]);
+
+  // 초기 마운트 시 이전 회전/인덱스 복원
+  useEffect(() => {
+    if (!didInitRef.current) {
+      didInitRef.current = true;
+      baseRotation.value = 0;
+      rotation.value = 0;
+    }
+    if (__DEV__) {
+      console.log('🎡 MusicWheel mounted, droppings count:', safeDroppings.length);
+    }
+  }, [rotation, baseRotation, safeDroppings.length]);
 
   useEffect(() => {
-    rotation.value = 0;
-  }, [rotation]);
+    if (__DEV__) {
+      console.log('Droppings changed, count:', safeDroppings.length);
+      console.log('Current index:', currentIndex);
+      console.log('Is swiping:', isSwiping);
+      console.log('Current song ID:', currentSongId);
+    }
+  }, [safeDroppings, currentIndex, isSwiping, currentSongId]);
 
-  const song1Query = useQuery({
-    queryKey: ['songInfo', droppings?.[0]?.songId],
-    queryFn: () => getSongInfo(droppings[0].songId),
-    enabled: !!(droppings?.[0]?.songId),
-  });
-  
-  const song2Query = useQuery({
-    queryKey: ['songInfo', droppings?.[1]?.songId],
-    queryFn: () => getSongInfo(droppings[1].songId),
-    enabled: !!(droppings?.[1]?.songId),
-  });
+  const visibleSongIds = React.useMemo(() => {
+    if (totalSongs === 0) return [];
+    const ids = [];
+    for (let i = 0; i < Math.min(TOTAL_NODES, totalSongs); i++) {
+      const dataIndex = (currentIndex + i) % totalSongs;
+      if (safeDroppings[dataIndex]?.songId) {
+        ids.push(safeDroppings[dataIndex].songId);
+      }
+    }
+    return ids;
+  }, [safeDroppings, currentIndex, totalSongs]);
 
-  const song3Query = useQuery({
-    queryKey: ['songInfo', droppings?.[2]?.songId],
-    queryFn: () => getSongInfo(droppings[2].songId),
-    enabled: !!(droppings?.[2]?.songId),
-  });
-
-  const song4Query = useQuery({
-    queryKey: ['songInfo', droppings?.[3]?.songId],
-    queryFn: () => getSongInfo(droppings[3].songId),
-    enabled: !!(droppings?.[3]?.songId),
-  });
-
-  const song5Query = useQuery({
-    queryKey: ['songInfo', droppings?.[4]?.songId],
-    queryFn: () => getSongInfo(droppings[4].songId),
-    enabled: !!(droppings?.[4]?.songId),
+  const songQueries = useQueries({
+    queries: visibleSongIds.map((songId, idx) => ({
+      queryKey: ['songInfo', songId, safeDroppings[(currentIndex + idx) % totalSongs]?.droppingId || idx],
+      queryFn: () => getSongInfo(songId),
+      enabled: !!songId,
+      staleTime: 5 * 60 * 1000,
+    })),
   });
 
-  const song6Query = useQuery({
-    queryKey: ['songInfo', droppings?.[5]?.songId],
-    queryFn: () => getSongInfo(droppings[5].songId),
-    enabled: !!(droppings?.[5]?.songId),
-  });
-
-  const song7Query = useQuery({
-    queryKey: ['songInfo', droppings?.[6]?.songId],
-    queryFn: () => getSongInfo(droppings[6].songId),
-    enabled: !!(droppings?.[6]?.songId),
-  });
-
-  const songQueries = [song1Query, song2Query, song3Query, song4Query, song5Query, song6Query, song7Query];
-
-  const handlerPressDrop = ()=>{
+  const handlerPressDrop = React.useCallback(() => {
     navigate('Drop');
-  }
+  }, []);
 
   const mainNodeIndex = useDerivedValue(() => {
     'worklet';
@@ -89,10 +99,11 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     let minDistance = Infinity;
 
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
-      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 60;
-      const currentAngle = baseAngle + rotation.value;
+      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 90;
+      const totalRotation = baseRotation.value + rotation.value;
+      const currentAngle = baseAngle + totalRotation;
       const normalizedAngle = ((currentAngle + 180) % 360) - 180;
-      const distanceFromMain = Math.abs(normalizedAngle - (-60));
+      const distanceFromMain = Math.abs(normalizedAngle - (-90));
 
       if (distanceFromMain < minDistance) {
         minDistance = distanceFromMain;
@@ -103,25 +114,40 @@ function MusicWheel({ droppings }: MusicWheelProps) {
     return closestIndex;
   });
 
-  const getVisibleNodes = () => {
+  const actualMainDataIndex = useMemo(() => {
+    if (totalSongs === 0) return 0;
+    return currentIndex % totalSongs;
+  }, [currentIndex, totalSongs]);
+
+  useEffect(() => {
+    if (safeDroppings && safeDroppings[actualMainDataIndex]) {
+      const nextId = safeDroppings[actualMainDataIndex].songId;
+      setCurrentSongId(nextId);
+    } else {
+      setCurrentSongId(undefined);
+    }
+  }, [actualMainDataIndex, safeDroppings]);
+
+  const visibleNodes = React.useMemo(() => {
     const nodes: VisibleNode[] = [];
-    if (!droppings || droppings.length === 0) {
+    if (totalSongs === 0) {
       return nodes;
     }
 
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
       const dataIndex = (currentIndex + nodeIndex) % totalSongs;
 
-      if (droppings[dataIndex]) {
-        const dropping = droppings[dataIndex];
+      if (safeDroppings[dataIndex]) {
+        const dropping = safeDroppings[dataIndex];
+        const isMainNode = nodeIndex === 0;
+
         let songInfo = null;
-        if (songQueries[dataIndex]?.data) {
-          songInfo = songQueries[dataIndex].data;
+        const queryIndex = visibleSongIds.indexOf(dropping.songId);
+        if (queryIndex !== -1 && songQueries[queryIndex]?.data) {
+          songInfo = songQueries[queryIndex].data;
         }
 
-        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 100;
-
-        const isMainNode = nodeIndex === 0;
+        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 90;
 
         nodes.push({
           position: {
@@ -139,103 +165,66 @@ function MusicWheel({ droppings }: MusicWheelProps) {
       }
     }
     return nodes;
-  };
-
-  const updateIndex = (direction: string) => {
-    if (direction === 'prev') {
-      setCurrentIndex((prev: number) => (prev - 1 + totalSongs) % totalSongs);
-    } else {
-      setCurrentIndex((prev: number) => (prev + 1) % totalSongs);
-    }
-  };
-
-  // Keep queue synced with droppings
-  useEffect(() => {
-    if (droppings && droppings.length > 0) {
-      setQueue(droppings.map(d => d.songId).filter(Boolean));
-    }
-  }, [droppings, setQueue]);
-
-  // Auto play when wheel selects a new main item
-  useEffect(() => {
-    if (!droppings || droppings.length === 0) return;
-    const current = droppings[currentIndex % droppings.length];
-    if (!current?.songId) return;
-    // Try to pass minimal meta if loaded
-    const q = songQueries.find(q => q?.data?.id === current.songId);
-    playIfDifferent(current.songId, {
-      title: q?.data?.title || current.title,
-      artist: q?.data?.artist || current.singer,
-      artwork: current.albumImageUrl,
-    });
-  }, [currentIndex, droppings]);
-
-  // Auto play next when current finishes
-  useEffect(() => {
-    const sub = TrackPlayer.addEventListener(Event.PlaybackQueueEnded, async () => {
-      await playNext();
-    });
-    return () => { try { sub.remove(); } catch {} };
-  }, [playNext]);
+  }, [safeDroppings, currentIndex, totalSongs, visibleSongIds, songQueries]);
 
   const pan = Gesture.Pan()
     .onBegin(() => {
         'worklet';
-        startRotation.value = rotation.value;
+        startRotation.value = baseRotation.value;
+        runOnJS(setIsSwiping)(true);
     })
     .onUpdate(event => {
         'worklet';
-        // 드래그 거리에 비례하여 rotation 값 업데이트 (적당한 반응)
-        const rawRotation = startRotation.value + sign * event.translationX * 0.8;
-
-        // 가장 가까운 스냅 포인트와의 거리 계산
-        const nearestStep = Math.round(rawRotation / ANGLE_PER_ITEM);
-        const nearestRotation = nearestStep * ANGLE_PER_ITEM;
-        const distanceToSnap = Math.abs(rawRotation - nearestRotation);
-
-        // 스냅 포인트에 가까울수록 자기 정렬 효과 적용 (약하게)
-        const snapInfluence = Math.max(0, 1 - (distanceToSnap / (ANGLE_PER_ITEM * 0.4)));
-        const alignedRotation = rawRotation + (nearestRotation - rawRotation) * snapInfluence * 0.1;
-
-        rotation.value = alignedRotation;
+        const currentRotation = startRotation.value + sign * event.translationX * 0.8;
+        rotation.value = currentRotation - baseRotation.value;
     })
     .onEnd(event => {
         'worklet';
         const drag = sign * event.translationX;
-        const velocity = Math.abs(event.velocityX);
+        const totalRotation = startRotation.value + drag * 0.8;
 
-        // 더 확실한 스와이프 의도 감지: 거리와 속도 모두 고려
-        const isDefiniteSwipe = Math.abs(drag) > SWIPE_THRESHOLD && velocity > 300;
+        const isDefiniteSwipe = Math.abs(drag) > SWIPE_THRESHOLD;
 
         if (isDefiniteSwipe) {
-            // 현재 rotation에서 가장 가까운 정확한 각도 위치 계산
-            const currentStep = Math.round(rotation.value / ANGLE_PER_ITEM);
             const direction = drag > 0 ? 1 : -1;
+            const currentStep = Math.round(baseRotation.value / ANGLE_PER_ITEM);
             const targetStep = currentStep + direction;
             const targetRotation = targetStep * ANGLE_PER_ITEM;
 
-            // 부드러운 스냅 애니메이션
-            rotation.value = withSpring(targetRotation, {
-                damping: 100,    // 더 부드러운 감쇠
-                stiffness: 50, // 적당한 탄성
-                mass: 1,        // 자연스러운 질량감
+            const animationTarget = targetRotation - baseRotation.value;
+            rotation.value = withSpring(animationTarget, {
+                damping: 20,
+                stiffness: 150,
+                mass: 1.2,
+            }, (finished) => {
+                'worklet';
+                if (finished) {
+                    baseRotation.value = targetRotation;
+                    rotation.value = 0;
+                    runOnJS(updateIndexAndSong)(targetStep % totalSongs);
+                    runOnJS(setIsSwiping)(false);
+                }
             });
-
-            runOnJS(updateIndex)(drag > 0 ? 'next' : 'prev');
         } else {
-            // 가장 가까운 정확한 각도로 부드럽게 스냅
-            const nearestStep = Math.round(rotation.value / ANGLE_PER_ITEM);
-            const nearestRotation = nearestStep * ANGLE_PER_ITEM;
+            const nearestStep = Math.round(totalRotation / ANGLE_PER_ITEM);
+            const targetRotation = nearestStep * ANGLE_PER_ITEM;
+            const animationTarget = targetRotation - baseRotation.value;
 
-            rotation.value = withSpring(nearestRotation, {
-                damping: 150,    // 빠른 복귀용 감쇠
-                stiffness: 200, // 적당한 탄성
-                mass: 1,      // 가벼운 질량감
+            rotation.value = withSpring(animationTarget, {
+                damping: 25,
+                stiffness: 200,
+                mass: 1.0,
+            }, (finished) => {
+                'worklet';
+                if (finished) {
+                    baseRotation.value = targetRotation;
+                    rotation.value = 0;
+                    runOnJS(updateIndexAndSong)(nearestStep % totalSongs);
+                    runOnJS(setIsSwiping)(false);
+                }
             });
         }
     });
-
-  const visibleNodes = getVisibleNodes();
 
   if (totalSongs === 0) {
     return (
@@ -259,6 +248,7 @@ function MusicWheel({ droppings }: MusicWheelProps) {
               index={index}
               baseAngle={node.position.angle}
               rotation={rotation}
+              baseRotation={baseRotation}
               mainNodeIndex={mainNodeIndex}
               nodeIndex={node.slotIndex}
             />
@@ -270,6 +260,15 @@ function MusicWheel({ droppings }: MusicWheelProps) {
       </Animated.View>
     </GestureDetector>
   );
-}
+}, (prevProps, nextProps) => {
+  if (prevProps.droppings.length !== nextProps.droppings.length) {
+    return false;
+  }
+
+  return prevProps.droppings.every((prev, index) => {
+    const next = nextProps.droppings[index];
+    return next && prev.droppingId === next.droppingId && prev.songId === next.songId;
+  });
+});
 
 export default MusicWheel;

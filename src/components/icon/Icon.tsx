@@ -27,6 +27,7 @@ import UserSvg from './icons/UserSvg';
 import DangerSvg from './icons/DangerSvg';
 import EyeOnSvg from './icons/EyeOnSvg';
 import EyeOffSvg from './icons/EyeOffSvg';
+import ListSvg from './icons/ListSvg';
 
 const icons = {
     edit: EditSvg,
@@ -56,6 +57,8 @@ const icons = {
     danger: DangerSvg,
     eyeOn: EyeOnSvg,
     eyeOff: EyeOffSvg,
+    toggleOn: ToggleOnSvg,
+    list: ListSvg,
 };
 
 export type IconName = keyof typeof icons;

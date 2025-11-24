@@ -1,6 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toggleLike, getDropLikeCount, getUserLikeCount } from "../api/likeApi";
-import { getMyLikedDroppingIds } from "../../profile/api/profileLikesApi";
 
 export const useDropLikeCount = (droppingId: string) => {
   return useQuery({
@@ -16,12 +15,7 @@ export const useUserLikeCount = () => {
   });
 };
 
-export const useMyLikes = () => {
-  return useQuery({
-    queryKey: ["myLikes"],
-    queryFn: getMyLikedDroppingIds,
-  });
-};
+// 중복된 useMyLikes 제거 - profile/hooks/useMyLike.ts 사용
 
 export const useToggleLike = (droppingId: string) => {
   const queryClient = useQueryClient();

@@ -27,7 +27,6 @@ function SignUpScreen() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  // 실시간 유효성 검사
   const validateField = (field: string, value: string): string => {
     switch (field) {
       case 'name':
@@ -94,18 +93,14 @@ function SignUpScreen() {
       setFormData(prev => ({ ...prev, [field]: value }));
     }
     
-    // 터치된 필드 표시
     if (!touched[field]) {
       setTouched(prev => ({ ...prev, [field]: true }));
     }
-    
-    // 실시간 유효성 검사 (터치된 필드만)
     if (touched[field] || finalValue) {
       const error = validateField(field, finalValue);
       setErrors(prev => ({ ...prev, [field]: error }));
     }
     
-    // password 변경 시 confirmPassword 재검증
     if (field === "password" && formData.confirmPassword) {
       const error = validateField("confirmPassword", formData.confirmPassword)
       setErrors(prev => ({ ...prev, confirmPassword: error }));
@@ -117,11 +112,9 @@ function SignUpScreen() {
   };
 
   const handleFocus = (_field: string) => {
-    // 포커스 시 필요한 로직이 있다면 여기에 추가
   };
 
   const handleBlur = (field: string) => {
-    // blur 시 해당 필드를 touched로 표시
     setTouched(prev => ({ ...prev, [field]: true }));
   };
 
@@ -132,7 +125,6 @@ function SignUpScreen() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    // 모든 필드 검증
     Object.keys(formData).forEach((field) => {
       if (field !== 'gender') {
         const value = formData[field as keyof typeof formData];
@@ -145,7 +137,6 @@ function SignUpScreen() {
 
     setErrors(newErrors);
     
-    // 모든 필드를 터치됨으로 표시
     const allTouched = Object.keys(formData).reduce((acc, field) => {
       acc[field] = true;
       return acc;

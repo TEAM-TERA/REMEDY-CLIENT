@@ -18,7 +18,6 @@ export const styles = StyleSheet.create({
         flexDirection : "row",
         padding : scale(0),
         alignItems : "center",
-        gap : scale(12),
         marginLeft : "auto",
         marginRight : "auto",
         alignSelf : "stretch"

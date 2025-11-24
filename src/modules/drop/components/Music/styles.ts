@@ -37,5 +37,15 @@ export const styles = StyleSheet.create({
     singerText : {
         color : TEXT_COLORS.CAPTION_LIGHTER,
         textAlign : "center"
+    },
+    disabledContainer : {
+        opacity : 0.5,
+        backgroundColor : BACKGROUND_COLORS.BACKGROUND
+    },
+    disabledImage : {
+        opacity : 0.6
+    },
+    disabledText : {
+        color : TEXT_COLORS.CAPTION
     }
 })

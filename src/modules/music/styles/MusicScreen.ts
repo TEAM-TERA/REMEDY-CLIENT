@@ -31,7 +31,9 @@ export const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     infoTextWrapper: {
+        flex: 1,
         gap: scale(4),
+        marginRight: scale(8),
     },
     title: {
         fontWeight: 'bold',
@@ -46,6 +48,7 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: scale(12),
+        flexShrink: 0,
     },
     smallLikeCommentRow: {
         flexDirection: 'row',
