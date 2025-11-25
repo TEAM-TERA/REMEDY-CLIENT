@@ -1,59 +1,33 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ActivityIndicator, ScrollView } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList } from '../../../types/navigation';
 import type { DropItemData } from '../types/DropItemData';
-import { TEXT_COLORS } from '../../../constants/colors';
-import { styles } from '../styles/userProfileScreen';
-import Header from '../components/Header';
-import DropItem from '../components/DropItem';
-import Icon from '../../../components/icon/Icon';
 import Button from '../../../components/button/Button';
+import ProfileHeader from '../../../components/header/ProfileHeader';
+import ProfileInfo from '../components/ProfileInfo';
+import TabNavigation from '../components/TabNavigation';
+import MusicCard from '../components/MusicCard';
+import PlaylistGrid from '../components/PlaylistGrid';
 import { useMyProfile } from '../hooks/useMyProfile';
 import { useMyDrop } from '../hooks/useMyDrop';
 import { useMyLikes } from '../hooks/useMyLike';
 import { getSongInfo } from '../../drop/api/dropApi';
 import { scale, verticalScale } from '../../../utils/scalers';
+import { BACKGROUND_COLORS, TEXT_COLORS } from '../../../constants/colors';
 
 function UserProfileScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
-    const [activeTab, setActiveTab] = useState<'drop' | 'like'>('drop');
-    const defaultProfileImg = require('../../../assets/images/profileImage.png');
+    const [activeTab, setActiveTab] = useState<'drop' | 'like' | 'playlist'>('drop');
 
     const { data: myDrops = [], isLoading: dropLoading } = useMyDrop();
     const { data: myLikes = [], isLoading: likeLoading, error: likeError } = useMyLikes();
-
     const { data: me, isLoading, isError, refetch, isFetching } = useMyProfile();
 
     const [songTitles, setSongTitles] = useState<Record<string, string>>({});
     const [songImages, setSongImages] = useState<Record<string, string>>({});
-
-    useEffect(() => {
-        console.log('=== 드랍 데이터 상태 ===');
-        console.log('myDrops:', myDrops);
-        console.log('dropLoading:', dropLoading);
-        console.log('myDrops 타입:', typeof myDrops);
-        console.log('myDrops 배열인가?:', Array.isArray(myDrops));
-        console.log('myDrops 길이:', myDrops ? myDrops.length : 'undefined');
-    }, [myDrops, dropLoading]);
-
-    useEffect(() => {
-        console.log('=== 좋아요 데이터 상태 ===');
-        console.log('myLikes:', myLikes);
-        console.log('likeLoading:', likeLoading);
-        console.log('likeError:', likeError);
-        console.log('myLikes 타입:', typeof myLikes);
-        console.log('myLikes 배열인가?:', Array.isArray(myLikes));
-        console.log('myLikes 길이:', myLikes ? myLikes.length : 'undefined');
-        if (myLikes && myLikes.length > 0) {
-            console.log('첫 번째 좋아요 아이템:', myLikes[0]);
-        }
-        if (likeError) {
-            console.error('좋아요 목록 API 에러:', likeError);
-        }
-    }, [myLikes, likeLoading, likeError]);
 
     useEffect(() => {
         const loadSongInfo = async () => {
@@ -90,52 +64,37 @@ function UserProfileScreen() {
         loadSongInfo();
     }, [myDrops]);
 
-
     const dropsArray = Array.isArray(myDrops) ? myDrops : [];
     const likesArray = Array.isArray(myLikes) ? myLikes : [];
 
-    console.log('=== currentData 계산 ===');
-    console.log('activeTab:', activeTab);
-    console.log('dropsArray 길이:', dropsArray.length);
-    console.log('dropsArray 내용:', dropsArray);
-
     const filteredDrops = dropsArray.filter((d: any) => d && d.droppingId);
-    console.log('필터링된 dropsArray 길이:', filteredDrops.length);
-    console.log('필터링된 dropsArray 내용:', filteredDrops);
-
     const filteredLikes = likesArray.filter((like: any) => like && like.droppingId);
-    console.log('필터링된 likesArray 길이:', filteredLikes.length);
-    console.log('필터링된 likesArray 내용:', filteredLikes);
+
+    const dummyPlaylists = [
+        { id: 1, name: "플리 1", coverImage: require('../../../assets/images/profileImage.png') },
+        { id: 2, name: "환상소곡집 op.3 : Monster", coverImage: require('../../../assets/images/profileImage.png') },
+        { id: 3, name: "Blu Swing 10th Anniversary BEST", coverImage: require('../../../assets/images/profileImage.png') },
+        { id: 4, name: "Tender", coverImage: require('../../../assets/images/profileImage.png') },
+    ];
 
     const currentData: DropItemData[] =
-    activeTab === "drop"
-        ? filteredDrops
-            .map((d: any) => ({
+        activeTab === "drop"
+            ? filteredDrops.map((d: any) => ({
                 droppingId: d.droppingId,
                 memo: songTitles[d.songId] || d.songId || "알 수 없는 곡",
                 location: d.address || "위치 정보 없음",
                 imageSource: songImages[d.songId] ? { uri: songImages[d.songId] } : undefined,
                 hasHeart: false,
             }))
-        : filteredLikes
-            .map((like: any) => {
-                console.log('좋아요 아이템 매핑:', {
-                    droppingId: like.droppingId,
-                    title: like.title,
-                    imageUrl: like.imageUrl,
-                    address: like.address
-                });
-                return {
+            : activeTab === "like"
+                ? filteredLikes.map((like: any) => ({
                     droppingId: like.droppingId,
                     memo: like.title || "알 수 없는 곡",
                     location: like.address || "위치 정보 없음",
                     imageSource: like.imageUrl ? { uri: like.imageUrl } : undefined,
                     hasHeart: true,
-                };
-            });
-
-    console.log('최종 currentData 길이:', currentData.length);
-    console.log('최종 currentData 내용:', currentData);
+                }))
+                : []; // 플레이리스트 탭
 
     const handleEditPress = () => {
         navigation.navigate('NameEdit');
@@ -147,14 +106,14 @@ function UserProfileScreen() {
 
     const handleRefetchProfile = () => {
         refetch();
-    }
-    
+    };
+
     if(isLoading || (dropLoading && !myDrops) || (likeLoading && !myLikes)){
         return (
-            <SafeAreaView style={styles.safeAreaView}>
-              <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
-                <ActivityIndicator />
-                <Text style={{ marginTop: verticalScale(8) }}>프로필 정보를 불러오고 있습니다!</Text>
+            <SafeAreaView style={newStyles.container}>
+              <View style={[newStyles.loadingContainer]}>
+                <ActivityIndicator color="#E61F54" />
+                <Text style={newStyles.loadingText}>프로필 정보를 불러오고 있습니다!</Text>
               </View>
             </SafeAreaView>
         );
@@ -162,125 +121,119 @@ function UserProfileScreen() {
 
     if (isError) {
         return (
-          <SafeAreaView style={styles.safeAreaView}>
-            <View style={[styles.container, { alignItems: 'center', justifyContent: 'center' }]}>
-              <Text>프로필 정보를 가져오는데 실패했어요!.</Text>
-              <Button title = "다시 시도하기" onPress = {handleRefetchProfile}></Button>
+          <SafeAreaView style={newStyles.container}>
+            <View style={newStyles.loadingContainer}>
+              <Text style={newStyles.errorText}>프로필 정보를 가져오는데 실패했어요!</Text>
+              <Button title="다시 시도하기" onPress={handleRefetchProfile} />
             </View>
           </SafeAreaView>
         );
     }
 
     return (
-        <SafeAreaView style={styles.safeAreaView}>
-            <View style={styles.container}>
-                <Header
-                    title="프로필"
-                    rightComponent={
-                        <TouchableOpacity onPress={handleSettingPress}>
-                            <Icon
-                                name="setting"
-                                width={scale(20)}
-                                height={scale(20)}
-                                color={TEXT_COLORS.DEFAULT}
-                            />
-                        </TouchableOpacity>
-                    }
-                />
-                <View style={styles.profileContainer}>
-                    <Image
-                        source={me?.profileImageUrl && me.profileImageUrl.trim() !== '' ? {uri : me.profileImageUrl} : defaultProfileImg}
-                        style={styles.profileImage}
-                    />
-                    <View style={styles.aliasContainer}>
-                        <Text style={styles.aliasText}>모험가</Text>
-                    </View>
-                    <View style={styles.profileNameContainer}>
-                        <Text style={styles.userNameText}>
-                            {me?.username ?? '테스트'}
-                        </Text>
-                        <TouchableOpacity onPress={handleEditPress}>
-                            <Icon
-                                name="edit"
-                                width={scale(20)}
-                                height={scale(20)}
-                                color={TEXT_COLORS.CAPTION}
-                            />
-                        </TouchableOpacity>
-                    </View>
-                </View>
+        <SafeAreaView style={newStyles.container}>
+            <ProfileHeader onSettingPress={handleSettingPress} />
 
-                <View style={styles.tabContainer}>
-                    <View style={styles.nav}>
-                        <TouchableOpacity
-                            onPress={() => setActiveTab('drop')}
-                            activeOpacity={1}
-                        >
-                            <Text
-                                style={[
-                                    styles.navText,
-                                    activeTab === 'drop' &&
-                                        styles.navTextActive,
-                                ]}
-                            >
-                                드랍
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            onPress={() => setActiveTab('like')}
-                            activeOpacity={1}
-                        >
-                            <Text
-                                style={[
-                                    styles.navText,
-                                    activeTab === 'like' &&
-                                        styles.navTextActive,
-                                ]}
-                            >
-                                좋아요
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                    <ScrollView
-                        style={styles.scrollView}
-                        contentContainerStyle={styles.listContent}
-                        showsVerticalScrollIndicator={false}
-                        keyboardShouldPersistTaps="handled"
-                        nestedScrollEnabled
-                    >
-                        {(activeTab === "like" && likeError) ? (
-                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: verticalScale(40) }}>
-                                <Text style={{ color: TEXT_COLORS.CAPTION, marginBottom: verticalScale(16) }}>
-                                    좋아요 목록을 불러올 수 없습니다
-                                </Text>
-                                <Text style={{ color: TEXT_COLORS.CAPTION, marginBottom: verticalScale(16), fontSize: 12 }}>
-                                    {likeError?.message || '네트워크 오류가 발생했습니다'}
-                                </Text>
-                            </View>
-                        ) : currentData.length === 0 ? (
-                            <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: verticalScale(40) }}>
-                                <Text style={{ color: TEXT_COLORS.CAPTION }}>
-                                    {activeTab === 'drop' ? '아직 드랍한 음악이 없습니다' : '좋아요한 음악이 없습니다'}
-                                </Text>
-                            </View>
+            <ScrollView style={newStyles.content} showsVerticalScrollIndicator={false}>
+                <ProfileInfo
+                    username={me?.username}
+                    onEditPress={handleEditPress}
+                />
+
+                <View style={newStyles.contentSection}>
+                    <TabNavigation
+                        activeTab={activeTab}
+                        onTabPress={setActiveTab}
+                    />
+
+                    <View style={newStyles.contentContainer}>
+                        {activeTab === 'playlist' ? (
+                            <PlaylistGrid playlists={dummyPlaylists} />
                         ) : (
-                            (currentData || [])
-                                .filter((item) => item && item.droppingId)
-                                .map((item, index) => (
-                                    <DropItem
-                                        key={`${item.droppingId}-${index}`}
-                                        memo={item.memo || "제목 없음"}
-                                        location={item.location || "위치 정보 없음"}
-                                        imageSource={item.imageSource}
-                                        hasHeart={item.hasHeart || false}
-                                    />
-                                ))
+                            <View style={newStyles.musicList}>
+                                {(activeTab === "like" && likeError) ? (
+                                    <View style={newStyles.emptyContainer}>
+                                        <Text style={newStyles.emptyText}>
+                                            좋아요 목록을 불러올 수 없습니다
+                                        </Text>
+                                    </View>
+                                ) : currentData.length === 0 ? (
+                                    <View style={newStyles.emptyContainer}>
+                                        <Text style={newStyles.emptyText}>
+                                            {activeTab === 'drop'
+                                                ? '아직 드랍한 음악이 없습니다'
+                                                : '좋아요한 음악이 없습니다'
+                                            }
+                                        </Text>
+                                    </View>
+                                ) : (
+                                    currentData
+                                        .filter((item) => item && item.droppingId)
+                                        .map((item, index) => (
+                                            <MusicCard
+                                                key={`${item.droppingId}-${index}`}
+                                                item={item}
+                                            />
+                                        ))
+                                )}
+                            </View>
                         )}
-                    </ScrollView>
+                    </View>
                 </View>
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 }
+
+const newStyles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: BACKGROUND_COLORS.BACKGROUND,
+    },
+    loadingContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: verticalScale(12),
+    },
+    loadingText: {
+        color: TEXT_COLORS.DEFAULT,
+        fontSize: scale(14),
+    },
+    errorText: {
+        color: TEXT_COLORS.DEFAULT,
+        fontSize: scale(14),
+        marginBottom: verticalScale(16),
+        textAlign: 'center',
+    },
+    content: {
+        flex: 1,
+        paddingHorizontal: scale(16),
+    },
+    contentSection: {
+        backgroundColor: 'transparent',
+        borderRadius: scale(12),
+        paddingHorizontal: scale(8),
+        paddingVertical: scale(24),
+        marginTop: verticalScale(24),
+        flex: 1,
+    },
+    contentContainer: {
+        flex: 1,
+    },
+    musicList: {
+        gap: verticalScale(24),
+    },
+    emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: verticalScale(40),
+    },
+    emptyText: {
+        color: TEXT_COLORS.CAPTION_1,
+        fontSize: scale(14),
+    },
+});
+
 export default UserProfileScreen;
 
