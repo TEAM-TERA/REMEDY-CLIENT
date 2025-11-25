@@ -2,7 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, Text, Image, StyleSheet } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import Icon from '../../../components/icon/Icon';
-import { scale, verticalScale } from '../../../utils/scalers';
+import { scale } from '../../../utils/scalers';
 import { TEXT_COLORS, FORM_COLORS, PRIMARY_COLORS } from '../../../constants/colors';
 import type { DropItemData } from '../types/DropItemData';
 import { TYPOGRAPHY } from '../../../constants/typography';

@@ -2,24 +2,19 @@ import React from 'react';
 import { View, TouchableOpacity, Text, Image, StyleSheet } from 'react-native';
 import { scale, verticalScale } from '../../../utils/scalers';
 import { TEXT_COLORS, FORM_COLORS } from '../../../constants/colors';
-
-interface PlaylistItem {
-    id: number;
-    name: string;
-    coverImage: any;
-}
+import type { Playlist } from '../types/Playlist';
 
 interface PlaylistGridProps {
-    playlists: PlaylistItem[];
+    playlists: Playlist[];
 }
 
-const PlaylistCard: React.FC<{ playlist: PlaylistItem }> = ({ playlist }) => (
+const PlaylistCard: React.FC<{ playlist: Playlist }> = ({ playlist }) => (
     <View style={styles.playlistItem}>
         <View style={styles.playlistContainer}>
             <View style={styles.playlistHeaderBar} />
             <View style={styles.playlistImageContainer}>
                 <Image
-                    source={playlist.coverImage}
+                    source={require('../../../assets/images/profileImage.png')}
                     style={styles.playlistThumbnail}
                 />
             </View>

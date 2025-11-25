@@ -14,6 +14,7 @@ import PlaylistGrid from '../components/PlaylistGrid';
 import { useMyProfile } from '../hooks/useMyProfile';
 import { useMyDrop } from '../hooks/useMyDrop';
 import { useMyLikes } from '../hooks/useMyLike';
+import { useMyPlaylists } from '../hooks/useMyPlaylists';
 import { getSongInfo } from '../../drop/api/dropApi';
 import { scale, verticalScale } from '../../../utils/scalers';
 import { BACKGROUND_COLORS, TEXT_COLORS } from '../../../constants/colors';
@@ -24,7 +25,8 @@ function UserProfileScreen() {
 
     const { data: myDrops = [], isLoading: dropLoading } = useMyDrop();
     const { data: myLikes = [], isLoading: likeLoading, error: likeError } = useMyLikes();
-    const { data: me, isLoading, isError, refetch, isFetching } = useMyProfile();
+    const { data: me, isLoading, isError, refetch } = useMyProfile();
+    const { data: myPlaylistsData, isLoading: playlistLoading } = useMyPlaylists();
 
     const [songTitles, setSongTitles] = useState<Record<string, string>>({});
     const [songImages, setSongImages] = useState<Record<string, string>>({});
@@ -70,12 +72,7 @@ function UserProfileScreen() {
     const filteredDrops = dropsArray.filter((d: any) => d && d.droppingId);
     const filteredLikes = likesArray.filter((like: any) => like && like.droppingId);
 
-    const dummyPlaylists = [
-        { id: 1, name: "플리 1", coverImage: require('../../../assets/images/profileImage.png') },
-        { id: 2, name: "환상소곡집 op.3 : Monster", coverImage: require('../../../assets/images/profileImage.png') },
-        { id: 3, name: "Blu Swing 10th Anniversary BEST", coverImage: require('../../../assets/images/profileImage.png') },
-        { id: 4, name: "Tender", coverImage: require('../../../assets/images/profileImage.png') },
-    ];
+    const playlists = myPlaylistsData?.playlists || [];
 
     const currentData: DropItemData[] =
         activeTab === "drop"
@@ -94,7 +91,7 @@ function UserProfileScreen() {
                     imageSource: like.imageUrl ? { uri: like.imageUrl } : undefined,
                     hasHeart: true,
                 }))
-                : []; // 플레이리스트 탭
+                : [];
 
     const handleEditPress = () => {
         navigation.navigate('NameEdit');
@@ -108,7 +105,7 @@ function UserProfileScreen() {
         refetch();
     };
 
-    if(isLoading || (dropLoading && !myDrops) || (likeLoading && !myLikes)){
+    if(isLoading || (dropLoading && !myDrops) || (likeLoading && !myLikes) || (playlistLoading && !myPlaylistsData)){
         return (
             <SafeAreaView style={newStyles.container}>
               <View style={[newStyles.loadingContainer]}>
@@ -148,7 +145,7 @@ function UserProfileScreen() {
 
                     <View style={newStyles.contentContainer}>
                         {activeTab === 'playlist' ? (
-                            <PlaylistGrid playlists={dummyPlaylists} />
+                            <PlaylistGrid playlists={playlists} />
                         ) : (
                             <View style={newStyles.musicList}>
                                 {(activeTab === "like" && likeError) ? (
