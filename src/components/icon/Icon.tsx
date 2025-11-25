@@ -57,7 +57,6 @@ const icons = {
     danger: DangerSvg,
     eyeOn: EyeOnSvg,
     eyeOff: EyeOffSvg,
-    toggleOn: ToggleOnSvg,
     list: ListSvg,
 };
 
