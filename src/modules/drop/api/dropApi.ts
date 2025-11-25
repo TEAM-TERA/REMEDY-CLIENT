@@ -1,4 +1,5 @@
 import axiosInstance from "../../auth/api/axiosInstance";
+import { AxiosError } from "axios";
 
 export async function createDropping({
   songId,
@@ -47,7 +48,7 @@ export async function getSongInfo(songId: string) {
     return res.data;
   } catch (error) {
     console.error(`getSongInfo 에러 (ID: ${songId}):`, error);
-    if (error?.response?.status === 404) {
+    if ((error as AxiosError)?.response?.status === 404) {
       console.warn(`곡 ${songId}를 찾을 수 없습니다 (404)`);
     }
     throw error;
@@ -62,9 +63,24 @@ export async function getDroppingById(droppingId: string) {
     return res.data;
   } catch (error) {
     console.error(`getDroppingById 에러 (ID: ${droppingId}):`, error);
-    if (error?.response?.status === 404) {
+    if ((error as AxiosError)?.response?.status === 404) {
       console.warn(`드랍핑 ${droppingId}를 찾을 수 없습니다 (404)`);
     }
     throw error;
   }
+}
+
+export async function createVoteDropping(payload: {
+  topic: string;
+  options: string[];
+  content: string;
+  latitude: number;
+  longitude: number;
+  address: string;
+}) {
+  const res = await axiosInstance.post("/droppings", {
+    type: "VOTE",
+    ...payload,
+  });
+  return res.data;
 }

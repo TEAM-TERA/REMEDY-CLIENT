@@ -189,8 +189,14 @@ function PlaylistScreen({ route, navigation }: Props) {
             <View style={styles.playlistHeaderRow}>
               <Text style={styles.playlistTitle}>{playlist.name}</Text>
               <View style={styles.playlistActions}>
-                <TouchableOpacity style={styles.actionButton}>
-                  <Icon name="edit" width={12} height={12} color={TEXT_COLORS.DEFAULT} />
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => navigation.navigate('PlaylistMusicSearch', {
+                    playlistId: route.params.playlistId,
+                    playlistName: playlist.name
+                  })}
+                >
+                  <Icon name="plus" width={12} height={12} color={TEXT_COLORS.DEFAULT} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionButton}>
                   <Icon name="edit" width={12.75} height={12.75} color={TEXT_COLORS.DEFAULT} />

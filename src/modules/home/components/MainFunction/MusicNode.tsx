@@ -55,18 +55,10 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
 
     const animatedStyle = useAnimatedStyle(() => {
         'worklet';
-
-        // 드랍 옵션일 때는 회전 없이 고정 위치
         if (data.isDropOption) {
             const angleInRadians = (baseAngle * Math.PI) / 180;
             const translateX = Math.cos(angleInRadians) * radius;
             const translateY = Math.sin(angleInRadians) * radius;
-
-            // 디버그 정보 (개발 모드에서만)
-            if (__DEV__) {
-                console.log(`MusicNode 각도계산 - 타입: ${data.dropping.type}, 각도: ${baseAngle}°, X: ${translateX.toFixed(1)}, Y: ${translateY.toFixed(1)}`);
-            }
-
             return {
                 transform: [
                     {
@@ -82,36 +74,27 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
                 opacity: 1.0,
             };
         }
-
-        // baseAngle + 누적 회전값(baseRotation) + 현재 제스처 회전값(rotation)을 더해서 동적으로 회전
-        // undefined 체크를 통해 안전하게 처리
         const baseRotationValue = baseRotation?.value ?? 0;
         const rotationValue = rotation?.value ?? 0;
         const totalRotation = baseRotationValue + rotationValue;
         const currentAngle = baseAngle + totalRotation;
         const angleInRadians = (currentAngle * Math.PI) / 180;
 
-        // 현재 각도를 -180 ~ 180 범위로 정규화
         const normalizedAngle = ((currentAngle + 180) % 360) - 180;
 
-        // 메인 위치(-90°) 기준으로 투명도와 스케일 계산 (더 정확한 범위)
         const distanceFromMain = Math.abs(normalizedAngle - (-90));
 
-        // 현재 이 노드가 메인 노드인지 동적으로 확인
         const mainNodeIndexValue = mainNodeIndex?.value ?? 0;
         const isCurrentlyMain = mainNodeIndexValue === nodeIndex;
 
-        // 전체 노드들의 기본 가시성 (60도 범위)
         const isVisible = distanceFromMain < 60;
 
-        // 투명도: 메인 노드는 완전히 선명, 나머지는 거리에 따라
         const opacity = isCurrentlyMain
             ? 1.0
             : isVisible
             ? interpolate(distanceFromMain, [0, 60], [0.8, 0.2], 'clamp')
             : 0.1;
 
-        // 스케일: 메인 노드는 64px(1.0), 서브 노드는 48px(0.75)로 통일
         const scale = isCurrentlyMain ? 1.0 : 0.75;
 
         return {
@@ -132,18 +115,15 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
 
     const handlePress = React.useCallback(() => {
         if (data.isDropOption) {
-            // 드랍 옵션 클릭 처리
             switch (data.dropping.type) {
                 case 'music':
                     navigate('Drop');
                     break;
                 case 'playlist':
                     console.log('플레이리스트 드랍 선택됨');
-                    // TODO: 플레이리스트 드랍 화면으로 이동
                     break;
                 case 'debate':
-                    console.log('토론 드랍 선택됨');
-                    // TODO: 토론 드랍 화면으로 이동
+                    navigate('DebateDrop');
                     break;
             }
             return;
@@ -167,7 +147,6 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
                 style={styles.container}
             >
                 {data.isDropOption ? (
-                    // 드랍 옵션 렌더링
                     <>
                         <View style={[styles.musicImg, { backgroundColor: '#161622', justifyContent: 'center', alignItems: 'center' }]}>
                             <Icon
@@ -186,7 +165,6 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
                         </Text>
                     </>
                 ) : (
-                    // 기존 뮤직 노드 렌더링
                     <>
                         <Image
                             source={imageSource}
@@ -204,8 +182,6 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
         </Animated.View>
     );
 }, (prevProps, nextProps) => {
-    // rotation과 mainNodeIndex는 SharedValue/DerivedValue이므로 참조 비교로 충분
-    // 실제 값 변경은 worklet 내부에서 처리됨
     return (
         prevProps.data.dropping.droppingId === nextProps.data.dropping.droppingId &&
         prevProps.data.dropping.songId === nextProps.data.dropping.songId &&

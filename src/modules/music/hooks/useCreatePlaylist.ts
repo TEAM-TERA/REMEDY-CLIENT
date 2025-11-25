@@ -7,7 +7,6 @@ export const useCreatePlaylist = () => {
   return useMutation({
     mutationFn: createPlaylist,
     onSuccess: () => {
-      // 플레이리스트 목록 캐시 무효화하여 새로고침
       queryClient.invalidateQueries({ queryKey: ['myPlaylists'] });
     },
     onError: (error) => {

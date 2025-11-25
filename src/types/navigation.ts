@@ -6,6 +6,21 @@ export type RootStackParamList = {
   Challenge: undefined;
   Customize: undefined;
   Tutorial: undefined;
+  DebateDrop:
+    | {
+        selectedSong?: {
+          id: string;
+          title: string;
+          artist: string;
+          imageUrl?: string;
+        };
+        slotIndex?: number;
+      }
+    | undefined;
+  DebateMusicSearch: {
+    slotIndex: number;
+    parentKey?: string;
+  };
 
   Music: {
     droppingId: string;
@@ -18,6 +33,11 @@ export type RootStackParamList = {
 
   Playlist: {
     playlistId: string;
+  };
+
+  PlaylistMusicSearch: {
+    playlistId: string;
+    playlistName?: string;
   };
 };
 
