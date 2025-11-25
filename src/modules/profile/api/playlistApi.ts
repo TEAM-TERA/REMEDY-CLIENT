@@ -7,7 +7,7 @@ export const getMyPlaylists = async (): Promise<PlaylistsResponse> => {
 };
 
 export const renamePlaylist = async (playlistId: string | number, name: string) => {
-  const response = await axiosInstance.post(`/playlists/${playlistId}`, { name });
+  const response = await axiosInstance.put(`/playlists/${playlistId}`, { name });
   return response.data;
 };
 

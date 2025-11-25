@@ -39,6 +39,16 @@ export type RootStackParamList = {
     playlistId: string;
     playlistName?: string;
   };
+
+  DebateScreen: {
+    droppingId: string;
+    content?: string;
+    location?: string;
+  };
+
+  MusicDetail: {
+    songId: string;
+  };
 };
 
 export type AuthStackParamList = {

@@ -26,12 +26,19 @@ interface MusicWheelProps {
 
 const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps) {
   const safeDroppings = Array.isArray(droppings) ? droppings : [];
-  const totalSongs = safeDroppings.length;
+  // MUSIC 타입만 필터링 (VOTE 타입 제외)
+  const musicDroppings = React.useMemo(() => {
+    return safeDroppings.filter(dropping => {
+      const dropType = String(dropping.type || 'MUSIC').toUpperCase();
+      return dropType === 'MUSIC';
+    });
+  }, [safeDroppings]);
+  const totalSongs = musicDroppings.length;
   const gestureOffset = useSharedValue(0);
   const [rotationDeg, setRotationDeg] = useState(persistedRotation);
   const rotationShared = useSharedValue(persistedRotation);
   const [currentIndex, setCurrentIndex] = useState<number>(persistedIndex);
-  const [selectedDroppingId, setSelectedDroppingId] = useState<string | undefined>(safeDroppings[0]?.droppingId);
+  const [selectedDroppingId, setSelectedDroppingId] = useState<string | undefined>(musicDroppings[0]?.droppingId);
   const [isSwiping, setIsSwiping] = useState<boolean>(false);
   const [showDropOptions, setShowDropOptions] = useState<boolean>(false);
   const { playIfDifferent, setCurrentId, currentId } = usePlayerStore();
@@ -53,22 +60,13 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
       return;
     }
 
-    if (selectedDroppingId) {
-      const foundIdx = safeDroppings.findIndex(d => String(d.droppingId) === String(selectedDroppingId));
-      if (foundIdx !== -1 && foundIdx !== currentIndex) {
-        setCurrentIndex(foundIdx);
-        persistedIndex = foundIdx;
-      } else if (foundIdx === -1) {
-        setSelectedDroppingId(safeDroppings[0]?.droppingId);
-        setCurrentIndex(0);
-        persistedIndex = 0;
-      }
-    } else {
-      setSelectedDroppingId(safeDroppings[0]?.droppingId);
+    // Only update if we don't have a valid selectedDroppingId or it doesn't exist in current data
+    if (!selectedDroppingId || !musicDroppings.find(d => String(d.droppingId) === String(selectedDroppingId))) {
+      setSelectedDroppingId(musicDroppings[0]?.droppingId);
       setCurrentIndex(0);
       persistedIndex = 0;
     }
-  }, [safeDroppings, totalSongs, selectedDroppingId, currentIndex]);
+  }, [musicDroppings, totalSongs]);
 
   useEffect(() => {
     rotationShared.value = rotationDeg;
@@ -76,8 +74,14 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
   }, [rotationDeg, rotationShared]);
 
   const playByIndex = React.useCallback((index: number) => {
-    if (!safeDroppings[index]) return;
-    const dropping = safeDroppings[index];
+    // Get current musicDroppings to avoid dependency issue
+    const currentMusicDroppings = safeDroppings.filter(dropping => {
+      const dropType = String(dropping.type || 'MUSIC').toUpperCase();
+      return dropType === 'MUSIC';
+    });
+
+    if (!currentMusicDroppings[index]) return;
+    const dropping = currentMusicDroppings[index];
     const newSongId = dropping.songId;
     if (!newSongId) return;
 
@@ -95,17 +99,25 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
     const newIndex = ((targetIndex % totalSongs) + totalSongs) % totalSongs;
     setCurrentIndex(newIndex);
     persistedIndex = newIndex;
-    setSelectedDroppingId(safeDroppings[newIndex]?.droppingId);
+
+    // Use the most current musicDroppings reference
+    const currentMusicDroppings = safeDroppings.filter(dropping => {
+      const dropType = String(dropping.type || 'MUSIC').toUpperCase();
+      return dropType === 'MUSIC';
+    });
+
+    setSelectedDroppingId(currentMusicDroppings[newIndex]?.droppingId);
     playByIndex(newIndex);
   }, [totalSongs, playByIndex, safeDroppings]);
 
   useEffect(() => {
     if (__DEV__) {
-      console.log('Droppings changed, count:', safeDroppings.length);
+      console.log('Music Droppings changed, count:', musicDroppings.length);
+      console.log('Total droppings (including VOTE):', safeDroppings.length);
       console.log('Current index:', currentIndex);
       console.log('Is swiping:', isSwiping);
     }
-  }, [safeDroppings, currentIndex, isSwiping]);
+  }, [musicDroppings, safeDroppings, currentIndex, isSwiping]);
 
   // visibleEntries와 songQueries는 displayData 이후로 이동됨
 
@@ -138,8 +150,8 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
   ], []);
 
   const displayData = React.useMemo(() => {
-    return showDropOptions ? dropOptions : safeDroppings;
-  }, [showDropOptions, dropOptions, safeDroppings]);
+    return showDropOptions ? dropOptions : musicDroppings;
+  }, [showDropOptions, dropOptions, musicDroppings]);
 
   const displayTotalSongs = displayData.length;
 

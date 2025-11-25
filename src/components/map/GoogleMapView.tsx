@@ -106,37 +106,68 @@ const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentL
   }, [currentLocation, isMapReady]);
 
   const handleMessage = useCallback((event: any) => {
-    const message = event.nativeEvent.data;
+    const rawMessage = event.nativeEvent.data;
+    try {
+      const message = typeof rawMessage === 'string' ? rawMessage.trim() : rawMessage;
+      const data = typeof message === 'string' ? JSON.parse(message) : message;
 
-    if (message.startsWith('{') && message.endsWith('}')) {
-      try {
-        const data = JSON.parse(message);
+      if (!data || typeof data !== 'object') {
+        return;
+      }
 
-        if (data.type === 'mapReady') {
-          console.log('[MAP] mapReady 수신됨 - setIsMapReady(true) 호출');
-          setIsMapReady(true);
-          return;
-        }
+      if (data.type === 'mapReady') {
+        console.log('[MAP] mapReady 수신됨 - setIsMapReady(true) 호출');
+        setIsMapReady(true);
+        return;
+      }
 
-        if (data.type === 'debug') {
-          return;
-        }
+      if (data.type === 'debug') {
+        return;
+      }
 
-        if (data.type === 'markerClick') {
-          if (data.action === 'navigateToMusic') {
-            (navigation as any).navigate('Music', {
-              droppingId: data.payload.droppingId || data.payload.id,
-              songId: data.payload.songId || data.payload.song_id,
-              title: data.payload.title || '드랍핑 음악',
-              artist: data.payload.artist || '알 수 없는 아티스트',
-              message: data.payload.content || '',
-              location: data.payload.address || data.payload.location || '위치 정보 없음'
+      if (data.type === 'markerClick') {
+        console.log('마커 클릭됨:', data.action, data.payload);
+        const payloadDroppingId = data.payload?.droppingId || data.payload?.id;
+        if (data.action === 'navigateToMusic') {
+          (navigation as any).navigate('Music', {
+            droppingId: data.payload.droppingId || data.payload.id,
+            songId: data.payload.songId || data.payload.song_id,
+            title: data.payload.title || '드랍핑 음악',
+            artist: data.payload.artist || '알 수 없는 아티스트',
+            message: data.payload.content || '',
+            location: data.payload.address || data.payload.location || '위치 정보 없음'
+          });
+        } else if (data.action === 'navigateToDebate') {
+          // DebateScreen으로 이동 (VOTE 드랍핑)
+          console.log('DebateScreen 네비게이션 시도:', data.payload);
+          const debateDroppingId = payloadDroppingId;
+          if (!debateDroppingId) {
+            console.warn('DebateScreen 네비게이션 실패: droppingId 없음');
+            return;
+          }
+          try {
+            (navigation as any).navigate('DebateScreen', {
+              droppingId: String(debateDroppingId),
+              content: data.payload.content,
+              location: data.payload.address || '위치 정보 없음'
             });
-          } else if (data.action === 'showDetails') {
+            console.log('DebateScreen 네비게이션 성공');
+          } catch (error) {
+            console.error('DebateScreen 네비게이션 실패:', error);
+          }
+        } else if (data.action === 'showDetails') {
+          if ((data.payload?.type || '').toUpperCase() === 'VOTE' && payloadDroppingId) {
+            console.log('원 밖 클릭이지만 DebateScreen 이동 시도');
+            (navigation as any).navigate('DebateScreen', {
+              droppingId: String(payloadDroppingId),
+              content: data.payload.content,
+              location: data.payload.address || '위치 정보 없음'
+            });
           }
         }
-      } catch (e) {
       }
+    } catch (e) {
+      console.warn('WebView 메시지 파싱 실패:', rawMessage, e);
     }
   }, [navigation]);
 
@@ -150,7 +181,7 @@ const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentL
         <style>
           html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; }
         </style>
-        <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=geometry"></script>
+        <script src="https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&callback=initMap&libraries=geometry" async defer></script>
         <script>
           var map;
           var mapReady = false;
@@ -365,25 +396,54 @@ const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentL
             clearDroppings();
 
             drops.forEach(function(drop) {
+              const dropId = drop.droppingId || drop.id;
+              const songId = drop.songId || drop.song_id;
               const dropPosition = new google.maps.LatLng(drop.latitude, drop.longitude);
               const centerPositionDynamic = map.getCenter();
               const distance = google.maps.geometry.spherical.computeDistanceBetween(centerPositionDynamic, dropPosition);
               const radius = ${MAP_RADIUS};
 
               const isCurrentlyPlaying = currentPlayingDroppingId &&
-                (String(drop.droppingId) === String(currentPlayingDroppingId));
+                (String(dropId) === String(currentPlayingDroppingId));
+
+              const dropType = String(drop.type || 'MUSIC').toUpperCase();
+              const isVoteDropping = dropType === 'VOTE';
 
               console.log('마커 생성 중:', {
-                droppingId: drop.droppingId,
-                songId: drop.songId,
+                droppingId: dropId,
+                songId: songId,
+                type: dropType,
+                isVoteDropping: isVoteDropping,
                 currentPlayingDroppingId: currentPlayingDroppingId,
-                droppingIdMatch: String(drop.droppingId) === String(currentPlayingDroppingId),
+                droppingIdMatch: String(dropId) === String(currentPlayingDroppingId),
                 isCurrentlyPlaying: isCurrentlyPlaying,
-                songIdType: typeof drop.songId,
+                songIdType: typeof songId,
                 currentPlayingDroppingIdType: typeof currentPlayingDroppingId
               });
 
-              const iconUrl = isCurrentlyPlaying
+              const iconUrl = isVoteDropping ?
+                // VOTE 드랍핑 아이콘 (토론 아이콘)
+                "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
+                  '<svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+                  '<g filter="url(#filter0_d_180_98)">' +
+                  '<rect x="20" y="20" width="35" height="35" rx="17.5" fill="#101118" shape-rendering="crispEdges"/>' +
+                  '<path d="M39.5 40.5V42.5C39.5 42.7652 39.3946 43.0196 39.2071 43.2071C39.0196 43.3946 38.7652 43.5 38.5 43.5H31.5L28.5 46.5V36.5C28.5 36.2348 28.6054 35.9804 28.7929 35.7929C28.9804 35.6054 29.2348 35.5 29.5 35.5H31.5M46.5 33V29.5C46.5 29.2348 46.3946 28.9804 46.2071 28.7929C46.0196 28.6054 45.7652 28.5 45.5 28.5H36.5C36.2348 28.5 35.9804 28.6054 35.7929 28.7929C35.6054 28.9804 35.5 29.2348 35.5 29.5V35.5C35.5 35.7652 35.6054 36.0196 35.7929 36.2071C35.9804 36.3946 36.2348 36.5 36.5 36.5H43.5L46.5 39.5V33.5" stroke="#6210EF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+                  '</g>' +
+                  '<defs>' +
+                  '<filter id="filter0_d_180_98" x="0" y="0" width="75" height="75" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">' +
+                  '<feFlood flood-opacity="0" result="BackgroundImageFix"/>' +
+                  '<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>' +
+                  '<feOffset/>' +
+                  '<feGaussianBlur stdDeviation="10"/>' +
+                  '<feComposite in2="hardAlpha" operator="out"/>' +
+                  '<feColorMatrix type="matrix" values="0 0 0 0 0.384314 0 0 0 0 0.0627451 0 0 0 0 0.937255 0 0 0 1 0"/>' +
+                  '<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_180_98"/>' +
+                  '<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_180_98" result="shape"/>' +
+                  '</filter>' +
+                  '</defs>' +
+                  '</svg>'
+                )
+              : isCurrentlyPlaying
                 ? "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(
                   '<svg width="75" height="75" viewBox="0 0 75 75" fill="none" xmlns="http://www.w3.org/2000/svg">' +
                   '<g filter="url(#filter0_d_660_1355)">' +
@@ -448,7 +508,11 @@ const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentL
                 zIndex: isCurrentlyPlaying ? 2000 : 100
               });
 
-              marker.droppingData = drop;
+              marker.droppingData = {
+                ...drop,
+                droppingId: dropId,
+                songId: songId,
+              };
 
               existingMarkers.push(marker);
 
@@ -461,17 +525,27 @@ const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentL
               
               marker.addListener('click', function() {
                 const isInCircle = distance <= radius;
+                console.log('WebView 마커 클릭:', {
+                  isVoteDropping: isVoteDropping,
+                  dropType: dropType,
+                  isInCircle: isInCircle,
+                  droppingId: dropId
+                });
+
                 if (isInCircle) {
+                  const action = isVoteDropping ? 'navigateToDebate' : 'navigateToMusic';
+                  console.log('WebView 액션 결정:', action);
                   window.ReactNativeWebView?.postMessage(JSON.stringify({
                     type: 'markerClick',
-                    action: 'navigateToMusic',
+                    action: action,
                     payload: {
-                      droppingId: drop.droppingId,
-                      songId: drop.songId,
+                      droppingId: dropId,
+                      songId: songId,
                       content: drop.content,
                       latitude: drop.latitude,
                       longitude: drop.longitude,
                       address: drop.address,
+                      type: dropType
                     }
                   }));
                 } else {
@@ -479,12 +553,13 @@ const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentL
                     type: 'markerClick',
                     action: 'showDetails',
                     payload: {
-                      droppingId: drop.droppingId,
-                      songId: drop.songId,
+                      droppingId: dropId,
+                      songId: songId,
                       content: drop.content,
                       latitude: drop.latitude,
                       longitude: drop.longitude,
                       address: drop.address,
+                      type: dropType
                     }
                   }));
                 }
@@ -855,7 +930,7 @@ const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentL
           window.addEventListener('message', function(event) {
             try {
               const data = JSON.parse(event.data);
-              
+
               if (!mapReady) {
                 messageQueue.push(data);
               } else {
@@ -864,8 +939,6 @@ const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentL
             } catch (e) {
             }
           });
-
-          window.onload = initMap;
         </script>
       </head>
       <body>

@@ -1,3 +1,5 @@
+import { StyleProp, ViewStyle } from "react-native";
+
 export type InputProps = {
     placeholder? : string;
     value? : string;
@@ -11,4 +13,5 @@ export type InputProps = {
     helperText?: string;
     onFocus?: () => void;
     onBlur?: () => void;
+    style?: StyleProp<ViewStyle>;
 };

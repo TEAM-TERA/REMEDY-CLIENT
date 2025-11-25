@@ -7,14 +7,17 @@ import type { Playlist } from '../types/Playlist';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { addSongToPlaylist, deletePlaylist, renamePlaylist } from '../api/playlistApi';
 import { listSongs } from '../../drop/api/dropApi';
+import { useNavigation } from '@react-navigation/native';
+import type { NavigationProp } from '@react-navigation/native';
+import type { RootStackParamList } from '../../../types/navigation';
 
 interface PlaylistGridProps {
     playlists: Playlist[];
     onCreatePlaylist?: () => void;
 }
 
-const PlaylistCard: React.FC<{ playlist: Playlist; onPressMore: (p: Playlist) => void }> = ({ playlist, onPressMore }) => (
-    <View style={styles.playlistItem}>
+const PlaylistCard: React.FC<{ playlist: Playlist; onPressMore: (p: Playlist) => void; onPressOpen: (p: Playlist) => void }> = ({ playlist, onPressMore, onPressOpen }) => (
+    <TouchableOpacity style={styles.playlistItem} activeOpacity={0.85} onPress={() => onPressOpen(playlist)}>
         <View style={styles.playlistContainer}>
             <View style={styles.playlistHeaderBar} />
             <View style={styles.playlistImageContainer}>
@@ -34,7 +37,7 @@ const PlaylistCard: React.FC<{ playlist: Playlist; onPressMore: (p: Playlist) =>
                 <View style={styles.moreDot} />
             </TouchableOpacity>
         </View>
-    </View>
+    </TouchableOpacity>
 );
 
 const CreatePlaylistCard: React.FC<{ onPress?: () => void }> = ({ onPress }) => (
@@ -62,6 +65,7 @@ const PlaylistGrid: React.FC<PlaylistGridProps> = ({ playlists, onCreatePlaylist
     const [newName, setNewName] = useState('');
     const [activePlaylist, setActivePlaylist] = useState<Playlist | null>(null);
     const queryClient = useQueryClient();
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const songsQuery = useQuery({
         queryKey: ['songs', addSongVisible],
@@ -111,6 +115,10 @@ const PlaylistGrid: React.FC<PlaylistGridProps> = ({ playlists, onCreatePlaylist
         setMenuVisible(true);
     };
 
+    const openPlaylist = (playlist: Playlist) => {
+        navigation.navigate('Playlist', { playlistId: String(playlist.id) });
+    };
+
     const openRename = () => {
         if (!activePlaylist) return;
         setNewName(activePlaylist.name);
@@ -118,8 +126,12 @@ const PlaylistGrid: React.FC<PlaylistGridProps> = ({ playlists, onCreatePlaylist
     };
 
     const openAddSong = () => {
-        setSearchText('');
-        setAddSongVisible(true);
+        if (!activePlaylist) return;
+        navigation.navigate('PlaylistMusicSearch', {
+            playlistId: String(activePlaylist.id),
+            playlistName: activePlaylist.name,
+        } as any);
+        setMenuVisible(false);
     };
 
     const handleRenameSubmit = () => {
@@ -154,7 +166,7 @@ const PlaylistGrid: React.FC<PlaylistGridProps> = ({ playlists, onCreatePlaylist
                         if (item.type === 'create') {
                             return <CreatePlaylistCard key="create" onPress={onCreatePlaylist} />;
                         } else {
-                            return <PlaylistCard key={item.data.id} playlist={item.data} onPressMore={openMenu} />;
+                            return <PlaylistCard key={item.data.id} playlist={item.data} onPressMore={openMenu} onPressOpen={openPlaylist} />;
                         }
                     })}
                     {/* 홀수 개일 경우 빈 공간 채우기 */}
