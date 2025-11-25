@@ -39,7 +39,7 @@ function MusicScreen({ route }: Props) {
   const musicLikeCount = useDropLikeCount(droppingId);
   const toggleLike = useToggleLike(droppingId);
   const myLikes = useMyLikes();
-  const isLiked = !!myLikes.data?.includes(droppingId);
+  const isLiked = !!myLikes.data?.some((like) => like.droppingId === droppingId);
   const [comment, setComment] = useState('');
   const scrollViewRef = useRef<any>(null);
   const commentInputRef = useRef<TextInput>(null);

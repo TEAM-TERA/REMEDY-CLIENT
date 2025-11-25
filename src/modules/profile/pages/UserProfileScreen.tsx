@@ -3,7 +3,7 @@ import { View, Text, ActivityIndicator, ScrollView, StyleSheet, Platform, Alert,
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
-import type { ProfileStackParamList } from '../../../types/navigation';
+import type { ProfileStackParamList, RootStackParamList } from '../../../types/navigation';
 import type { DropItemData } from '../types/DropItemData';
 import Button from '../../../components/button/Button';
 import ProfileHeader from '../../../components/header/ProfileHeader';
@@ -11,11 +11,13 @@ import ProfileInfo from '../components/ProfileInfo';
 import TabNavigation from '../components/TabNavigation';
 import MusicCard from '../components/MusicCard';
 import PlaylistGrid from '../components/PlaylistGrid';
+import CreatePlaylistModal from '../../music/components/CreatePlaylistModal';
 import { useMyProfile } from '../hooks/useMyProfile';
 import { useMyDrop } from '../hooks/useMyDrop';
 import { useMyLikes } from '../hooks/useMyLike';
 import { useMyPlaylists } from '../hooks/useMyPlaylists';
 import { useUpdateProfileImage } from '../hooks/useUpdateProfileImage';
+import { useCreatePlaylist } from '../../music/hooks/useCreatePlaylist';
 import { getSongInfo } from '../../drop/api/dropApi';
 import { scale, verticalScale } from '../../../utils/scalers';
 import { BACKGROUND_COLORS, TEXT_COLORS } from '../../../constants/colors';
@@ -23,7 +25,7 @@ import ToastModal from '../../../components/modal/ToastModal';
 import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
 
 function UserProfileScreen() {
-    const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
+    const navigation = useNavigation<NavigationProp<ProfileStackParamList & RootStackParamList>>();
     const [activeTab, setActiveTab] = useState<'drop' | 'like' | 'playlist'>('drop');
 
     const { data: myDrops = [], isLoading: dropLoading } = useMyDrop();
@@ -36,8 +38,10 @@ function UserProfileScreen() {
     const [songArtists, setSongArtists] = useState<Record<string, string>>({});
     const [showToast, setShowToast] = useState(false);
     const [toastMessage, setToastMessage] = useState('');
+    const [showCreatePlaylistModal, setShowCreatePlaylistModal] = useState(false);
 
     const updateProfileImageMutation = useUpdateProfileImage();
+    const createPlaylistMutation = useCreatePlaylist();
 
     useEffect(() => {
         const loadSongInfo = async () => {
@@ -116,6 +120,28 @@ function UserProfileScreen() {
 
     const handleRefetchProfile = () => {
         refetch();
+    };
+
+    const handleCreatePlaylist = () => {
+        console.log('플레이리스트 생성 버튼 클릭됨');
+        setShowCreatePlaylistModal(true);
+    };
+
+    const handleConfirmCreatePlaylist = async (playlistName: string) => {
+        try {
+            await createPlaylistMutation.mutateAsync(playlistName);
+            setShowCreatePlaylistModal(false);
+            setToastMessage('플레이리스트가 생성되었습니다');
+            setShowToast(true);
+        } catch (error) {
+            console.error('플레이리스트 생성 실패:', error);
+            setToastMessage('플레이리스트 생성에 실패했습니다');
+            setShowToast(true);
+        }
+    };
+
+    const handleCloseCreatePlaylistModal = () => {
+        setShowCreatePlaylistModal(false);
     };
 
     const handleImagePress = async () => {
@@ -257,7 +283,10 @@ function UserProfileScreen() {
 
                     <View style={newStyles.contentContainer}>
                         {activeTab === 'playlist' ? (
-                            <PlaylistGrid playlists={playlists} />
+                            <PlaylistGrid
+                                playlists={playlists}
+                                onCreatePlaylist={handleCreatePlaylist}
+                            />
                         ) : (
                             <View style={newStyles.musicList}>
                                 {(activeTab === "like" && likeError) ? (
@@ -296,6 +325,13 @@ function UserProfileScreen() {
                 message={toastMessage}
                 type="success"
                 onClose={() => setShowToast(false)}
+            />
+
+            <CreatePlaylistModal
+                visible={showCreatePlaylistModal}
+                onClose={handleCloseCreatePlaylistModal}
+                onConfirm={handleConfirmCreatePlaylist}
+                isCreating={createPlaylistMutation.isPending}
             />
         </SafeAreaView>
     );

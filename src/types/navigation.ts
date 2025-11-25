@@ -15,6 +15,10 @@ export type RootStackParamList = {
     location: string;
     message?: string;
   };
+
+  Playlist: {
+    playlistId: string;
+  };
 };
 
 export type AuthStackParamList = {

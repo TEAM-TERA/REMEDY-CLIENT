@@ -11,6 +11,7 @@ import ProfileStack from './ProfileStack';
 import AuthStack from './AuthStack';
 import HomeScreen from '../modules/home/pages/HomeScreen';
 import MusicScreen from '../modules/music/pages/MusicScreen';
+import PlaylistScreen from '../modules/music/pages/PlaylistScreen';
 import ChallengeScreen from '../modules/challenge/pages/ChallengeScreen';
 import TutorialScreenPage from '../modules/tutorial/pages/TutorialScreen';
 
@@ -47,6 +48,7 @@ export default function RootNavigation() {
         <Stack.Screen name="Profile" component={ProfileStack} options={{ headerShown: false }} />
         <Stack.Screen name="Drop" component={DropStack} options={{ headerShown: false }} />
         <Stack.Screen name="Music" component={MusicScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Playlist" component={PlaylistScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Challenge" component={ChallengeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Tutorial" component={TutorialScreenPage} options={{ headerShown: false }} />
       </Stack.Navigator>
