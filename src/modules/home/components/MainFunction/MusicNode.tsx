@@ -1,16 +1,19 @@
 import React from 'react';
-import { Image, TouchableOpacity, Text } from 'react-native';
+import { Image, TouchableOpacity, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, SharedValue, interpolate, DerivedValue } from 'react-native-reanimated';
 import { styles } from '../../styles/MainFunction/MusicNode';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../../types/navigation';
 import { scale } from '../../../../utils/scalers';
+import Icon from '../../../../components/icon/Icon';
+import { navigate } from '../../../../navigation';
 
 interface MusicNodeProps {
     data: {
         dropping: any;
         songInfo?: any;
+        isDropOption?: boolean;
     };
     isMain: boolean;
     index: number;
@@ -34,8 +37,51 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
         return require('../../../../assets/images/profileImage.png');
     }, [data.songInfo?.albumImagePath]);
 
+    // 드랍 옵션별 아이콘과 색상 설정
+    const getDropOptionInfo = React.useMemo(() => {
+        if (!data.isDropOption) return null;
+
+        switch (data.dropping.type) {
+            case 'music':
+                return { iconName: 'music' as const, color: '#E61F54' };
+            case 'playlist':
+                return { iconName: 'playlist' as const, color: '#EF9210' };
+            case 'debate':
+                return { iconName: 'debate' as const, color: '#6210EF' };
+            default:
+                return { iconName: 'music' as const, color: '#E61F54' };
+        }
+    }, [data.isDropOption, data.dropping.type]);
+
     const animatedStyle = useAnimatedStyle(() => {
         'worklet';
+
+        // 드랍 옵션일 때는 회전 없이 고정 위치
+        if (data.isDropOption) {
+            const angleInRadians = (baseAngle * Math.PI) / 180;
+            const translateX = Math.cos(angleInRadians) * radius;
+            const translateY = Math.sin(angleInRadians) * radius;
+
+            // 디버그 정보 (개발 모드에서만)
+            if (__DEV__) {
+                console.log(`MusicNode 각도계산 - 타입: ${data.dropping.type}, 각도: ${baseAngle}°, X: ${translateX.toFixed(1)}, Y: ${translateY.toFixed(1)}`);
+            }
+
+            return {
+                transform: [
+                    {
+                        translateX: translateX,
+                    },
+                    {
+                        translateY: translateY,
+                    },
+                    {
+                        scale: 1.0,
+                    },
+                ],
+                opacity: 1.0,
+            };
+        }
 
         // baseAngle + 누적 회전값(baseRotation) + 현재 제스처 회전값(rotation)을 더해서 동적으로 회전
         // undefined 체크를 통해 안전하게 처리
@@ -85,6 +131,24 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
     });
 
     const handlePress = React.useCallback(() => {
+        if (data.isDropOption) {
+            // 드랍 옵션 클릭 처리
+            switch (data.dropping.type) {
+                case 'music':
+                    navigate('Drop');
+                    break;
+                case 'playlist':
+                    console.log('플레이리스트 드랍 선택됨');
+                    // TODO: 플레이리스트 드랍 화면으로 이동
+                    break;
+                case 'debate':
+                    console.log('토론 드랍 선택됨');
+                    // TODO: 토론 드랍 화면으로 이동
+                    break;
+            }
+            return;
+        }
+
         navigation.navigate('Music', {
           droppingId: data.dropping.droppingId,
           songId: data.dropping.songId,
@@ -93,7 +157,7 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
           location: data.dropping.address,
           message: data.dropping.content,
         });
-    }, [navigation, data.dropping.droppingId, data.dropping.songId, data.dropping.address, data.dropping.content, data.songInfo?.title, data.songInfo?.artist]);
+    }, [navigation, data.dropping, data.songInfo, data.isDropOption]);
 
 
     return (
@@ -102,16 +166,40 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
                 onPress={handlePress}
                 style={styles.container}
             >
-                <Image
-                    source={imageSource}
-                    style={styles.musicImg}
-                />
-                <Text style={styles.musicTitle}>
-                    {data.songInfo?.title || data.dropping.title || '드랍핑 음악'}
-                </Text>
-                <Text style={styles.singerText}>
-                    {data.songInfo?.artist || data.dropping.singer || '알 수 없는 아티스트'}
-                </Text>
+                {data.isDropOption ? (
+                    // 드랍 옵션 렌더링
+                    <>
+                        <View style={[styles.musicImg, { backgroundColor: '#161622', justifyContent: 'center', alignItems: 'center' }]}>
+                            <Icon
+                                name={getDropOptionInfo?.iconName || 'music'}
+                                width={32}
+                                height={32}
+                                color={getDropOptionInfo?.color || '#E61F54'}
+                            />
+                        </View>
+                        <Text style={[styles.musicTitle, { color: getDropOptionInfo?.color || '#E61F54' }]}>
+                            {data.dropping.title}
+                        </Text>
+                        <Text style={styles.singerText}>
+                            {data.dropping.type === 'music' ? '' :
+                             data.dropping.type === 'playlist' ? '' : ''}
+                        </Text>
+                    </>
+                ) : (
+                    // 기존 뮤직 노드 렌더링
+                    <>
+                        <Image
+                            source={imageSource}
+                            style={styles.musicImg}
+                        />
+                        <Text style={styles.musicTitle}>
+                            {data.songInfo?.title || data.dropping.title || '드랍핑 음악'}
+                        </Text>
+                        <Text style={styles.singerText}>
+                            {data.songInfo?.artist || data.dropping.singer || '알 수 없는 아티스트'}
+                        </Text>
+                    </>
+                )}
             </TouchableOpacity>
         </Animated.View>
     );
@@ -123,6 +211,7 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
         prevProps.data.dropping.songId === nextProps.data.dropping.songId &&
         prevProps.baseAngle === nextProps.baseAngle &&
         prevProps.nodeIndex === nextProps.nodeIndex &&
+        prevProps.data.isDropOption === nextProps.data.isDropOption &&
         prevProps.data.songInfo?.albumImagePath === nextProps.data.songInfo?.albumImagePath &&
         prevProps.data.songInfo?.title === nextProps.data.songInfo?.title &&
         prevProps.data.songInfo?.artist === nextProps.data.songInfo?.artist

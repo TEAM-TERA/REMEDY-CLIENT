@@ -33,6 +33,7 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
   const [currentIndex, setCurrentIndex] = useState<number>(persistedIndex);
   const [selectedDroppingId, setSelectedDroppingId] = useState<string | undefined>(safeDroppings[0]?.droppingId);
   const [isSwiping, setIsSwiping] = useState<boolean>(false);
+  const [showDropOptions, setShowDropOptions] = useState<boolean>(false);
   const { playIfDifferent, setCurrentId, currentId } = usePlayerStore();
 
   useEffect(() => {
@@ -106,16 +107,54 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
     }
   }, [safeDroppings, currentIndex, isSwiping]);
 
+  // visibleEntries와 songQueries는 displayData 이후로 이동됨
+
+  // 드랍 옵션 데이터
+  const dropOptions = React.useMemo(() => [
+    {
+      droppingId: 'drop-option-music',
+      songId: 'music',
+      type: 'music',
+      title: 'Music',
+      address: '',
+      content: '',
+    },
+    {
+      droppingId: 'drop-option-playlist',
+      songId: 'playlist',
+      type: 'playlist',
+      title: 'Playlist',
+      address: '',
+      content: '',
+    },
+    {
+      droppingId: 'drop-option-debate',
+      songId: 'debate',
+      type: 'debate',
+      title: 'Debate',
+      address: '',
+      content: '',
+    },
+  ], []);
+
+  const displayData = React.useMemo(() => {
+    return showDropOptions ? dropOptions : safeDroppings;
+  }, [showDropOptions, dropOptions, safeDroppings]);
+
+  const displayTotalSongs = displayData.length;
+
   const visibleEntries = React.useMemo(() => {
-    if (totalSongs === 0) return [];
+    if (displayTotalSongs === 0) return [];
     const entries: { songId: string; droppingId: string; dataIndex: number; slotIndex: number }[] = [];
-    const maxNodes = Math.min(TOTAL_NODES, totalSongs);
+    const maxNodes = Math.min(TOTAL_NODES, displayTotalSongs);
+
     for (let slotIndex = 0; slotIndex < maxNodes; slotIndex++) {
-      const dataIndex = (currentIndex + slotIndex) % totalSongs;
-      const drop = safeDroppings[dataIndex];
-      if (drop?.songId) {
+      const dataIndex = (showDropOptions ? slotIndex : (currentIndex + slotIndex)) % displayTotalSongs;
+      const drop = displayData[dataIndex];
+
+      if (drop) {
         entries.push({
-          songId: drop.songId,
+          songId: drop.songId || drop.type || String(dataIndex),
           droppingId: String(drop.droppingId ?? dataIndex),
           dataIndex,
           slotIndex,
@@ -123,20 +162,27 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
       }
     }
     return entries;
-  }, [safeDroppings, totalSongs, currentIndex]);
+  }, [displayData, displayTotalSongs, currentIndex, showDropOptions]);
 
   const songQueries = useQueries({
     queries: visibleEntries.map(entry => ({
       queryKey: ['songInfo', entry.songId, entry.droppingId, entry.slotIndex],
       queryFn: () => getSongInfo(entry.songId),
-      enabled: !!entry.songId,
+      enabled: !showDropOptions &&
+        !!entry.songId &&
+        !String(entry.droppingId).startsWith('drop-option-'),
       staleTime: 5 * 60 * 1000,
     })),
   });
 
   const handlerPressDrop = React.useCallback(() => {
-    navigate('Drop');
-  }, []);
+    if (showDropOptions) {
+      setShowDropOptions(false);
+    } else {
+      setShowDropOptions(true);
+    }
+  }, [showDropOptions]);
+
 
   const mainNodeIndex = useDerivedValue(() => {
     'worklet';
@@ -161,21 +207,30 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
 
   const visibleNodes = React.useMemo(() => {
     const nodes: VisibleNode[] = [];
-    if (totalSongs === 0) {
+    if (displayTotalSongs === 0) {
       return nodes;
     }
 
     for (let idx = 0; idx < visibleEntries.length; idx++) {
       const entry = visibleEntries[idx];
-      const dropping = safeDroppings[entry.dataIndex];
+      const dropping = displayData[entry.dataIndex];
       if (!dropping) continue;
 
       let songInfo = null;
-      if (songQueries[idx]?.data) {
+      if (!showDropOptions && songQueries[idx]?.data) {
         songInfo = songQueries[idx].data;
       }
-
-      const baseAngle = entry.slotIndex * ANGLE_PER_ITEM - 90;
+      let baseAngle;
+      if (showDropOptions) {
+        switch (entry.slotIndex) {
+          case 0: baseAngle = -98; break; 
+          case 1: baseAngle = -138; break; 
+          case 2: baseAngle = -185; break;
+          default: baseAngle = -90; break;
+        }
+      } else {
+        baseAngle = entry.slotIndex * ANGLE_PER_ITEM - 90;
+      }
 
       nodes.push({
         position: {
@@ -186,14 +241,15 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
         },
         song: {
           dropping: dropping,
-          songInfo: songInfo
+          songInfo: songInfo,
+          isDropOption: showDropOptions
         } as any,
         slotIndex: entry.slotIndex,
       });
     }
 
     return nodes;
-  }, [safeDroppings, totalSongs, visibleEntries, songQueries]);
+  }, [displayData, displayTotalSongs, visibleEntries, songQueries, showDropOptions]);
 
   const handleSwipeBegin = React.useCallback(() => {
     setIsSwiping(true);
@@ -203,8 +259,10 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
     setIsSwiping(false);
   }, []);
 
+  let startX = 0;
+
   const pan = Gesture.Pan()
-    .enabled(true)
+    .enabled(!showDropOptions) // 드랍 옵션 모드에서는 제스처 비활성화
     .manualActivation(true) // 기본 탭은 통과, 스와이프만 수동 활성
     .onBegin((event) => {
         'worklet';
@@ -225,8 +283,8 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
     })
     .onTouchesMove((event, state) => {
         'worklet';
-        const dragX = event.translationX;
-        // 일정 거리 이상 움직였을 때만 제스처 활성화
+        const currentX = event.changedTouches[0]?.x || 0;
+        const dragX = currentX - startX;
         if (Math.abs(dragX) > 12) {
           state.activate();
         }
@@ -264,11 +322,11 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
         runOnJS(handleSwipeEnd)();
     });
 
-  if (totalSongs === 0) {
+  if (displayTotalSongs === 0 && !showDropOptions) {
     return (
       <View style={styles.container}>
         <View style={styles.dropButtonWrapper}>
-          <DropButton onPress={handlerPressDrop} />
+          <DropButton onPress={handlerPressDrop} isCancel={showDropOptions} />
         </View>
       </View>
     );
@@ -278,23 +336,31 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
     <Animated.View style={[styles.container, { pointerEvents: 'auto' }]}>
       <GestureDetector gesture={pan}>
         <View style={styles.nodeGroup}>
-          {visibleNodes.map((node: VisibleNode, index) => (
-            <MusicNode
-              key={`${(node.song as any).dropping.droppingId}-${node.slotIndex}-${currentIndex}`}
-              data={node.song as any}
-              isMain={node.position.isMain}
-              index={index}
-              baseAngle={node.position.angle}
-              rotation={gestureOffset}
-              baseRotation={rotationShared}
-              mainNodeIndex={mainNodeIndex}
-              nodeIndex={node.slotIndex}
-            />
-          ))}
+          {(() => {
+            if (__DEV__ && showDropOptions) {
+              console.log(`=== 렌더링 시작: ${visibleNodes.length}개 노드 ===`);
+              visibleNodes.forEach((node, idx) => {
+                console.log(`렌더링 노드 ${idx}: ${(node.song as any).dropping.type}, 각도: ${node.position.angle}°`);
+              });
+            }
+            return visibleNodes.map((node: VisibleNode, index) => (
+              <MusicNode
+                key={`${(node.song as any).dropping.droppingId}-${node.slotIndex}-${showDropOptions ? 'drop' : currentIndex}`}
+                data={node.song as any}
+                isMain={node.position.isMain}
+                index={index}
+                baseAngle={node.position.angle}
+                rotation={gestureOffset}
+                baseRotation={rotationShared}
+                mainNodeIndex={mainNodeIndex}
+                nodeIndex={node.slotIndex}
+              />
+            ));
+          })()}
         </View>
       </GestureDetector>
       <View style={styles.dropButtonWrapper}>
-        <DropButton onPress={handlerPressDrop} />
+        <DropButton onPress={handlerPressDrop} isCancel={showDropOptions} />
       </View>
     </Animated.View>
   );
