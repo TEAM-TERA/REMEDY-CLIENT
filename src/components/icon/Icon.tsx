@@ -31,6 +31,10 @@ import ListSvg from './icons/ListSvg';
 import PrevTrackSvg from './icons/PrevTrackSvg';
 import NextTrackSvg from './icons/NextTrackSvg';
 import DownloadSvg from './icons/DownloadSvg';
+import PlaylistSvg from './icons/PlaylistSvg';
+import DebateSvg from './icons/DebateSvg';
+import PlusSvg from './icons/PlusSvg';
+import TrashSvg from './icons/TrashSvg';
 
 const icons = {
     edit: EditSvg,
@@ -64,6 +68,10 @@ const icons = {
     prevTrack: PrevTrackSvg,
     nextTrack: NextTrackSvg,
     download: DownloadSvg,
+    playlist: PlaylistSvg,
+    debate: DebateSvg,
+    plus: PlusSvg,
+    trash: TrashSvg,
 };
 
 export type IconName = keyof typeof icons;

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, StyleSheet, Platform, Alert, PermissionsAndroid } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView, StyleSheet, Platform, Alert, PermissionsAndroid, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { ProfileStackParamList, RootStackParamList } from '../../../types/navigation';
 import type { DropItemData } from '../types/DropItemData';
 import Button from '../../../components/button/Button';
-import ProfileHeader from '../../../components/header/ProfileHeader';
+import HeaderNav from '../../../components/header/HeaderNav';
 import ProfileInfo from '../components/ProfileInfo';
 import TabNavigation from '../components/TabNavigation';
 import MusicCard from '../components/MusicCard';
@@ -23,6 +23,7 @@ import { scale, verticalScale } from '../../../utils/scalers';
 import { BACKGROUND_COLORS, TEXT_COLORS } from '../../../constants/colors';
 import ToastModal from '../../../components/modal/ToastModal';
 import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
+import Icon from '../../../components/icon/Icon';
 
 function UserProfileScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList & RootStackParamList>>();
@@ -265,7 +266,16 @@ function UserProfileScreen() {
 
     return (
         <SafeAreaView style={newStyles.container}>
-            <ProfileHeader onSettingPress={handleSettingPress} />
+            <HeaderNav
+                title="프로필"
+                variant="withIcon"
+                centerIcon={<Icon name="user" width={scale(14)} height={16} color={TEXT_COLORS.BUTTON} />}
+                rightComponent={
+                    <TouchableOpacity onPress={handleSettingPress} style={newStyles.navButton}>
+                        <Icon name="setting" width={scale(24)} height={scale(24)} color={TEXT_COLORS.CAPTION_1} />
+                    </TouchableOpacity>
+                }
+            />
 
             <ScrollView style={newStyles.content} showsVerticalScrollIndicator={false}>
                 <ProfileInfo
@@ -370,6 +380,12 @@ const newStyles = StyleSheet.create({
         marginTop: verticalScale(24),
         flex: 1,
     },
+    navButton: {
+        width: scale(32),
+        height: scale(32),
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
     contentContainer: {
         flex: 1,
     },
@@ -388,4 +404,3 @@ const newStyles = StyleSheet.create({
 });
 
 export default UserProfileScreen;
-
