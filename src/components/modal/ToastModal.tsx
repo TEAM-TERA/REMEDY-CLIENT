@@ -34,13 +34,13 @@ const ToastModal: React.FC<ToastModalProps> = ({
   const getIconName = () => {
     switch (type) {
       case 'success':
-        return 'check';
+        return 'heart';
       case 'error':
-        return 'close';
+        return 'danger';
       case 'info':
-        return 'info';
+        return 'list';
       default:
-        return 'check';
+        return 'heart';
     }
   };
 

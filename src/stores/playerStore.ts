@@ -9,6 +9,7 @@ type PlayerState = {
   setCurrentId: (id: string | null) => void;
   playIfDifferent: (songId: string, meta?: { title?: string; artist?: string; artwork?: string }) => Promise<void>;
   playNext: () => Promise<void>;
+  playPrevious: () => Promise<void>;
 };
 
 export const usePlayerStore = create<PlayerState>((set, get) => ({
@@ -68,6 +69,13 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     if (!nextId || nextId === currentId) return;
     await get().playIfDifferent(nextId);
   },
+  playPrevious: async () => {
+    const { queue, currentId } = get();
+    if (!queue || queue.length === 0 || !currentId) return;
+    const idx = queue.indexOf(currentId);
+    const prevId = queue[(idx - 1 + queue.length) % queue.length];
+    if (!prevId || prevId === currentId) return;
+    await get().playIfDifferent(prevId);
+  },
 }));
-
 

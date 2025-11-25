@@ -1,7 +1,7 @@
 import React from 'react';
 import Svg, { Path, SvgProps } from 'react-native-svg';
 
-const HeartSvg = (props: SvgProps) => {
+const LikeSvg = (props: SvgProps) => {
   const strokeColor = props.color || "white";
 
   return (
@@ -23,4 +23,4 @@ const HeartSvg = (props: SvgProps) => {
   );
 };
 
-export default HeartSvg;
+export default LikeSvg;

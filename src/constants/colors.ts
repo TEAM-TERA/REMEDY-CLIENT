@@ -43,6 +43,7 @@ export const TEXT_COLORS = {
     CAPTION_LIGHTER : "#656581",
     CAPTION_RED : "#75575F",
     CAPTION_BLUE : "#575C75",
+    TEXT2 : "#FFFFFF",
     BUTTON : "#E9E2E3",
 }
 

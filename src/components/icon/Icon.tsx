@@ -28,6 +28,9 @@ import DangerSvg from './icons/DangerSvg';
 import EyeOnSvg from './icons/EyeOnSvg';
 import EyeOffSvg from './icons/EyeOffSvg';
 import ListSvg from './icons/ListSvg';
+import PrevTrackSvg from './icons/PrevTrackSvg';
+import NextTrackSvg from './icons/NextTrackSvg';
+import DownloadSvg from './icons/DownloadSvg';
 
 const icons = {
     edit: EditSvg,
@@ -58,6 +61,9 @@ const icons = {
     eyeOn: EyeOnSvg,
     eyeOff: EyeOffSvg,
     list: ListSvg,
+    prevTrack: PrevTrackSvg,
+    nextTrack: NextTrackSvg,
+    download: DownloadSvg,
 };
 
 export type IconName = keyof typeof icons;
