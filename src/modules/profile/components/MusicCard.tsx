@@ -33,8 +33,11 @@ const MusicCard: React.FC<MusicCardProps> = ({ item }) => {
                 </View>
 
                 <View style={styles.musicContent}>
-                    <Text style={styles.musicTitle} numberOfLines={3}>
+                    <Text style={styles.musicTitle} numberOfLines={2}>
                         {item.memo || "알 수 없는 곡"}
+                    </Text>
+                    <Text style={styles.artistName} numberOfLines={1}>
+                        by {item.artist || "알 수 없는 가수"}
                     </Text>
                 </View>
 
@@ -105,7 +108,17 @@ const styles = StyleSheet.create({
         textAlign: 'left',
         width: '100%',
         color: PRIMARY_COLORS.DEFAULT,
-        maxHeight: scale(68),
+        fontSize: scale(20),
+        fontWeight: '700',
+        marginLeft: scale(18),
+        marginBottom: scale(4),
+    },
+    artistName: {
+        textAlign: 'left',
+        width: '100%',
+        color: TEXT_COLORS.DEFAULT,
+        fontSize: scale(16),
+        fontWeight: '400',
         marginLeft: scale(18),
     },
     moreOptionsButton: {

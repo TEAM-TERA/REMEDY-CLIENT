@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Image } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 import Icon from '../../../components/icon/Icon';
 import { scale, verticalScale } from '../../../utils/scalers';
@@ -7,7 +7,9 @@ import { TEXT_COLORS, FORM_COLORS, BACKGROUND_COLORS } from '../../../constants/
 
 interface ProfileInfoProps {
     username?: string;
+    profileImageUrl?: string;
     onEditPress: () => void;
+    onImagePress: () => void;
 }
 
 const ProfileIcon = () => (
@@ -18,12 +20,21 @@ const ProfileIcon = () => (
     </Svg>
 );
 
-const ProfileInfo: React.FC<ProfileInfoProps> = ({ username = 'User_1', onEditPress }) => {
+const ProfileInfo: React.FC<ProfileInfoProps> = ({
+    username = 'User_1',
+    profileImageUrl,
+    onEditPress,
+    onImagePress
+}) => {
     return (
         <View style={styles.profileSection}>
-            <View style={styles.profileImageContainer}>
-                <ProfileIcon />
-            </View>
+            <TouchableOpacity style={styles.profileImageContainer} onPress={onImagePress}>
+                {profileImageUrl ? (
+                    <Image source={{ uri: profileImageUrl }} style={styles.profileImage} />
+                ) : (
+                    <ProfileIcon />
+                )}
+            </TouchableOpacity>
             <View style={styles.profileInfo}>
                 <View style={styles.nameContainer}>
                     <Text style={styles.userName}>{username}</Text>
@@ -55,6 +66,11 @@ const styles = StyleSheet.create({
         padding: scale(14),
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    profileImage: {
+        width: scale(72),
+        height: scale(72),
+        borderRadius: scale(36),
     },
     profileInfo: {
         flex: 1,

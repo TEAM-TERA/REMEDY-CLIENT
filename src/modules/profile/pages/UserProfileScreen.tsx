@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, ActivityIndicator, ScrollView, StyleSheet, Platform, Alert, PermissionsAndroid } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
@@ -15,9 +15,12 @@ import { useMyProfile } from '../hooks/useMyProfile';
 import { useMyDrop } from '../hooks/useMyDrop';
 import { useMyLikes } from '../hooks/useMyLike';
 import { useMyPlaylists } from '../hooks/useMyPlaylists';
+import { useUpdateProfileImage } from '../hooks/useUpdateProfileImage';
 import { getSongInfo } from '../../drop/api/dropApi';
 import { scale, verticalScale } from '../../../utils/scalers';
 import { BACKGROUND_COLORS, TEXT_COLORS } from '../../../constants/colors';
+import ToastModal from '../../../components/modal/ToastModal';
+import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
 
 function UserProfileScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
@@ -30,6 +33,11 @@ function UserProfileScreen() {
 
     const [songTitles, setSongTitles] = useState<Record<string, string>>({});
     const [songImages, setSongImages] = useState<Record<string, string>>({});
+    const [songArtists, setSongArtists] = useState<Record<string, string>>({});
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+
+    const updateProfileImageMutation = useUpdateProfileImage();
 
     useEffect(() => {
         const loadSongInfo = async () => {
@@ -46,18 +54,21 @@ function UserProfileScreen() {
                 const results = await Promise.all(uniqueIds.map(async (id: string) => {
                     try {
                         const info = await getSongInfo(id);
-                        return [id, info?.title as string, info?.albumImagePath as string];
+                        return [id, info?.title as string, info?.artist as string, info?.albumImagePath as string];
                     } catch {
-                        return [id, id, ''];
+                        return [id, id, '', ''];
                     }
                 }));
                 const titleMap: Record<string, string> = {};
+                const artistMap: Record<string, string> = {};
                 const imageMap: Record<string, string> = {};
-                results.forEach(([id, title, image]) => {
+                results.forEach(([id, title, artist, image]) => {
                     titleMap[id as string] = (title as string) || String(id);
+                    artistMap[id as string] = (artist as string) || '';
                     imageMap[id as string] = (image as string) || '';
                 });
                 setSongTitles(titleMap);
+                setSongArtists(artistMap);
                 setSongImages(imageMap);
             } catch {
                 console.log('songInfo 로드 실패');
@@ -79,6 +90,7 @@ function UserProfileScreen() {
             ? filteredDrops.map((d: any) => ({
                 droppingId: d.droppingId,
                 memo: songTitles[d.songId] || d.songId || "알 수 없는 곡",
+                artist: songArtists[d.songId] || "알 수 없는 가수",
                 location: d.address || "위치 정보 없음",
                 imageSource: songImages[d.songId] ? { uri: songImages[d.songId] } : undefined,
                 hasHeart: false,
@@ -87,6 +99,7 @@ function UserProfileScreen() {
                 ? filteredLikes.map((like: any) => ({
                     droppingId: like.droppingId,
                     memo: like.title || "알 수 없는 곡",
+                    artist: like.artist || "알 수 없는 가수",
                     location: like.address || "위치 정보 없음",
                     imageSource: like.imageUrl ? { uri: like.imageUrl } : undefined,
                     hasHeart: true,
@@ -103,6 +116,103 @@ function UserProfileScreen() {
 
     const handleRefetchProfile = () => {
         refetch();
+    };
+
+    const handleImagePress = async () => {
+        console.log('프로필 이미지 클릭됨');
+
+        if (Platform.OS === 'android') {
+            try {
+                const permission = Platform.Version >= 33
+                    ? PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES
+                    : PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE;
+
+                const granted = await PermissionsAndroid.request(permission, {
+                    title: '저장소 접근 권한',
+                    message: '갤러리에서 이미지를 선택하려면 저장소 접근 권한이 필요합니다.',
+                    buttonNeutral: '나중에',
+                    buttonNegative: '취소',
+                    buttonPositive: '확인',
+                });
+
+                console.log('권한 요청 결과:', granted);
+
+                if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+                    Alert.alert('권한 필요', '갤러리 접근을 위해 저장소 권한이 필요합니다.');
+                    return;
+                }
+            } catch (err) {
+                console.warn('권한 요청 실패:', err);
+            }
+        }
+
+        openImagePicker();
+    };
+
+    const openImagePicker = async () => {
+        console.log('갤러리 열기 시도');
+
+        const options = {
+            mediaType: 'photo' as MediaType,
+            includeBase64: false,
+            maxHeight: 1024,
+            maxWidth: 1024,
+            quality: 0.8 as any,
+            selectionLimit: 1,
+        };
+
+        const handleImagePickerResponse = async (response: ImagePickerResponse) => {
+            console.log('Image picker response:', response);
+
+            if (response.didCancel) {
+                console.log('사용자가 이미지 선택을 취소했습니다');
+                return;
+            }
+
+            if (response.errorMessage) {
+                console.error('Image picker error:', response.errorMessage);
+                Alert.alert('오류', `이미지 선택 오류: ${response.errorMessage}`);
+                return;
+            }
+
+            if (response.assets && response.assets.length > 0) {
+                const asset = response.assets[0];
+                console.log('선택된 이미지:', asset);
+
+                if (asset.uri && asset.fileName && asset.type) {
+                    try {
+                        console.log('이미지 업로드 시작');
+                        const formData = new FormData();
+                        formData.append('image', {
+                            uri: Platform.OS === 'ios' ? asset.uri.replace('file://', '') : asset.uri,
+                            type: asset.type,
+                            name: asset.fileName,
+                        } as any);
+
+                        await updateProfileImageMutation.mutateAsync(formData);
+                        console.log('이미지 업로드 성공');
+                        setToastMessage('프로필 이미지 변경 완료');
+                        setShowToast(true);
+                    } catch (error) {
+                        console.error('프로필 이미지 업로드 실패:', error);
+                        setToastMessage('프로필 이미지 업데이트에 실패했습니다');
+                        setShowToast(true);
+                    }
+                } else {
+                    console.error('이미지 정보 부족:', { uri: asset.uri, fileName: asset.fileName, type: asset.type });
+                }
+            } else {
+                console.log('선택된 이미지가 없습니다');
+            }
+        };
+
+        try {
+            console.log('launchImageLibrary 호출');
+            launchImageLibrary(options, handleImagePickerResponse);
+        } catch (error) {
+            console.error('launchImageLibrary 에러:', error);
+            Alert.alert('오류', '갤러리를 열 수 없습니다. 앱을 다시 시작해보세요.');
+        }
     };
 
     if(isLoading || (dropLoading && !myDrops) || (likeLoading && !myLikes) || (playlistLoading && !myPlaylistsData)){
@@ -134,7 +244,9 @@ function UserProfileScreen() {
             <ScrollView style={newStyles.content} showsVerticalScrollIndicator={false}>
                 <ProfileInfo
                     username={me?.username}
+                    profileImageUrl={me?.profileImageUrl || undefined}
                     onEditPress={handleEditPress}
+                    onImagePress={handleImagePress}
                 />
 
                 <View style={newStyles.contentSection}>
@@ -178,6 +290,13 @@ function UserProfileScreen() {
                     </View>
                 </View>
             </ScrollView>
+
+            <ToastModal
+                visible={showToast}
+                message={toastMessage}
+                type="success"
+                onClose={() => setShowToast(false)}
+            />
         </SafeAreaView>
     );
 }
