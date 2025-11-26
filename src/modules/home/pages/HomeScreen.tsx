@@ -18,7 +18,20 @@ function HomeScreen() {
   const { location } = useLocation();
 
   const defaultLocation = useMemo(() => ({ latitude: 37.5665, longitude: 126.9780 }), []);
-  const currentLocation = useMemo(() => location || defaultLocation, [location, defaultLocation]);
+  
+  // GPS 떨림 방지: 의미있는 위치 변화만 반영 (약 100m 이상)
+  const stableLocation = useMemo(() => {
+    if (!location) return defaultLocation;
+    
+    // 소수점 3자리로 반올림 (약 111m 정확도)
+    const roundedLat = Math.round(location.latitude * 1000) / 1000;
+    const roundedLng = Math.round(location.longitude * 1000) / 1000;
+    
+    return { latitude: roundedLat, longitude: roundedLng };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location?.latitude, location?.longitude, defaultLocation]);
+  
+  const currentLocation = stableLocation;
   const { currentId, setCurrentId, playIfDifferent } = usePlayerStore();
   const mapRef = useRef<any>(null);
 
