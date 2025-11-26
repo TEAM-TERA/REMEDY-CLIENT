@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import TrackPlayer, { TrackType, State } from 'react-native-track-player';
+import TrackPlayer, { TrackType, State, Event } from 'react-native-track-player';
 import Config from 'react-native-config';
 
 type PlayerState = {
@@ -41,16 +41,27 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       };
 
       await TrackPlayer.add(trackData);
-      await TrackPlayer.play();
+      
+      await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        subscription.remove();
+        reject(new Error('재생 시작 타임아웃'));
+      }, 5000); // 5초 타임아웃
 
-      await new Promise(resolve => setTimeout(resolve, 500));
+      const subscription = TrackPlayer.addEventListener(Event.PlaybackState, (event) => {
+        if (event.state === State.Playing) {
+          clearTimeout(timeout);
+          subscription.remove();
+          resolve();
+        } else if (event.state === State.Error) {
+          clearTimeout(timeout);
+          subscription.remove();
+          reject(new Error('재생 실패'));
+        }
+      });
 
-      const state = await TrackPlayer.getPlaybackState();
-
-      if (state.state !== State.Playing) {
-        await TrackPlayer.play();
-        await new Promise(resolve => setTimeout(resolve, 300));
-      }
+      TrackPlayer.play();
+    });
 
       set({ currentId: songId });
     } catch (e) {
