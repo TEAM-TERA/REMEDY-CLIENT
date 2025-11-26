@@ -7,6 +7,9 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
+  Modal,
+  TextInput,
+  Alert,
 } from 'react-native';
 import TrackPlayer, { usePlaybackState, useActiveTrack } from 'react-native-track-player';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -22,7 +25,8 @@ import {
 import { TYPOGRAPHY } from '../../../constants/typography';
 import { scale } from '../../../utils/scalers';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getDroppingById, toggleLike, getLikeCount } from '../../drop/api/dropApi';
+import { getDroppingById } from '../../drop/api/dropApi';
+import { renamePlaylist, deletePlaylist } from '../../profile/api/playlistApi';
 import type { PlaylistDropDetail, PlaylistDetailSong } from '../types/PlaylistDetail';
 import Config from 'react-native-config';
 import { usePlayerStore } from '../../../stores/playerStore';
@@ -36,6 +40,9 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
   const activeTrack = useActiveTrack();
   const queryClient = useQueryClient();
 
+  const [showRenameModal, setShowRenameModal] = useState(false);
+  const [newPlaylistName, setNewPlaylistName] = useState('');
+
   const isPlaying = playbackState.state === 'playing';
   const currentTrackId = activeTrack?.id;
 
@@ -45,16 +52,20 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
     staleTime: 5 * 60 * 1000,
   });
 
-  const { data: likeCountData } = useQuery({
-    queryKey: ['likeCount', droppingId],
-    queryFn: () => getLikeCount(droppingId),
-    staleTime: 1 * 60 * 1000, // 1분
+  const renameMutation = useMutation({
+    mutationFn: (name: string) => renamePlaylist(droppingId, name),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['playlistDropDetail', droppingId] });
+      queryClient.invalidateQueries({ queryKey: ['playlists', 'my'] });
+      setShowRenameModal(false);
+    },
   });
 
-  const likeMutation = useMutation({
-    mutationFn: () => toggleLike(droppingId),
+  const deleteMutation = useMutation({
+    mutationFn: () => deletePlaylist(droppingId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['likeCount', droppingId] });
+      queryClient.invalidateQueries({ queryKey: ['playlists', 'my'] });
+      navigation.goBack();
     },
   });
 
@@ -168,8 +179,40 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
     await playPlaylist(songIds, 0, songMetas);
   };
 
-  const handleLikePress = () => {
-    likeMutation.mutate();
+  const handleAddSongPress = () => {
+    navigation.navigate('PlaylistMusicSearch', {
+      playlistId: droppingId,
+      playlistName: playlistDetail?.playlistName || '플레이리스트',
+    } as any);
+  };
+
+  const handleRenamePress = () => {
+    setNewPlaylistName(playlistDetail?.playlistName || '');
+    setShowRenameModal(true);
+  };
+
+  const handleRenameSubmit = () => {
+    if (newPlaylistName.trim()) {
+      renameMutation.mutate(newPlaylistName.trim());
+    }
+  };
+
+  const handleDeletePress = () => {
+    Alert.alert(
+      '플레이리스트 삭제',
+      '정말로 이 플레이리스트를 삭제하시겠습니까?',
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: () => deleteMutation.mutate(),
+        },
+      ]
+    );
   };
 
   const togglePlayPause = async () => {
@@ -223,7 +266,17 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
           <Icon name="playlist" width={16} height={16} fill={SECONDARY_COLORS.DEFAULT} />
           <Text style={styles.headerLocationText}>플레이리스트</Text>
         </View>
-        <View style={styles.placeholder} />
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.headerButton} onPress={handleRenamePress}>
+            <Icon name="edit" width={16} height={16} fill={TEXT_COLORS.CAPTION} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.headerButton} onPress={handleAddSongPress}>
+            <Icon name="plus" width={16} height={16} fill={TEXT_COLORS.CAPTION} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.headerButton} onPress={handleDeletePress}>
+            <Icon name="trash" width={16} height={16} fill={TEXT_COLORS.CAPTION} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
@@ -253,11 +306,7 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
 
         {/* Action Buttons */}
         <View style={styles.actionButtonsRow}>
-          <TouchableOpacity style={styles.likeButton} onPress={handleLikePress} disabled={likeMutation.isPending}>
-            <Icon name="heart" width={16} height={16} fill={SECONDARY_COLORS.DEFAULT} />
-            <Text style={styles.likeCount}>{likeCountData?.likeCount || 0}</Text>
-          </TouchableOpacity>
-
+          <View style={styles.leftActions} />
           <View style={styles.rightActions}>
             <TouchableOpacity style={styles.shuffleButton}>
               <Icon name="shuffle" width={16} height={16} fill={TEXT_COLORS.TEXT2} />
@@ -332,6 +381,48 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
           })}
         </View>
       </ScrollView>
+
+      {/* Rename Modal */}
+      <Modal
+        visible={showRenameModal}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowRenameModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableOpacity
+            style={styles.modalBackground}
+            activeOpacity={1}
+            onPress={() => setShowRenameModal(false)}
+          />
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>플레이리스트 이름 수정</Text>
+            <TextInput
+              value={newPlaylistName}
+              onChangeText={setNewPlaylistName}
+              placeholder="플레이리스트 이름"
+              placeholderTextColor={TEXT_COLORS.CAPTION}
+              style={styles.modalInput}
+              autoFocus={true}
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={() => setShowRenameModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>취소</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.confirmButton]}
+                onPress={handleRenameSubmit}
+                disabled={renameMutation.isPending}
+              >
+                <Text style={styles.confirmButtonText}>저장</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -370,9 +461,16 @@ const styles = StyleSheet.create({
     fontSize: scale(16),
     lineHeight: scale(22),
   },
-  placeholder: {
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(12),
+  },
+  headerButton: {
     width: scale(24),
     height: scale(24),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     flex: 1,
@@ -486,17 +584,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(12),
     marginBottom: scale(12),
   },
-  likeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: scale(6),
-  },
-  likeCount: {
-    ...TYPOGRAPHY.BODY_2,
-    color: SECONDARY_COLORS.DEFAULT,
-    fontSize: scale(12),
-    lineHeight: scale(16.5),
-    fontWeight: 'bold',
+  leftActions: {
+    flex: 1,
   },
   rightActions: {
     flexDirection: 'row',
@@ -616,6 +705,72 @@ const styles = StyleSheet.create({
     backgroundColor: SECONDARY_COLORS.DEFAULT,
     borderRadius: scale(1.5),
     marginBottom: scale(2),
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: scale(20),
+  },
+  modalBackground: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: FORM_COLORS.BACKGROUND_3,
+    borderRadius: scale(16),
+    padding: scale(20),
+    width: '100%',
+    maxWidth: scale(300),
+  },
+  modalTitle: {
+    ...TYPOGRAPHY.BODY_2,
+    color: TEXT_COLORS.TEXT2,
+    fontSize: scale(18),
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: scale(20),
+  },
+  modalInput: {
+    backgroundColor: BACKGROUND_COLORS.BACKGROUND,
+    borderRadius: scale(8),
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(10),
+    color: TEXT_COLORS.TEXT2,
+    fontSize: scale(16),
+    borderWidth: 1,
+    borderColor: FORM_COLORS.STROKE,
+    marginBottom: scale(20),
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: scale(12),
+  },
+  modalButton: {
+    flex: 1,
+    paddingVertical: scale(12),
+    borderRadius: scale(8),
+    alignItems: 'center',
+  },
+  cancelButton: {
+    backgroundColor: FORM_COLORS.BACKGROUND_2,
+  },
+  confirmButton: {
+    backgroundColor: SECONDARY_COLORS.DEFAULT,
+  },
+  cancelButtonText: {
+    ...TYPOGRAPHY.BODY_2,
+    color: TEXT_COLORS.CAPTION,
+    fontSize: scale(14),
+    fontWeight: '500',
+  },
+  confirmButtonText: {
+    ...TYPOGRAPHY.BODY_2,
+    color: TEXT_COLORS.TEXT2,
+    fontSize: scale(14),
+    fontWeight: 'bold',
   },
 });
 

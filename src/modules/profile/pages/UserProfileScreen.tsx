@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -38,19 +38,10 @@ import { useMyDrop } from '../hooks/useMyDrop';
 import { useMyLikes } from '../hooks/useMyLike';
 import { useMyPlaylists } from '../hooks/useMyPlaylists';
 import { useCreatePlaylist } from '../../music/hooks/useCreatePlaylist';
-import { getSongInfo } from '../../drop/api/dropApi';
-import { updateProfileImageApi, getMyLikesApi } from '../../auth/api/authApi';
+import { updateProfileImageApi } from '../../auth/api/authApi';
 import { getErrorMessage } from '../../../utils/errorHandler';
 import Config from 'react-native-config';
 
-type DropItemData = {
-  droppingId: string;
-  memo: string;
-  artist: string;
-  location: string;
-  imageSource?: { uri: string };
-  hasHeart: boolean;
-};
 
 // 드랍 타입 정의
 type DroppingType = 'MUSIC' | 'PLAYLIST' | 'VOTE';
@@ -91,52 +82,12 @@ function UserProfileScreen() {
   const { data: me, isLoading, isError, refetch } = useMyProfile();
   const { data: myPlaylistsData, isLoading: playlistLoading } = useMyPlaylists();
 
-  const [songTitles, setSongTitles] = useState<Record<string, string>>({});
-  const [songImages, setSongImages] = useState<Record<string, string>>({});
-  const [songArtists, setSongArtists] = useState<Record<string, string>>({});
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [showCreatePlaylistModal, setShowCreatePlaylistModal] = useState(false);
 
   const createPlaylistMutation = useCreatePlaylist();
 
-  useEffect(() => {
-    const loadSongInfo = async () => {
-      if (!myDrops || !Array.isArray(myDrops) || myDrops.length === 0) return;
-
-      const drops = myDrops;
-      const uniqueIds = Array.from(new Set(
-        drops
-          .filter((d: any) => d && d.songId)
-          .map((d: any) => d.songId)
-          .filter(Boolean)
-      ));
-      try {
-        const results = await Promise.all(uniqueIds.map(async (id: string) => {
-          try {
-            const info = await getSongInfo(id);
-            return [id, info?.title as string, info?.artist as string, info?.albumImagePath as string];
-          } catch {
-            return [id, id, '', ''];
-          }
-        }));
-        const titleMap: Record<string, string> = {};
-        const artistMap: Record<string, string> = {};
-        const imageMap: Record<string, string> = {};
-        results.forEach(([id, title, artist, image]) => {
-          titleMap[id as string] = (title as string) || String(id);
-          artistMap[id as string] = (artist as string) || '';
-          imageMap[id as string] = (image as string) || '';
-        });
-        setSongTitles(titleMap);
-        setSongArtists(artistMap);
-        setSongImages(imageMap);
-      } catch {
-        console.log('songInfo 로드 실패');
-      }
-    };
-    loadSongInfo();
-  }, [myDrops]);
 
   const handleGoBack = () => {
     navigation.goBack();
@@ -389,44 +340,6 @@ function UserProfileScreen() {
 
   const playlists = myPlaylistsData?.playlists || [];
 
-  const currentData: DropItemData[] =
-    activeTab === "drop"
-      ? filteredDrops.map((d: any) => ({
-          droppingId: d.droppingId,
-          memo: songTitles[d.songId] || d.songId || "알 수 없는 곡",
-          artist: songArtists[d.songId] || "알 수 없는 가수",
-          location: d.address || "위치 정보 없음",
-          imageSource: songImages[d.songId] ? { uri: songImages[d.songId] } : undefined,
-          hasHeart: false,
-        }))
-      : activeTab === "like"
-        ? filteredLikes.map((like: any) => {
-            let memo = "";
-            let artist = "";
-            let imageSource = undefined;
-
-            if (like.droppingType === "MUSIC") {
-              memo = like.title || "알 수 없는 곡";
-              artist = like.artist || "알 수 없는 가수";
-              imageSource = like.imageUrl ? { uri: like.imageUrl } : undefined;
-            } else if (like.droppingType === "PLAYLIST") {
-              memo = like.playlistName || "알 수 없는 플레이리스트";
-              artist = "플레이리스트";
-            } else if (like.droppingType === "VOTE") {
-              memo = like.topic || "알 수 없는 투표";
-              artist = "투표";
-            }
-
-            return {
-              droppingId: like.droppingId,
-              memo,
-              artist,
-              location: like.address || "위치 정보 없음",
-              imageSource,
-              hasHeart: true,
-            };
-          })
-        : [];
 
   // 새로운 타입별 UI용 데이터 (드랍/좋아요 탭용)
   const droppingsData: any[] =

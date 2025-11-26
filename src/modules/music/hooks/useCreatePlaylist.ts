@@ -7,7 +7,7 @@ export const useCreatePlaylist = () => {
   return useMutation({
     mutationFn: createPlaylist,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['myPlaylists'] });
+      queryClient.invalidateQueries({ queryKey: ['playlists', 'my'] });
     },
     onError: (error) => {
       console.error('플레이리스트 생성 실패:', error);

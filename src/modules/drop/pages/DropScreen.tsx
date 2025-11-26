@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, TextInput, Image, Platform } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
-import { useState, useEffect, useContext, useRef, useCallback, useMemo } from 'react';
+import { useState, useContext, useRef, useCallback, useMemo } from 'react';
 import { styles } from '../styles/DropScreen';
 import { TYPOGRAPHY } from '../../../constants/typography';
 import { TEXT_COLORS } from '../../../constants/colors';
@@ -14,26 +14,26 @@ import type { DropStackParamList } from '../../../navigation/DropStack';
 import { useCreateDropping } from '../hooks/useCreateDropping';
 import { AuthContext } from '../../auth/auth-context';
 import Button from '../../../components/button/Button';
-import Geolocation from 'react-native-geolocation-service';
 import { useQuery } from '@tanstack/react-query';
 import { getSongInfo } from '../api/dropApi';
 import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
 import MarqueeText from '../../../components/marquee/MarqueeText';
 import { ConfirmModal } from '../../../components';
+import useLocation from '../../../hooks/useLocation';
 
 function DropScreen() {
     const route = useRoute<RouteProp<DropStackParamList, 'DropDetail'>>();
     const navigation = useNavigation();
-    const { musicTitle, singer, musicTime, location, imgUrl, songId } = route.params;
+    const { musicTitle, singer, musicTime, songId } = route.params;
     const { userToken } = useContext(AuthContext);
     const createDroppingMutation = useCreateDropping();
-  
+    const { location: currentLocation, address: currentAddress } = useLocation();
+
     const [content, setContent] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
     const [modalTitle, setModalTitle] = useState('');
     const [modalMessage, setModalMessage] = useState('');
     const confirmActionRef = useRef<(() => void) | null>(null);
-    const [currentLocation, setCurrentLocation] = useState<{ latitude: number; longitude: number } | null>(null);
 
     const musicPlayer = useHLSPlayer(songId);
 
@@ -45,40 +45,36 @@ function DropScreen() {
 
     const defaultLocation = useMemo(() => ({ latitude: 37.5665, longitude: 126.9780 }), []);
 
-    const finalLocation = useMemo(() => {
-      if (!location || location.trim() === "" ||
-          location.includes("가져오는 중") ||
-          location.includes("로딩") ||
-          location.includes("...")) {
-        return "대한민국";
-      }
-      return location;
-    }, [location]);
+    // 주소 로딩 상태 판단
+    const isAddressLoading = useMemo(() => {
+      return !currentAddress ||
+             currentAddress.trim() === '' ||
+             currentAddress === '서울특별시 중구 세종대로 110' ||
+             currentAddress.includes('위치 정보를 가져올 수 없습니다');
+    }, [currentAddress]);
 
-    useEffect(() => {
-      Geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          });
-        },
-        () => {
-          setCurrentLocation(defaultLocation);
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 10000,
-        }
-      );
-    }, [defaultLocation]);
+    // 실제 주소 정보 사용 (useLocation 훅에서 가져온 상세 주소)
+    const finalAddress = useMemo(() => {
+      if (isAddressLoading) {
+        return "주소를 불러오는 중...";
+      }
+      console.log('✅ 실제 주소 사용:', currentAddress);
+      return currentAddress;
+    }, [currentAddress, isAddressLoading]);
 
 
     const handleCreateDropping = useCallback(() => {
       if (!userToken) {
         setModalTitle('로그인 필요');
         setModalMessage('드롭핑을 생성하려면 로그인이 필요합니다.');
+        confirmActionRef.current = null;
+        setModalVisible(true);
+        return;
+      }
+
+      if (isAddressLoading) {
+        setModalTitle('위치 정보 로딩 중');
+        setModalMessage('위치 정보를 불러오는 중입니다. 잠시만 기다려주세요.');
         confirmActionRef.current = null;
         setModalVisible(true);
         return;
@@ -92,7 +88,6 @@ function DropScreen() {
         return;
       }
 
-
       if (!songId) {
         setModalTitle('음악 오류');
         setModalMessage('음악 정보를 찾을 수 없습니다.');
@@ -105,9 +100,9 @@ function DropScreen() {
         {
           songId: songId,
           content: content.trim(),
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
-          address: finalLocation,
+          latitude: currentLocation?.latitude || defaultLocation.latitude,
+          longitude: currentLocation?.longitude || defaultLocation.longitude,
+          address: currentAddress,  // 로딩 체크를 이미 했으므로 실제 주소 사용
         },
         {
           onSuccess: () => {
@@ -125,7 +120,7 @@ function DropScreen() {
           },
         }
       );
-    }, [userToken, currentLocation, songId, content, location, createDroppingMutation, navigation]);
+    }, [userToken, currentLocation, songId, content, currentAddress, isAddressLoading, defaultLocation, createDroppingMutation, navigation]);
   
     const mapLocation = useMemo(() => currentLocation || defaultLocation, [currentLocation, defaultLocation]);
 
@@ -184,7 +179,11 @@ function DropScreen() {
                 <Text style={[TYPOGRAPHY.SUBTITLE, styles.remainText]}>위치 선택</Text>
                 <View style={styles.locationContainer}>
                   <LocationMarkerSvg />
-                  <Text style={[TYPOGRAPHY.CAPTION_1, styles.locationText]}>{location}</Text>
+                  <Text style={[
+                    TYPOGRAPHY.CAPTION_1,
+                    styles.locationText,
+                    isAddressLoading && { opacity: 0.6, fontStyle: 'italic' }
+                  ]}>{finalAddress}</Text>
                 </View>
                 <GoogleMapView droppings={[]} currentLocation={mapLocation} />
               </View>
@@ -192,9 +191,9 @@ function DropScreen() {
 
             <View style={styles.buttonContainer}>
               <Button
-                title="드롭핑 생성"
+                title={isAddressLoading ? "위치 정보 불러오는 중..." : "드롭핑 생성"}
                 onPress={handleCreateDropping}
-                disabled={createDroppingMutation.isPending}
+                disabled={createDroppingMutation.isPending || isAddressLoading}
               />
             </View>
           </KeyboardAwareScrollView>

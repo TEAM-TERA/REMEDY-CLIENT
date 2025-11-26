@@ -10,7 +10,8 @@ function MainFunction(){
     const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
     const { data: droppings } = useDroppings(
         currentLocation.longitude,
-        currentLocation.latitude
+        currentLocation.latitude,
+        1000  // 1km 반경 내 드랍핑 조회
     );
     return(
         <GestureHandlerRootView style={styles.container}>

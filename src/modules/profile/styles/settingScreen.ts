@@ -43,4 +43,36 @@ export const styles = StyleSheet.create({
     color: TEXT_COLORS.CAPTION,
     ...TYPOGRAPHY.BODY_2,
   },
+
+  // 모달 스타일
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    width: '90%',
+    maxHeight: '80%',
+    backgroundColor: BACKGROUND_COLORS.BACKGROUND,
+    borderRadius: 12,
+    padding: 20,
+  },
+  modalTitle: {
+    ...TYPOGRAPHY.HEADLINE_2,
+    color: TEXT_COLORS.DEFAULT,
+    textAlign: 'center',
+    marginBottom: 16,
+  },
+  modalScrollView: {
+    maxHeight: '75%',
+  },
+  modalText: {
+    ...TYPOGRAPHY.BODY_2,
+    color: TEXT_COLORS.DEFAULT,
+    lineHeight: 22,
+  },
+  modalButtonContainer: {
+    marginTop: 20,
+  },
 });

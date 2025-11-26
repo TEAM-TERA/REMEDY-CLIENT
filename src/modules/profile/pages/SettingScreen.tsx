@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { View, Alert } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { View, Alert, Text, ScrollView, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
@@ -10,13 +10,59 @@ import SettingSection from '../components/SettingSection';
 import SettingItem from '../components/SettingItem';
 import { AuthContext } from '../../auth/auth-context';
 import { navigate } from '../../../navigation';
+import Button from '../../../components/button/Button';
+import axiosInstance from '../../auth/api/axiosInstance';
+import { TERMS } from '../../../constants/terms';
 
 function SettingScreen() {
     const navigation = useNavigation<NavigationProp<ProfileStackParamList>>();
     const { logout } = useContext(AuthContext);
+    const [showLocationModal, setShowLocationModal] = useState(false);
+    const [isWithdrawing, setIsWithdrawing] = useState(false);
 
     const handleInfoEditPress = () => {
         navigation.navigate('InfoEdit');
+    };
+
+    const handleLocationInfoPress = () => {
+        setShowLocationModal(true);
+    };
+
+    const handleWithdrawalPress = () => {
+        Alert.alert(
+            '회원 탈퇴',
+            '정말 탈퇴하시겠습니까? 모든 데이터가 삭제되며 복구할 수 없습니다.',
+            [
+                {
+                    text: '취소',
+                    style: 'cancel'
+                },
+                {
+                    text: '탈퇴',
+                    style: 'destructive',
+                    onPress: async () => {
+                        setIsWithdrawing(true);
+                        try {
+                            await axiosInstance.post('/users/withdrawal');
+                            Alert.alert('완료', '회원 탈퇴가 완료되었습니다.', [
+                                {
+                                    text: '확인',
+                                    onPress: async () => {
+                                        await logout();
+                                        navigate('Auth');
+                                    }
+                                }
+                            ]);
+                        } catch (error) {
+                            console.error('회원 탈퇴 실패:', error);
+                            Alert.alert('오류', '회원 탈퇴에 실패했습니다. 다시 시도해주세요.');
+                        } finally {
+                            setIsWithdrawing(false);
+                        }
+                    }
+                }
+            ]
+        );
     };
 
     const handleLogoutPress = () => {
@@ -53,15 +99,13 @@ function SettingScreen() {
                         title="내 정보"
                         onPress={handleInfoEditPress}
                     />
-                    <SettingItem title="비밀번호 변경" onPress={() => {}} />
                     <SettingItem title="로그아웃" onPress={handleLogoutPress} />
                 </SettingSection>
 
                 <SettingSection title="앱 사용 환경 설정">
-                    <SettingItem title="알림 설정" onPress={() => {}} />
                     <SettingItem
                         title="위치정보 수집 및 이용 동의"
-                        onPress={() => {}}
+                        onPress={handleLocationInfoPress}
                     />
                 </SettingSection>
 
@@ -73,11 +117,38 @@ function SettingScreen() {
                     />
                     <SettingItem
                         title="회원 탈퇴"
-                        onPress={() => {}}
+                        onPress={handleWithdrawalPress}
                         isDestructive={true}
+                        disabled={isWithdrawing}
                     />
                 </SettingSection>
             </View>
+
+            <Modal
+                visible={showLocationModal}
+                transparent={true}
+                animationType="slide"
+                onRequestClose={() => setShowLocationModal(false)}
+            >
+                <View style={styles.modalContainer}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.modalTitle}>
+                            {TERMS.find(term => term.id === 'location')?.title}
+                        </Text>
+                        <ScrollView style={styles.modalScrollView}>
+                            <Text style={styles.modalText}>
+                                {TERMS.find(term => term.id === 'location')?.contentLines.join('\n')}
+                            </Text>
+                        </ScrollView>
+                        <View style={styles.modalButtonContainer}>
+                            <Button
+                                title="확인"
+                                onPress={() => setShowLocationModal(false)}
+                            />
+                        </View>
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 }

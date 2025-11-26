@@ -70,13 +70,24 @@ export async function getLikeCount(droppingId: string) {
   }
 }
 
-export async function getDroppings({ longitude, latitude }: { longitude: number; latitude: number }) {
+export async function getDroppings({
+  longitude,
+  latitude,
+  distance = 1000
+}: {
+  longitude: number;
+  latitude: number;
+  distance?: number;
+}) {
   try {
+    console.log('🔍 getDroppings 호출:', { longitude, latitude, distance });
     const res = await axiosInstance.get("/droppings", {
-      params: { longitude, latitude }
+      params: { longitude, latitude, distance }
     });
+    console.log('🔍 getDroppings 응답:', res.data);
     return res.data.droppings;
   } catch (error) {
+    console.error('🔍 getDroppings 에러:', error);
     handleApiError(error);
   }
 }

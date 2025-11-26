@@ -40,7 +40,8 @@ function HomeScreen() {
 
   const { data: droppings } = useDroppings(
     currentLocation.longitude,
-    currentLocation.latitude
+    currentLocation.latitude,
+    1000  // 1km 반경 내 드랍핑 조회
   );
 
   const [selectedDroppingId, setSelectedDroppingId] = useState<string | undefined>(undefined);

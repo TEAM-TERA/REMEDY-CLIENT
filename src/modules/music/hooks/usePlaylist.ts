@@ -24,6 +24,11 @@ export const useAddSongToPlaylist = () => {
         queryKey: ['playlist', variables.playlistId],
       });
 
+      // Also invalidate playlist drop details for the playlist detail screen
+      queryClient.invalidateQueries({
+        queryKey: ['playlistDropDetail', variables.playlistId],
+      });
+
       // Also invalidate my playlists if it exists
       queryClient.invalidateQueries({
         queryKey: ['playlists', 'my'],

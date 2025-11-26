@@ -75,7 +75,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     try {
       await TrackPlayer.reset();
 
-      const trackData = {
       // Set up TrackPlayer options for single track playback
       await TrackPlayer.updateOptions({
         capabilities: [
@@ -88,7 +87,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         stopWithApp: false,
       });
 
-      await TrackPlayer.add({
+      const trackData = {
         id: songId,
         url: streamUrl,
         title: meta?.title || '음악',
