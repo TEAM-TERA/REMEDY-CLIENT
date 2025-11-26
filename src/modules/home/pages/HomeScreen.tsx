@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { BACKGROUND_COLORS } from "../../../constants/colors";
 import HeaderBar from "../components/HeaderBar";
 import GoogleMapView from "../../../components/map/GoogleMapView";
@@ -16,48 +16,83 @@ import { getCommentsByDroppingId } from "../../music/api/commentApi";
 
 function HomeScreen() {
   const { location } = useLocation();
-  const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
-  const { currentId } = usePlayerStore();
+
+  const defaultLocation = useMemo(() => ({ latitude: 37.5665, longitude: 126.9780 }), []);
+  const currentLocation = useMemo(() => location || defaultLocation, [location, defaultLocation]);
+  const { currentId, setCurrentId, playIfDifferent } = usePlayerStore();
   const mapRef = useRef<any>(null);
 
   const [currentSongData, setCurrentSongData] = useState<any>(null);
-
-  useEffect(() => {
-    console.log('HomeScreen - Current location:', currentLocation);
-    console.log('Using location:', location ? '실제 GPS 위치' : '기본 위치 (서울시청)');
-  }, [location, currentLocation]);
+  const isInitialLoad = useRef(true);
 
   const { data: droppings } = useDroppings(
     currentLocation.longitude,
     currentLocation.latitude
   );
 
-  const currentDroppingId = useMemo(() => {
-    if (!currentId || !Array.isArray(droppings)) return null;
-    const found = droppings.find((d: Dropping) => String(d.songId) === String(currentId));
-    return found ? found.droppingId : null;
-  }, [currentId, droppings]);
+  const [selectedDroppingId, setSelectedDroppingId] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    console.log('HomeScreen - 드랍핑 데이터 확인:', droppings?.length || 0, '개');
-    if (droppings && droppings.length > 0) {
-      console.log('첫 번째 드랍핑:', droppings[0]);
-      console.log('모든 드랍핑 songId 목록:', droppings.map((d: Dropping) => ({ droppingId: d.droppingId, songId: d.songId })));
+  const handleDroppingChange = useCallback(async (droppingId: string | undefined, songId: string | undefined) => {
+
+    setSelectedDroppingId(droppingId);
+
+    if (songId && droppingId) {
+      try {
+        let songMeta = {
+          title: '재생 중인 음악',
+          artist: '아티스트',
+          artwork: undefined as string | undefined
+        };
+
+        try {
+          const songInfo = await getSongInfo(songId);
+          if (songInfo) {
+            songMeta = {
+              title: songInfo.title || '재생 중인 음악',
+              artist: songInfo.artist || '알 수 없는 아티스트',
+              artwork: songInfo.albumImagePath
+            };
+          }
+        } catch (songInfoError) {
+          console.warn('getSongInfo 실패, 기본값 사용:', songInfoError);
+        }
+
+        if (isInitialLoad.current) {
+          isInitialLoad.current = false;
+        }
+
+        await playIfDifferent(songId, songMeta, true);
+        setCurrentId(songId);
+      } catch (error) {
+        console.error('음악 재생 실패:', songId, error);
+      }
+    } else {
+      setCurrentId(null);
     }
-  }, [droppings]);
+  }, [setCurrentId, playIfDifferent]);
+  
+  const currentDroppingId = useMemo(() => {
+    if (selectedDroppingId) {
+      return selectedDroppingId;
+    }
 
-  useEffect(() => {
-    const timestamp = new Date().toISOString();
-    console.log('[DEBUG] HomeScreen - 현재 재생 중인 음악 ID 변경:', {
-      timestamp,
-      currentId,
-      type: typeof currentId,
-      isNull: currentId === null,
-      isUndefined: currentId === undefined
-    });
-  }, [currentId]);
+    if (!currentId || !Array.isArray(droppings)) {
+      return null;
+    }
 
-  // WebView에 곡 데이터 전송
+    let found = droppings.find((d: any) => String(d.songId) === String(currentId));
+
+    if (!found) {
+      found = droppings.find((d: any) =>
+        d.type === 'VOTE' &&
+        Array.isArray(d.options) &&
+        d.options.some((optionId: string) => String(optionId) === String(currentId))
+      );
+    }
+
+    return found ? found.droppingId : null;
+  }, [currentId, droppings, selectedDroppingId]);
+
   useEffect(() => {
     if (mapRef.current && currentSongData) {
       const message = JSON.stringify({
@@ -71,22 +106,28 @@ function HomeScreen() {
       });
       mapRef.current.postMessage(message);
     }
-  }, [currentSongData]);
+  }, [currentSongData, currentDroppingId]);
 
   useEffect(() => {
     if (currentId && currentDroppingId) {
       const fetchCurrentSongData = async () => {
         try {
-          console.log('현재 재생 중인 곡 정보 가져오기 시작:', { currentId, currentDroppingId });
+          const localDropping = droppings.find((d: Dropping) => String(d.droppingId) === String(currentDroppingId));
 
-          const droppingData = await getDroppingById(currentDroppingId);
-          console.log('드랍핑 데이터:', droppingData);
+          let droppingData = localDropping;
+          if (!droppingData) {
+            try {
+              droppingData = await getDroppingById(String(currentDroppingId));
+            } catch (apiError) {
+              console.warn('API 호출 실패, 로컬 데이터 사용:', apiError);
+              droppingData = localDropping;
+            }
+          }
 
           let songData = null;
           if (droppingData?.songId) {
             try {
               songData = await getSongInfo(droppingData.songId);
-              console.log('곡 데이터:', songData);
             } catch (songError) {
               console.warn('곡 정보 가져오기 실패:', songError);
             }
@@ -96,7 +137,6 @@ function HomeScreen() {
           try {
             const likeData = await getDropLikeCount(currentDroppingId);
             likeCount = likeData.likeCount || 0;
-            console.log('좋아요 수:', likeCount);
           } catch (likeError) {
             console.warn('좋아요 수 가져오기 실패:', likeError);
           }
@@ -105,7 +145,6 @@ function HomeScreen() {
           try {
             const comments = await getCommentsByDroppingId(currentDroppingId);
             commentCount = Array.isArray(comments) ? comments.length : 0;
-            console.log('댓글 수:', commentCount);
           } catch (commentError) {
             console.warn('댓글 수 가져오기 실패:', commentError);
           }
@@ -131,7 +170,7 @@ function HomeScreen() {
     } else {
       setCurrentSongData(null);
     }
-  }, [currentId, currentDroppingId]);
+  }, [currentId, currentDroppingId, droppings]);
 
   return (
     <View style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }}>
@@ -146,7 +185,10 @@ function HomeScreen() {
                 <HeaderBar />
             </SafeAreaView>
 
-            <MusicWheel droppings={Array.isArray(droppings) ? droppings : []}/>
+            <MusicWheel
+              droppings={Array.isArray(droppings) ? droppings : []}
+              onDroppingChange={handleDroppingChange}
+            />
         </View>
     </View>
 
