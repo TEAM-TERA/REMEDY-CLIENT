@@ -88,15 +88,6 @@ function UserProfileScreen() {
   const { data: myLikesResponse, isLoading: likeLoading, error: likeError } = useMyLikes();
   const myLikes = myLikesResponse?.droppings || [];
 
-  // 좋아요 데이터 디버깅
-  console.log('🔥 [DEBUG] UserProfileScreen - 좋아요 데이터 상태:', {
-    myLikesResponse,
-    myLikes,
-    myLikesLength: myLikes?.length,
-    likeLoading,
-    likeError: likeError?.message,
-    activeTab,
-  });
   const { data: me, isLoading, isError, refetch } = useMyProfile();
   const { data: myPlaylistsData, isLoading: playlistLoading } = useMyPlaylists();
 
@@ -392,24 +383,12 @@ function UserProfileScreen() {
   const dropsArray = Array.isArray(myDrops) ? myDrops : [];
   const likesArray = Array.isArray(myLikes) ? myLikes : [];
 
-  console.log('🔥 [DEBUG] 배열 처리:', {
-    dropsArrayLength: dropsArray.length,
-    likesArrayLength: likesArray.length,
-    likesArraySample: likesArray.slice(0, 2),
-  });
-
   const filteredDrops = dropsArray.filter((d: any) => d && d.droppingId);
   const filteredLikes = likesArray.filter((like: any) => like && like.droppingId);
 
-  console.log('🔥 [DEBUG] 필터링 후:', {
-    filteredDropsLength: filteredDrops.length,
-    filteredLikesLength: filteredLikes.length,
-    filteredLikesSample: filteredLikes.slice(0, 2),
-  });
 
   const playlists = myPlaylistsData?.playlists || [];
 
-  // 기존 MusicCard용 데이터 (플레이리스트 탭용)
   const currentData: DropItemData[] =
     activeTab === "drop"
       ? filteredDrops.map((d: any) => ({
@@ -422,7 +401,6 @@ function UserProfileScreen() {
         }))
       : activeTab === "like"
         ? filteredLikes.map((like: any) => {
-            // 새로운 API 응답 형식에 맞춰서 처리
             let memo = "";
             let artist = "";
             let imageSource = undefined;
@@ -474,16 +452,9 @@ function UserProfileScreen() {
               // VOTE type fields
               topic: like.topic,
             };
-            console.log('🔥 [DEBUG] 좋아요 데이터 변환:', like, '→', converted);
             return converted;
           })
         : [];
-
-  console.log('🔥 [DEBUG] droppingsData:', {
-    activeTab,
-    droppingsDataLength: droppingsData.length,
-    droppingsDataSample: droppingsData.slice(0, 2),
-  });
 
   if(isLoading || (dropLoading && !myDrops) || (likeLoading && !myLikes) || (playlistLoading && !myPlaylistsData)){
     return (
@@ -596,9 +567,6 @@ function UserProfileScreen() {
                   droppingsData
                     .filter((item) => item && item.droppingId)
                     .map((item) => {
-                      console.log('🔥 [DEBUG] renderDropItem 호출:', item);
-                      console.log('🔥 [DEBUG] item.type:', item.type);
-                      console.log('🔥 [DEBUG] item.droppingType:', item.droppingType);
                       return renderDropItem(item);
                     })
                 )}
