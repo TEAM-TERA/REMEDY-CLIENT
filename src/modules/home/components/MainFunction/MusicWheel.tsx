@@ -46,10 +46,8 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
   const { playIfDifferent, setCurrentId } = usePlayerStore();
   const { location, address } = useLocation();
 
-  // 위치 정보를 기본값으로 설정 (서울시청)
   const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
-  // 테스트용 실제 주소 (실제 위치 서비스가 안 될 때)
-  const currentAddress = address || "부산광역시 기장군 가락대로 123";
+  const currentAddress = address || "부산광역시 강서구 가락대로 73";
 
   // 디버깅을 위한 로그
   console.log('MusicWheel location data:', { location, address, currentLocation, currentAddress });
@@ -228,8 +226,8 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
       if (showDropOptions) {
         switch (entry.slotIndex) {
           case 0: baseAngle = -98; break;
-          case 1: baseAngle = -138; break;
-          case 2: baseAngle = -185; break;
+          case 1: baseAngle = -142; break;
+          case 2: baseAngle = -194; break;
           default: baseAngle = -90; break;
         }
       } else {
