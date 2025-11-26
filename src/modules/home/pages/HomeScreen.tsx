@@ -172,7 +172,7 @@ function HomeScreen() {
   }, [currentId, currentDroppingId, droppings]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }} edges={['bottom']}>
         <View style={{ flex: 1, position: 'relative' }}>
             <GoogleMapView
                 ref={mapRef}
@@ -180,7 +180,7 @@ function HomeScreen() {
                 currentLocation={currentLocation}
                 currentPlayingDroppingId={currentDroppingId as any}
             />
-            <SafeAreaView style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+            <SafeAreaView style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }} edges={['top']}>
                 <HeaderBar />
             </SafeAreaView>
 
@@ -189,7 +189,7 @@ function HomeScreen() {
               onDroppingChange={handleDroppingChange}
             />
         </View>
-    </View>
+    </SafeAreaView>
 
   );
 }
