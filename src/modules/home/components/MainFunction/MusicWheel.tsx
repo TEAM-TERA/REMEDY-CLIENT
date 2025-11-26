@@ -10,6 +10,7 @@ import DropButton from './DropButton';
 import { useQueries } from '@tanstack/react-query';
 import { getSongInfo } from '../../../drop/api/dropApi';
 import { usePlayerStore } from '../../../../stores/playerStore';
+import useLocation from '../../../../hooks/useLocation';
 
 let persistedRotation = 0;
 let persistedIndex = 0;
@@ -42,6 +43,15 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
   const [isSwiping, setIsSwiping] = useState<boolean>(false);
   const [showDropOptions, setShowDropOptions] = useState<boolean>(false);
   const { playIfDifferent, setCurrentId, currentId } = usePlayerStore();
+  const { location, address } = useLocation();
+
+  // 위치 정보를 기본값으로 설정 (서울시청)
+  const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
+  // 테스트용 실제 주소 (실제 위치 서비스가 안 될 때)
+  const currentAddress = address || "부산광역시 기장군 가락대로 123"; // 실제 주소 또는 기본 주소
+
+  // 디버깅을 위한 로그
+  console.log('MusicWheel location data:', { location, address, currentLocation, currentAddress });
 
   useEffect(() => {
     setCurrentIndex(prev => {
@@ -366,6 +376,8 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
                 baseRotation={rotationShared}
                 mainNodeIndex={mainNodeIndex}
                 nodeIndex={node.slotIndex}
+                currentLocation={currentLocation}
+                currentAddress={currentAddress}
               />
             ));
           })()}

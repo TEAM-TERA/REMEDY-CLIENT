@@ -20,6 +20,9 @@ import DebateMusicSearchScreen from '../modules/drop/pages/DebateMusicSearchScre
 import DebateScreen from '../modules/music/pages/DebateScreen';
 import MusicDetailScreen from '../modules/music/pages/MusicDetailScreen';
 import MusicPlayerScreen from '../modules/music/pages/MusicPlayerScreen';
+import PlaylistSelectionScreen from '../modules/drop/pages/PlaylistSelectionScreen';
+import PlaylistDropModal from '../modules/drop/pages/PlaylistDropModal';
+import PlaylistDetailScreen from '../modules/playlist/pages/PlaylistDetailScreen';
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 export function navigate<Screen extends keyof RootStackParamList>(
@@ -63,6 +66,17 @@ export default function RootNavigation() {
         <Stack.Screen name="DebateScreen" component={DebateScreen} options={{ headerShown: false }} />
         <Stack.Screen name="MusicDetail" component={MusicDetailScreen} options={{ headerShown: false }} />
         <Stack.Screen name="MusicPlayer" component={MusicPlayerScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="PlaylistSelection" component={PlaylistSelectionScreen} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="PlaylistDropModal"
+          component={PlaylistDropModal}
+          options={{
+            headerShown: false,
+            presentation: 'transparentModal',
+            animation: 'fade',
+          }}
+        />
+        <Stack.Screen name="PlaylistDetail" component={PlaylistDetailScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

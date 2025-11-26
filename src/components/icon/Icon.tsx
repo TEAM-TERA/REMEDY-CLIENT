@@ -38,6 +38,9 @@ import TrashSvg from './icons/TrashSvg';
 import ShuffleSvg from './icons/ShuffleSvg';
 import DeleteSvg from './icons/DeleteSvg';
 import RepeatSvg from './icons/RepeatSvg';
+import PlaylistDropSvg from './icons/PlaylistDropSvg';
+import CloseSvg from './icons/CloseSvg';
+import PlaylistMarkerSvg from './icons/PlaylistMarkerSvg';
 
 const icons = {
     edit: EditSvg,
@@ -78,6 +81,9 @@ const icons = {
     shuffle: ShuffleSvg,
     delete: DeleteSvg,
     repeat: RepeatSvg,
+    playlistDrop: PlaylistDropSvg,
+    close: CloseSvg,
+    playlistMarker: PlaylistMarkerSvg,
 };
 
 export type IconName = keyof typeof icons;

@@ -6,17 +6,17 @@ export const getMyPlaylists = async (): Promise<PlaylistsResponse> => {
   return response.data;
 };
 
-export const renamePlaylist = async (playlistId: string | number, name: string) => {
+export const renamePlaylist = async (playlistId: string, name: string) => {
   const response = await axiosInstance.put(`/playlists/${playlistId}`, { name });
   return response.data;
 };
 
-export const deletePlaylist = async (playlistId: string | number) => {
+export const deletePlaylist = async (playlistId: string) => {
   const response = await axiosInstance.delete(`/playlists/${playlistId}`);
   return response.data;
 };
 
-export const addSongToPlaylist = async (playlistId: string | number, songIds: string[]) => {
+export const addSongToPlaylist = async (playlistId: string, songIds: string[]) => {
   const response = await axiosInstance.post(`/playlists/${playlistId}/songs`, { songIds });
   return response.data;
 };

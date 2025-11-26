@@ -58,6 +58,27 @@ export type RootStackParamList = {
       albumImagePath: string;
     };
   };
+
+  PlaylistSelection: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+
+  PlaylistDropModal: {
+    playlist: {
+      id: string;
+      name: string;
+      albumImageUrl?: string;
+    };
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+
+  PlaylistDetail: {
+    droppingId: string;
+  };
 };
 
 export type AuthStackParamList = {

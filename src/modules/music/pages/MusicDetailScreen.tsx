@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import TrackPlayer, { State } from 'react-native-track-player';
+import TrackPlayer, { State, usePlaybackState, useActiveTrack } from 'react-native-track-player';
 import Icon from '../../../components/icon/Icon';
 import { BACKGROUND_COLORS, TEXT_COLORS, TERTIARY_COLORS, UI_COLORS } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
@@ -27,17 +27,53 @@ type Props = {
 export default function MusicDetailScreen() {
   const navigation = useNavigation();
   const route = useRoute<Props['route']>();
-  const { songId } = route.params;
+  const { songId: initialSongId } = route.params;
 
   const {
     currentId,
-    currentTrack,
     playIfDifferent,
-    togglePlayPause,
-    isPlaying,
-    next,
-    previous
+    playNext,
+    playPrevious,
+    skipToSongInPlaylist,
+    isPlaylistMode,
+    queue,
+    playlistMetas
   } = usePlayerStore();
+
+  const playbackState = usePlaybackState();
+  const activeTrack = useActiveTrack();
+
+  const isPlaying = playbackState.state === 'playing';
+  const currentTrack = activeTrack;
+
+  // Use current playing track ID if available, fallback to initial songId
+  const displaySongId = currentId || initialSongId;
+
+  // Get current track metadata from playlist or use activeTrack as fallback
+  const getCurrentTrackInfo = useCallback(() => {
+    if (isPlaylistMode && currentId && queue.length > 0 && playlistMetas.length > 0) {
+      const currentIndex = queue.indexOf(currentId);
+      if (currentIndex !== -1 && currentIndex < playlistMetas.length) {
+        const meta = playlistMetas[currentIndex];
+        console.log('🎵 Using playlist metadata:', { currentId, index: currentIndex, meta });
+        return {
+          title: meta.title || 'Unknown',
+          artist: meta.artist || 'Unknown',
+          artwork: meta.artwork || '',
+        };
+      }
+    }
+
+    // Fallback to activeTrack
+    console.log('🎵 Using activeTrack fallback:', currentTrack);
+    return {
+      title: currentTrack?.title || 'LILAC',
+      artist: currentTrack?.artist || 'IU',
+      artwork: currentTrack?.artwork || '',
+    };
+  }, [isPlaylistMode, currentId, queue, playlistMetas, currentTrack]);
+
+  const displayTrackInfo = getCurrentTrackInfo();
 
   const [isLoading, setIsLoading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -49,21 +85,31 @@ export default function MusicDetailScreen() {
   }, [navigation]);
 
   const handlePlay = useCallback(async () => {
-    if (!songId) return;
+    if (!displaySongId) return;
 
     try {
       setIsLoading(true);
 
-      if (currentId === songId) {
+      if (currentId === displaySongId) {
         // 현재 곡이면 일시정지/재생 토글
-        await togglePlayPause();
+        if (isPlaying) {
+          await TrackPlayer.pause();
+        } else {
+          await TrackPlayer.play();
+        }
       } else {
-        // 다른 곡이면 새로 재생
-        await playIfDifferent(songId, {
-          title: currentTrack?.title || 'Unknown',
-          artist: currentTrack?.artist || 'Unknown',
-          artwork: getImageUrl(currentTrack?.albumImagePath || ''),
-        });
+        // 다른 곡이면 플레이리스트 모드 고려해서 재생
+        if (isPlaylistMode) {
+          console.log('🎵 MusicDetailScreen: In playlist mode, skipping to song:', displaySongId);
+          await skipToSongInPlaylist(displaySongId);
+        } else {
+          console.log('🎵 MusicDetailScreen: Single song mode, playing different song');
+          await playIfDifferent(displaySongId, {
+            title: displayTrackInfo.title,
+            artist: displayTrackInfo.artist,
+            artwork: getImageUrl(displayTrackInfo.artwork),
+          });
+        }
       }
     } catch (error) {
       console.error('음악 재생 실패:', error);
@@ -71,29 +117,29 @@ export default function MusicDetailScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [songId, currentId, togglePlayPause, playIfDifferent, currentTrack]);
+  }, [displaySongId, currentId, isPlaying, playIfDifferent, currentTrack, skipToSongInPlaylist, isPlaylistMode]);
 
   const handleNext = useCallback(async () => {
     try {
       setIsLoading(true);
-      await next();
+      await playNext();
     } catch (error) {
       console.error('다음 곡 재생 실패:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [next]);
+  }, [playNext]);
 
   const handlePrevious = useCallback(async () => {
     try {
       setIsLoading(true);
-      await previous();
+      await playPrevious();
     } catch (error) {
       console.error('이전 곡 재생 실패:', error);
     } finally {
       setIsLoading(false);
     }
-  }, [previous]);
+  }, [playPrevious]);
 
   const getImageUrl = (imagePath: string) => {
     if (!imagePath) return 'https://via.placeholder.com/300x300/1D1D26/E9E2E3?text=Music';
@@ -131,7 +177,20 @@ export default function MusicDetailScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  const currentIsPlaying = currentId === songId && isPlaying;
+  // Track 변경 감지 및 로깅
+  useEffect(() => {
+    console.log('🎵 [MusicDetailScreen] Track info updated:', {
+      displaySongId,
+      currentId,
+      isPlaylistMode,
+      activeTrackId: currentTrack?.id,
+      displayTrackInfo,
+      queueLength: queue.length,
+      playlistMetasLength: playlistMetas.length,
+    });
+  }, [displayTrackInfo, currentId, displaySongId, isPlaylistMode, queue.length, playlistMetas.length]);
+
+  const currentIsPlaying = currentId === displaySongId && isPlaying;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -151,7 +210,7 @@ export default function MusicDetailScreen() {
           <View style={styles.recordPlayer}>
             <View style={styles.recordPlayerMask}>
               <Image
-                source={{ uri: getImageUrl(currentTrack?.albumImagePath || '') }}
+                source={{ uri: getImageUrl(displayTrackInfo.artwork || '') }}
                 style={styles.recordCover}
                 resizeMode="cover"
               />
@@ -164,12 +223,12 @@ export default function MusicDetailScreen() {
         <View style={styles.musicInfo}>
           <View style={styles.musicHeader}>
             <Text style={styles.musicTitle}>
-              {currentTrack?.title || 'LILAC'}
+              {displayTrackInfo.title}
             </Text>
           </View>
           <View style={styles.artistInfo}>
             <Text style={styles.artistText}>
-              by {currentTrack?.artist || 'IU'}
+              by {displayTrackInfo.artist}
             </Text>
           </View>
         </View>

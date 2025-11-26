@@ -22,9 +22,14 @@ interface MusicNodeProps {
     baseRotation: SharedValue<number>;
     mainNodeIndex: DerivedValue<number>;
     nodeIndex: number;
+    currentLocation?: {
+        latitude: number;
+        longitude: number;
+    };
+    currentAddress?: string;
 }
 
-const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, baseRotation, mainNodeIndex, nodeIndex }: MusicNodeProps) {
+const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, baseRotation, mainNodeIndex, nodeIndex, currentLocation, currentAddress }: MusicNodeProps) {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     // 모든 노드가 같은 반지름의 원 위에 배치
@@ -120,7 +125,15 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
                     navigate('Drop');
                     break;
                 case 'playlist':
-                    console.log('플레이리스트 드랍 선택됨');
+                    if (currentLocation && currentAddress) {
+                        navigate('PlaylistSelection', {
+                            latitude: currentLocation.latitude,
+                            longitude: currentLocation.longitude,
+                            address: currentAddress,
+                        });
+                    } else {
+                        console.warn('위치 정보가 없습니다.');
+                    }
                     break;
                 case 'debate':
                     navigate('DebateDrop');
@@ -137,7 +150,7 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
           location: data.dropping.address,
           message: data.dropping.content,
         });
-    }, [navigation, data.dropping, data.songInfo, data.isDropOption]);
+    }, [navigation, data.dropping, data.songInfo, data.isDropOption, currentLocation, currentAddress]);
 
 
     return (

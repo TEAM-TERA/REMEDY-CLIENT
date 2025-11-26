@@ -4,26 +4,37 @@ import { handleApiError } from "../../../utils/errorHandler";
 
 export async function createDropping({
   songId,
+  playlistId,
+  type = "MUSIC",
   content,
   latitude,
   longitude,
   address,
 }: {
-  songId: string;
+  songId?: string;
+  playlistId?: string;
+  type?: "MUSIC" | "PLAYLIST";
   content: string;
   latitude: number;
   longitude: number;
   address: string;
 }) {
   try {
-    const res = await axiosInstance.post("/droppings", {
-      type: "MUSIC",
-      songId,
+    const payload: any = {
+      type,
       content,
       latitude,
       longitude,
       address,
-    });
+    };
+
+    if (type === "MUSIC" && songId) {
+      payload.songId = songId;
+    } else if (type === "PLAYLIST" && playlistId) {
+      payload.playlistId = playlistId;
+    }
+
+    const res = await axiosInstance.post("/droppings", payload);
     return res.data;
   } catch (error) {
     handleApiError(error);
@@ -34,6 +45,26 @@ export async function listSongs() {
   try {
     const res = await axiosInstance.get("/songs");
     return res.data?.songs ?? res.data?.songResponses ?? [];
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function toggleLike(droppingId: string) {
+  try {
+    const res = await axiosInstance.post("/likes", {
+      droppingId
+    });
+    return res.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+export async function getLikeCount(droppingId: string) {
+  try {
+    const res = await axiosInstance.get(`/likes/count/dropping/${droppingId}`);
+    return res.data;
   } catch (error) {
     handleApiError(error);
   }
