@@ -7,7 +7,7 @@ type PlayerState = {
   currentId: string | null;
   setQueue: (ids: string[]) => void;
   setCurrentId: (id: string | null) => void;
-  playIfDifferent: (songId: string, meta?: { title?: string; artist?: string; artwork?: string }) => Promise<void>;
+  playIfDifferent: (songId: string, meta?: { title?: string; artist?: string; artwork?: string }, forcePlay?: boolean) => Promise<void>;
   playNext: () => Promise<void>;
 };
 
@@ -16,48 +16,45 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   currentId: null,
   setQueue: (ids) => set({ queue: ids }),
   setCurrentId: (id) => {
-    console.log('🔄 [STORE] playerStore.setCurrentId 호출됨:', {
-      newId: id,
-      type: typeof id,
-      timestamp: new Date().toISOString()
-    });
     set({ currentId: id });
   },
-  playIfDifferent: async (songId, meta) => {
+  playIfDifferent: async (songId, meta, forcePlay = false) => {
     const { currentId } = get();
-    if (currentId === songId) {
-      console.log('⏭️ Same song already playing, skipping:', songId);
+
+    if (currentId === songId && !forcePlay) {
       return;
     }
+
     const streamBase = Config.MUSIC_STREAM_BASE_URL || Config.MUSIC_API_BASE_URL;
     const streamUrl = `${streamBase}/hls/${songId}/playlist.m3u8`;
-    console.log('🎵 Attempting to play:', songId);
-    console.log('🔗 Stream URL:', streamUrl);
-    console.log('📝 Meta:', meta);
+
     try {
       await TrackPlayer.reset();
-      console.log('✅ TrackPlayer reset');
 
-      await TrackPlayer.add({
+      const trackData = {
         id: songId,
         url: streamUrl,
         title: meta?.title || '음악',
         artist: meta?.artist || '알 수 없음',
         artwork: meta?.artwork,
         type: TrackType.HLS,
-      });
-      console.log('✅ Track added to player');
+      };
 
+      await TrackPlayer.add(trackData);
       await TrackPlayer.play();
-      console.log('✅ Play command sent');
+
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       const state = await TrackPlayer.getPlaybackState();
-      console.log('🎮 Playback state after play:', state);
+
+      if (state.state !== 'playing') {
+        await TrackPlayer.play();
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
 
       set({ currentId: songId });
-      console.log('✅ Current ID set to:', songId);
     } catch (e) {
-      console.error('❌ Failed to play song:', e);
+      console.error('음악 재생 실패:', e);
     }
   },
   playNext: async () => {
