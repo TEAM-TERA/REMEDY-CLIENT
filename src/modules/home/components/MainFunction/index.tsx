@@ -6,7 +6,7 @@ import { useDroppings } from "../../../drop/hooks/useDroppings"
 import useLocation from "../../../../hooks/useLocation"
 
 function MainFunction(){
-    const { location } = useLocation();
+    const { location, address } = useLocation();
     const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
     const { data: droppings } = useDroppings(
         currentLocation.longitude,

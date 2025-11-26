@@ -1,16 +1,19 @@
 import React from 'react';
-import { Image, TouchableOpacity, Text } from 'react-native';
+import { Image, TouchableOpacity, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, SharedValue, interpolate, DerivedValue } from 'react-native-reanimated';
 import { styles } from '../../styles/MainFunction/MusicNode';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
 import type { RootStackParamList } from '../../../../types/navigation';
 import { scale } from '../../../../utils/scalers';
+import Icon from '../../../../components/icon/Icon';
+import { navigate } from '../../../../navigation';
 
 interface MusicNodeProps {
     data: {
         dropping: any;
         songInfo?: any;
+        isDropOption?: boolean;
     };
     isMain: boolean;
     index: number;
@@ -19,9 +22,14 @@ interface MusicNodeProps {
     baseRotation: SharedValue<number>;
     mainNodeIndex: DerivedValue<number>;
     nodeIndex: number;
+    currentLocation?: {
+        latitude: number;
+        longitude: number;
+    };
+    currentAddress?: string;
 }
 
-const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, baseRotation, mainNodeIndex, nodeIndex }: MusicNodeProps) {
+const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, baseRotation, mainNodeIndex, nodeIndex, currentLocation, currentAddress }: MusicNodeProps) {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     // 모든 노드가 같은 반지름의 원 위에 배치
@@ -34,38 +42,64 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
         return require('../../../../assets/images/profileImage.png');
     }, [data.songInfo?.albumImagePath]);
 
+    // 드랍 옵션별 아이콘과 색상 설정
+    const getDropOptionInfo = React.useMemo(() => {
+        if (!data.isDropOption) return null;
+
+        switch (data.dropping.type) {
+            case 'music':
+                return { iconName: 'music' as const, color: '#E61F54' };
+            case 'playlist':
+                return { iconName: 'playlist' as const, color: '#EF9210' };
+            case 'debate':
+                return { iconName: 'debate' as const, color: '#6210EF' };
+            default:
+                return { iconName: 'music' as const, color: '#E61F54' };
+        }
+    }, [data.isDropOption, data.dropping.type]);
+
     const animatedStyle = useAnimatedStyle(() => {
         'worklet';
-
-        // baseAngle + 누적 회전값(baseRotation) + 현재 제스처 회전값(rotation)을 더해서 동적으로 회전
-        // undefined 체크를 통해 안전하게 처리
+        if (data.isDropOption) {
+            const angleInRadians = (baseAngle * Math.PI) / 180;
+            const translateX = Math.cos(angleInRadians) * radius;
+            const translateY = Math.sin(angleInRadians) * radius;
+            return {
+                transform: [
+                    {
+                        translateX: translateX,
+                    },
+                    {
+                        translateY: translateY,
+                    },
+                    {
+                        scale: 1.0,
+                    },
+                ],
+                opacity: 1.0,
+            };
+        }
         const baseRotationValue = baseRotation?.value ?? 0;
         const rotationValue = rotation?.value ?? 0;
         const totalRotation = baseRotationValue + rotationValue;
         const currentAngle = baseAngle + totalRotation;
         const angleInRadians = (currentAngle * Math.PI) / 180;
 
-        // 현재 각도를 -180 ~ 180 범위로 정규화
         const normalizedAngle = ((currentAngle + 180) % 360) - 180;
 
-        // 메인 위치(-90°) 기준으로 투명도와 스케일 계산 (더 정확한 범위)
         const distanceFromMain = Math.abs(normalizedAngle - (-90));
 
-        // 현재 이 노드가 메인 노드인지 동적으로 확인
         const mainNodeIndexValue = mainNodeIndex?.value ?? 0;
         const isCurrentlyMain = mainNodeIndexValue === nodeIndex;
 
-        // 전체 노드들의 기본 가시성 (60도 범위)
         const isVisible = distanceFromMain < 60;
 
-        // 투명도: 메인 노드는 완전히 선명, 나머지는 거리에 따라
         const opacity = isCurrentlyMain
             ? 1.0
             : isVisible
             ? interpolate(distanceFromMain, [0, 60], [0.8, 0.2], 'clamp')
             : 0.1;
 
-        // 스케일: 메인 노드는 64px(1.0), 서브 노드는 48px(0.75)로 통일
         const scale = isCurrentlyMain ? 1.0 : 0.75;
 
         return {
@@ -85,6 +119,29 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
     });
 
     const handlePress = React.useCallback(() => {
+        if (data.isDropOption) {
+            switch (data.dropping.type) {
+                case 'music':
+                    navigate('Drop');
+                    break;
+                case 'playlist':
+                    if (currentLocation && currentAddress) {
+                        navigate('PlaylistSelection', {
+                            latitude: currentLocation.latitude,
+                            longitude: currentLocation.longitude,
+                            address: currentAddress,
+                        });
+                    } else {
+                        console.warn('위치 정보가 없습니다.');
+                    }
+                    break;
+                case 'debate':
+                    navigate('DebateDrop');
+                    break;
+            }
+            return;
+        }
+
         navigation.navigate('Music', {
           droppingId: data.dropping.droppingId,
           songId: data.dropping.songId,
@@ -93,7 +150,7 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
           location: data.dropping.address,
           message: data.dropping.content,
         });
-    }, [navigation, data.dropping.droppingId, data.dropping.songId, data.dropping.address, data.dropping.content, data.songInfo?.title, data.songInfo?.artist]);
+    }, [navigation, data.dropping, data.songInfo, data.isDropOption, currentLocation, currentAddress]);
 
 
     return (
@@ -102,27 +159,48 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
                 onPress={handlePress}
                 style={styles.container}
             >
-                <Image
-                    source={imageSource}
-                    style={styles.musicImg}
-                />
-                <Text style={styles.musicTitle}>
-                    {data.songInfo?.title || data.dropping.title || '드랍핑 음악'}
-                </Text>
-                <Text style={styles.singerText}>
-                    {data.songInfo?.artist || data.dropping.singer || '알 수 없는 아티스트'}
-                </Text>
+                {data.isDropOption ? (
+                    <>
+                        <View style={[styles.musicImg, { backgroundColor: '#161622', justifyContent: 'center', alignItems: 'center' }]}>
+                            <Icon
+                                name={getDropOptionInfo?.iconName || 'music'}
+                                width={32}
+                                height={32}
+                                color={getDropOptionInfo?.color || '#E61F54'}
+                            />
+                        </View>
+                        <Text style={[styles.musicTitle, { color: getDropOptionInfo?.color || '#E61F54' }]}>
+                            {data.dropping.title}
+                        </Text>
+                        <Text style={styles.singerText}>
+                            {data.dropping.type === 'music' ? '' :
+                             data.dropping.type === 'playlist' ? '' : ''}
+                        </Text>
+                    </>
+                ) : (
+                    <>
+                        <Image
+                            source={imageSource}
+                            style={styles.musicImg}
+                        />
+                        <Text style={styles.musicTitle}>
+                            {data.songInfo?.title || data.dropping.title || '드랍핑 음악'}
+                        </Text>
+                        <Text style={styles.singerText}>
+                            {data.songInfo?.artist || data.dropping.singer || '알 수 없는 아티스트'}
+                        </Text>
+                    </>
+                )}
             </TouchableOpacity>
         </Animated.View>
     );
 }, (prevProps, nextProps) => {
-    // rotation과 mainNodeIndex는 SharedValue/DerivedValue이므로 참조 비교로 충분
-    // 실제 값 변경은 worklet 내부에서 처리됨
     return (
         prevProps.data.dropping.droppingId === nextProps.data.dropping.droppingId &&
         prevProps.data.dropping.songId === nextProps.data.dropping.songId &&
         prevProps.baseAngle === nextProps.baseAngle &&
         prevProps.nodeIndex === nextProps.nodeIndex &&
+        prevProps.data.isDropOption === nextProps.data.isDropOption &&
         prevProps.data.songInfo?.albumImagePath === nextProps.data.songInfo?.albumImagePath &&
         prevProps.data.songInfo?.title === nextProps.data.songInfo?.title &&
         prevProps.data.songInfo?.artist === nextProps.data.songInfo?.artist

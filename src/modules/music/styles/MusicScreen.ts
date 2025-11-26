@@ -12,174 +12,223 @@ import { verticalScale } from '../../../utils/scalers';
 export const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingVertical: verticalScale(16),
-        paddingHorizontal: scale(16),
         backgroundColor: BACKGROUND_COLORS.BACKGROUND,
     },
-    innerContainer: {
-        gap: scale(24),
-    },
-    content: {
+    contentContainer: {
         flex: 1,
-        paddingVertical: verticalScale(12),
+        paddingHorizontal: scale(16),
+        paddingVertical: scale(8),
+        gap: scale(16),
+    },
+    // Header
+    header: {
+        flexDirection: 'column',
+        gap: 0,
+        width: '100%',
+    },
+    backButton: {
+        width: scale(24),
+        height: scale(24),
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: verticalScale(4),
+    },
+    cdPlayerSection: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+        marginTop: verticalScale(-30),
+        paddingVertical: verticalScale(5),
+    },
+    musicInfoSection: {
         paddingHorizontal: scale(12),
-        gap: scale(12),
+        paddingVertical: scale(8),
+        gap: scale(16),
+        borderRadius: scale(12),
     },
-    infoRow: {
+    titleSection: {
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+    },
+    titleRow: {
         flexDirection: 'row',
-        alignItems: 'flex-end',
-        justifyContent: 'space-between',
-    },
-    infoTextWrapper: {
-        flex: 1,
-        gap: scale(4),
-        marginRight: scale(8),
+        gap: scale(10),
+        alignItems: 'center',
+        width: '100%',
     },
     title: {
-        fontWeight: 'bold',
         color: PRIMARY_COLORS.DEFAULT,
         ...TYPOGRAPHY.HEADLINE_1,
+        lineHeight: scale(40),
+    },
+    artistRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        width: scale(319),
     },
     artist: {
-        color: PRIMARY_COLORS.PLUS_TEN,
-        ...TYPOGRAPHY.SUBTITLE,
+        color: TEXT_COLORS.DEFAULT,
+        ...TYPOGRAPHY.BODY_2,
     },
-    likeCommentRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(12),
-        flexShrink: 0,
-    },
-    smallLikeCommentRow: {
+    // Action Buttons
+    actionButtons: {
         flexDirection: 'row',
         gap: scale(4),
-    },
-    likeCommentText: {
-        color: TEXT_COLORS.DEFAULT,
-        ...TYPOGRAPHY.BODY_1,
-    },
-    inner: {
-        paddingVertical: verticalScale(12),
-        paddingHorizontal: scale(12),
-        gap: scale(12),
-    },
-    userRow: {
-        flexDirection: 'row',
-        width: '100%',
         alignItems: 'center',
+        justifyContent: 'center',
+    },
+    actionButton: {
+        backgroundColor: UI_COLORS.BACKGROUND,
+        borderRadius: scale(8),
+        paddingHorizontal: scale(12),
+        paddingVertical: scale(8),
+        flexDirection: 'row',
+        gap: scale(4),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    actionButtonText: {
+        ...TYPOGRAPHY.CAPTION_2,
+        lineHeight: scale(16),
+    },
+    likeButtonText: {
+        color: PRIMARY_COLORS.DEFAULT,
+    },
+    saveButtonText: {
+        color: '#EF9210',
+    },
+    // Progress Bar Section
+    progressSection: {
+        flexDirection: 'row',
         gap: scale(8),
+        alignItems: 'center',
+        paddingHorizontal: 0,
+        paddingVertical: 0,
+        width: '100%',
+    },
+    progressSlider: {
+        flex: 1,
+    },
+    timeText: {
+        color: TEXT_COLORS.DEFAULT,
+        ...TYPOGRAPHY.CAPTION_3,
+        lineHeight: scale(16),
+    },
+    progressContainer: {
+        flex: 1,
+        height: scale(10),
+    },
+    playControlsSection: {
+        flexDirection: 'row',
+        gap: scale(16),
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '100%',
+    },
+    skipButton: {
+        width: scale(36),
+        height: scale(36),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    playPauseButton: {
+        width: scale(60),
+        height: scale(60),
+        borderRadius: scale(30),
+        backgroundColor: TEXT_COLORS.DEFAULT,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    userLocationSection: {
+        paddingHorizontal: 0,
+        paddingVertical: scale(8),
+        gap: scale(10),
+        width: '100%',
+    },
+    userInfoRow: {
+        flexDirection: 'column',
+        gap: scale(8),
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+        width: '100%',
+    },
+    userCard: {
+        backgroundColor: UI_COLORS.BACKGROUND,
+        borderColor: UI_COLORS.STROKE || '#27273a',
+        borderWidth: 1,
+        borderRadius: scale(24),
+        flexDirection: 'row',
+        gap: scale(8),
+        alignItems: 'center',
+        paddingHorizontal: scale(12),
+        paddingVertical: scale(4),
     },
     userDot: {
         width: scale(20),
         height: scale(20),
-        borderRadius: verticalScale(10),
+        borderRadius: scale(10),
         backgroundColor: PRIMARY_COLORS.DEFAULT,
-    },
-    userInfo: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: scale(4),
     },
     userName: {
         color: TEXT_COLORS.DEFAULT,
         ...TYPOGRAPHY.SUBTITLE,
+        lineHeight: scale(24),
     },
-    userBadge: {
+    locationRow: {
+        flexDirection: 'row',
+        gap: scale(4),
         alignItems: 'center',
-        borderRadius: verticalScale(16),
+        paddingHorizontal: scale(8),
+        paddingVertical: 0,
+        width: '100%',
+    },
+    locationIcon: {
+        width: scale(24),
+        height: scale(24),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    locationTag: {
+        backgroundColor: UI_COLORS.INPUT_1 || '#212131',
+        borderColor: UI_COLORS.STROKE || '#27273a',
+        borderWidth: 1,
+        borderRadius: scale(24),
         paddingHorizontal: scale(8),
         paddingVertical: scale(4),
-        borderWidth: scale(1),
-        backgroundColor: BACKGROUND_COLORS.BACKGROUND,
-        borderColor: TEXT_COLORS.CAPTION_LIGHTER,
-    },
-    userBadgeText: {
-        color: TEXT_COLORS.CAPTION_LIGHTER,
-        ...TYPOGRAPHY.CAPTION_2,
-    },
-    messageLocationRow: {
         flexDirection: 'row',
+        gap: scale(10),
         alignItems: 'center',
-        gap: scale(4),
+        justifyContent: 'center',
     },
-    messageBox: {
+    locationTagText: {
+        color: PRIMARY_COLORS.PLUS_TEN,
+        ...TYPOGRAPHY.CAPTION_2,
+        lineHeight: scale(16),
+    },
+    // Message Section
+    messageSection: {
+        paddingHorizontal: scale(8),
+        paddingVertical: 0,
+        width: '100%',
+    },
+    messageContainer: {
         backgroundColor: UI_COLORS.BACKGROUND,
-        borderRadius: verticalScale(12),
-        paddingVertical: verticalScale(16),
-        paddingHorizontal: scale(16),
-        gap: scale(8),
+        borderColor: UI_COLORS.STROKE || '#27273a',
+        borderWidth: 1,
+        borderRadius: scale(12),
+        width: '100%',
     },
-
+    messageContent: {
+        paddingHorizontal: scale(16),
+        paddingVertical: scale(16),
+        gap: scale(12),
+        alignItems: 'flex-start',
+        justifyContent: 'center',
+    },
     messageText: {
         color: PRIMARY_COLORS.DEFAULT,
-        ...TYPOGRAPHY.BODY_2,
-    },
-    messageLocation: {
-        color: PRIMARY_COLORS.PLUS_TEN,
-        ...TYPOGRAPHY.CAPTION_1,
-    },
-    commentSection: {
-        paddingVertical: verticalScale(12),
-        paddingHorizontal: scale(12),
-        gap: scale(12),
-    },
-    commentTitle: {
-        color: TEXT_COLORS.DEFAULT,
-        fontWeight: 'bold',
-        ...TYPOGRAPHY.SUBTITLE,
-    },
-    commentInputRow: {
-        flexDirection: 'row',
-        gap: scale(8),
-    },
-    commentItemInfo: {
-        flexDirection: 'row',
-        gap: scale(8),
-    },
-    commentInput: {
-        flex: 1,
-        backgroundColor: UI_COLORS.BACKGROUND_RED,
-        borderRadius: verticalScale(8),
-        paddingHorizontal: scale(12),
-        color: TEXT_COLORS.DEFAULT,
-        height: verticalScale(40),
-    },
-    commentButton: {
-        backgroundColor: PRIMARY_COLORS.DEFAULT,
-        borderRadius: verticalScale(8),
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: scale(18),
-    },
-
-    commentButtonText: {
-        color: TEXT_COLORS.DEFAULT,
-        ...TYPOGRAPHY.BUTTON_TEXT,
-    },
-    commentItemWrapper: {
-        backgroundColor: UI_COLORS.BACKGROUND_RED,
-        borderRadius: verticalScale(12),
-        paddingVertical: verticalScale(12),
-        paddingHorizontal: scale(12),
-        gap: scale(8),
-        marginBottom: verticalScale(12),
-    },
-    commentItemDot: {
-        width: scale(10),
-        height: scale(10),
-        borderRadius: verticalScale(5),
-    },
-    commentItemUser: {
-        fontWeight: 'bold',
-    },
-    commentItemBox: {
-        borderRadius: verticalScale(8),
-        paddingHorizontal: scale(8),
-        paddingVertical: verticalScale(6),
-        flex: 1,
-    },
-    commentItemText: {
-        color: PRIMARY_COLORS.PLUS_TEN,
-        ...TYPOGRAPHY.BODY_2,
+        ...TYPOGRAPHY.BODY_1,
+        lineHeight: scale(22),
     },
 });

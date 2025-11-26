@@ -14,6 +14,11 @@ export const styles = StyleSheet.create({
     zIndex: 10,
     elevation: 10,
   },
+  optionWrapper: {
+    position: 'absolute',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   nodeGroup: {
     flex: 1,
     justifyContent: 'center',
@@ -25,5 +30,35 @@ export const styles = StyleSheet.create({
     position: 'absolute',
     bottom: verticalScale(120),
     alignSelf: 'center',
+  },
+  selectorOverlay: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectorOption: {
+    alignItems: 'center',
+    gap: scale(6),
+    width: scale(70),
+  },
+  selectorIconWrap: {
+    width: scale(64),
+    height: scale(64),
+    borderRadius: scale(32),
+    backgroundColor: 'rgba(19,3,9,0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 12,
+  },
+  selectorLabel: {
+    color: '#E9E2E3',
+    fontSize: scale(13),
+    textAlign: 'center',
   },
 });

@@ -4,10 +4,10 @@ import { scale } from '../../utils/scalers';
 export const styles = StyleSheet.create({
     container: {
         display: 'flex',
-        height: scale(240),
-        padding: scale(10),
+        height: scale(200),
+        padding: scale(5),
         flexDirection: 'column',
         alignItems: 'center',
-        gap: scale(10),
+        gap: scale(5),
     },
 });

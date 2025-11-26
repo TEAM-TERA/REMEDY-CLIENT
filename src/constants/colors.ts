@@ -15,7 +15,7 @@ export const SECONDARY_COLORS = {
 }
 
 export const TERTIARY_COLORS = {
-    DEFAULT : "#595BEA",
+    DEFAULT : "#6210EF",
     MINUS_TEN : "#2A2DE4",
     MINUS_TWENTY : "#181BC3",
     PLUS_TEN : "#8586F0",
@@ -43,6 +43,7 @@ export const TEXT_COLORS = {
     CAPTION_LIGHTER : "#656581",
     CAPTION_RED : "#75575F",
     CAPTION_BLUE : "#575C75",
+    TEXT2 : "#FFFFFF",
     BUTTON : "#E9E2E3",
 }
 
