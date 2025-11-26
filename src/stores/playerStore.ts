@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import TrackPlayer, { TrackType } from 'react-native-track-player';
+import TrackPlayer, { TrackType, State } from 'react-native-track-player';
 import Config from 'react-native-config';
 
 type PlayerState = {
@@ -47,7 +47,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
 
       const state = await TrackPlayer.getPlaybackState();
 
-      if (state.state !== 'playing') {
+      if (state.state !== State.Playing) {
         await TrackPlayer.play();
         await new Promise(resolve => setTimeout(resolve, 300));
       }
