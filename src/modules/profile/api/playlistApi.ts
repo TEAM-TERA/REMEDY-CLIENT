@@ -16,7 +16,7 @@ export const deletePlaylist = async (playlistId: string | number) => {
   return response.data;
 };
 
-export const addSongToPlaylist = async (playlistId: string | number, songId: string) => {
-  const response = await axiosInstance.post(`/playlists/${playlistId}/songs`, { songId });
+export const addSongToPlaylist = async (playlistId: string | number, songIds: string[]) => {
+  const response = await axiosInstance.post(`/playlists/${playlistId}/songs`, { songIds });
   return response.data;
 };

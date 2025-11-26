@@ -19,6 +19,7 @@ import PlaylistMusicSearchScreen from '../modules/music/pages/PlaylistMusicSearc
 import DebateMusicSearchScreen from '../modules/drop/pages/DebateMusicSearchScreen';
 import DebateScreen from '../modules/music/pages/DebateScreen';
 import MusicDetailScreen from '../modules/music/pages/MusicDetailScreen';
+import MusicPlayerScreen from '../modules/music/pages/MusicPlayerScreen';
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 export function navigate<Screen extends keyof RootStackParamList>(
@@ -61,6 +62,7 @@ export default function RootNavigation() {
         <Stack.Screen name="PlaylistMusicSearch" component={PlaylistMusicSearchScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DebateScreen" component={DebateScreen} options={{ headerShown: false }} />
         <Stack.Screen name="MusicDetail" component={MusicDetailScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="MusicPlayer" component={MusicPlayerScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

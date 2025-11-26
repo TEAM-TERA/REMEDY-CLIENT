@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import { usePlaylist } from '../hooks/usePlaylist';
 import { usePlayerStore } from '../../../stores/playerStore';
 import type { Song } from '../types/playlist';
 import Config from 'react-native-config';
+import TrackPlayer, { State, Event } from 'react-native-track-player';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Playlist'>;
 
@@ -80,10 +81,103 @@ const PlaylistItem = memo(({ song, onPress, isPlaying = false }: { song: Song; o
 function PlaylistScreen({ route, navigation }: Props) {
   const { playlistId } = route.params;
   const { data: playlist, isLoading, isError, refetch } = usePlaylist(playlistId);
-  const { currentId, playIfDifferent, setQueue } = usePlayerStore();
+  const { currentId, playIfDifferent, setQueue, isShuffleEnabled, setShuffleEnabled } = usePlayerStore();
+  const [isCurrentlyPlaying, setIsCurrentlyPlaying] = useState(false);
+
+  // 재생 상태 체크
+  useEffect(() => {
+    const checkPlaybackState = async () => {
+      try {
+        const state = await TrackPlayer.getPlaybackState();
+        setIsCurrentlyPlaying(state.state === State.Playing);
+      } catch (error) {
+        console.error('Failed to get playback state:', error);
+      }
+    };
+
+    checkPlaybackState();
+    const interval = setInterval(checkPlaybackState, 1000);
+    return () => clearInterval(interval);
+  }, [currentId]);
+
+  // 플레이리스트 내에서 다음 곡 재생 (메타데이터 포함)
+  const handlePlayNextInPlaylist = async () => {
+    if (!playlist?.songs || !currentId) return;
+
+    const currentIndex = playlist.songs.findIndex(song => song.id === currentId);
+    if (currentIndex === -1) return;
+
+    const nextIndex = (currentIndex + 1) % playlist.songs.length;
+    const nextSong = playlist.songs[nextIndex];
+
+    console.log('🔄 Auto-playing next song:', {
+      currentId,
+      currentIndex,
+      nextIndex,
+      nextSong: nextSong ? { id: nextSong.id, title: nextSong.title, artist: nextSong.artist } : null
+    });
+
+    if (nextSong) {
+      await handlePlaySong(nextSong);
+    }
+  };
+
+  // 자동 다음 곡 재생을 위한 이벤트 리스너
+  useEffect(() => {
+    const onTrackPlaybackQueueEnded = async () => {
+      console.log('Track ended, playing next...');
+      await handlePlayNextInPlaylist();
+    };
+
+    // TrackPlayer 이벤트 리스너 등록
+    const trackEndedListener = TrackPlayer.addEventListener(Event.PlaybackQueueEnded, onTrackPlaybackQueueEnded);
+
+    return () => {
+      trackEndedListener.remove();
+    };
+  }, [playlist, currentId]);
 
   const handleGoBack = () => {
     navigation.goBack();
+  };
+
+  const handleTogglePlayPause = async () => {
+    try {
+      if (currentId && playlist?.songs) {
+        // 현재 재생 중인 곡 찾기
+        const currentSong = playlist.songs.find(song => song.id === currentId);
+        if (currentSong) {
+          // MusicPlayer 화면으로 이동
+          navigation.navigate('MusicPlayer', {
+            songId: currentSong.id,
+            songInfo: {
+              title: currentSong.title,
+              artist: currentSong.artist,
+              albumImagePath: currentSong.albumImagePath,
+            }
+          });
+          return;
+        }
+      }
+
+      // 현재 재생 중인 곡이 없으면 첫 번째 곡부터 재생
+      await handlePlayAll();
+    } catch (error) {
+      console.error('Failed to toggle playback:', error);
+    }
+  };
+
+  const handleToggleShuffle = () => {
+    setShuffleEnabled(!isShuffleEnabled);
+  };
+
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
   };
 
   const handlePlaySong = async (song: Song) => {
@@ -92,9 +186,16 @@ function PlaylistScreen({ route, navigation }: Props) {
         ? song.albumImagePath
         : `${Config.MUSIC_API_BASE_URL}${song.albumImagePath}`;
 
-      await playIfDifferent(song.id, {
+      console.log('🎵 Playing song with metadata:', {
+        id: song.id,
         title: song.title,
         artist: song.artist,
+        albumImagePath: song.albumImagePath,
+      });
+
+      await playIfDifferent(song.id, {
+        title: song.title || '음악',
+        artist: song.artist || '알 수 없음',
         artwork: imageUrl,
       });
     } catch (error) {
@@ -107,18 +208,77 @@ function PlaylistScreen({ route, navigation }: Props) {
     if (!playlist?.songs.length) return;
 
     try {
-      // Play first song
-      await handlePlaySong(playlist.songs[0]);
-      // Set queue with all songs
-      setQueue(playlist.songs.map(song => song.id));
+      let songsToPlay = [...playlist.songs];
+
+      // 셔플이 활성화된 경우 곡 순서를 섞음
+      if (isShuffleEnabled) {
+        songsToPlay = shuffleArray(songsToPlay);
+      }
+
+      // 첫 번째 곡 재생
+      await handlePlaySong(songsToPlay[0]);
+
+      // 큐에 모든 곡 설정
+      setQueue(songsToPlay.map(song => song.id));
+
+      setIsCurrentlyPlaying(true);
+
+      // MusicPlayer 화면으로 이동
+      navigation.navigate('MusicPlayer', {
+        songId: songsToPlay[0].id,
+        songInfo: {
+          title: songsToPlay[0].title,
+          artist: songsToPlay[0].artist,
+          albumImagePath: songsToPlay[0].albumImagePath,
+        }
+      });
     } catch (error) {
       console.error('Failed to play playlist:', error);
       Alert.alert('오류', '플레이리스트 재생에 실패했습니다.');
     }
   };
 
-  const handleMusicDetail = (song: Song) => {
-    navigation.navigate('MusicDetail', { songId: song.id });
+  const handleMusicDetail = async (song: Song) => {
+    if (!playlist?.songs) return;
+
+    try {
+      // 선택한 곡을 재생
+      await handlePlaySong(song);
+
+      // 선택한 곡부터 시작하는 큐 생성
+      const selectedIndex = playlist.songs.findIndex(s => s.id === song.id);
+      if (selectedIndex !== -1) {
+        let reorderedSongs = [...playlist.songs];
+
+        if (isShuffleEnabled) {
+          // 셔플이 활성화된 경우: 선택한 곡을 첫 번째로 하고 나머지를 셞플
+          const otherSongs = playlist.songs.filter(s => s.id !== song.id);
+          const shuffledOthers = shuffleArray(otherSongs);
+          reorderedSongs = [song, ...shuffledOthers];
+        } else {
+          // 일반 모드: 선택한 곡부터 시작하는 순서
+          reorderedSongs = [
+            ...playlist.songs.slice(selectedIndex),
+            ...playlist.songs.slice(0, selectedIndex)
+          ];
+        }
+
+        setQueue(reorderedSongs.map(s => s.id));
+      }
+
+      setIsCurrentlyPlaying(true);
+
+      navigation.navigate('MusicPlayer', {
+        songId: song.id,
+        songInfo: {
+          title: song.title,
+          artist: song.artist,
+          albumImagePath: song.albumImagePath,
+        }
+      });
+    } catch (error) {
+      console.error('Failed to play selected song:', error);
+    }
   };
 
   if (isLoading) {
@@ -146,6 +306,20 @@ function PlaylistScreen({ route, navigation }: Props) {
         </View>
       </SafeAreaView>
     );
+  }
+
+  // 플레이리스트 데이터 로깅 (디버깅용)
+  if (playlist && __DEV__) {
+    console.log('📋 Playlist data:', {
+      name: playlist.name,
+      songsCount: playlist.songs?.length,
+      firstSong: playlist.songs?.[0] ? {
+        id: playlist.songs[0].id,
+        title: playlist.songs[0].title,
+        artist: playlist.songs[0].artist,
+        fields: Object.keys(playlist.songs[0])
+      } : null
+    });
   }
 
   const getPlaylistCoverImage = () => {
@@ -213,6 +387,7 @@ function PlaylistScreen({ route, navigation }: Props) {
           <View style={styles.userInfo}>
             <View style={styles.userAvatar} />
             <Text style={styles.userName}>User_1</Text>
+            <Text style={styles.songCount}>{playlist.songs.length}곡</Text>
           </View>
         </View>
 
@@ -220,22 +395,33 @@ function PlaylistScreen({ route, navigation }: Props) {
         <View style={styles.controls}>
           <View style={styles.leftControls}>
             <TouchableOpacity style={styles.controlButton}>
-              <Icon name="plus" width={12} height={12} color={TEXT_COLORS.DEFAULT} />
+              <Icon name="plus" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.controlButton}>
-              <Icon name="edit" width={12.75} height={12.75} color={TEXT_COLORS.DEFAULT} />
+              <Icon name="edit" width={16} height={16} color={TEXT_COLORS.DEFAULT} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.controlButton}>
-              <Icon name="heart" width={12} height={13.5} color={SECONDARY_COLORS.DEFAULT} />
+              <Icon name="heart" width={16} height={16} color={SECONDARY_COLORS.DEFAULT} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.rightControls}>
-            <TouchableOpacity style={styles.controlButton}>
-              <Icon name="music" width={15} height={13.333} color={TEXT_COLORS.DEFAULT} />
+            <TouchableOpacity
+              style={[styles.controlButton, isShuffleEnabled && styles.activeControlButton]}
+              onPress={handleToggleShuffle}
+            >
+              <Icon name="shuffle" width={20} height={20} color={isShuffleEnabled ? SECONDARY_COLORS.DEFAULT : TEXT_COLORS.DEFAULT} />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.playButton} onPress={handlePlayAll}>
-              <Icon name="play" width={10.667} height={12} color={TEXT_COLORS.BUTTON} />
+            <TouchableOpacity style={styles.controlButton}>
+              <Icon name="delete" width={20} height={20} color={SECONDARY_COLORS.DEFAULT} />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.playButton} onPress={currentId ? handleTogglePlayPause : handlePlayAll}>
+              <Icon
+                name={isCurrentlyPlaying ? "pause" : "play"}
+                width={14}
+                height={14}
+                color={TEXT_COLORS.BUTTON}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -432,33 +618,44 @@ const styles = StyleSheet.create({
     fontSize: scale(12),
     lineHeight: scale(16),
   },
+  songCount: {
+    ...TYPOGRAPHY.CAPTION_3,
+    color: TEXT_COLORS.CAPTION,
+    fontSize: scale(12),
+    lineHeight: scale(16),
+    marginLeft: scale(8),
+  },
   controls: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: scale(28),
-    marginVertical: scale(12),
+    marginTop: scale(24),
+    marginBottom: scale(16),
   },
   leftControls: {
     flexDirection: 'row',
-    gap: scale(16),
+    gap: scale(20),
   },
   rightControls: {
     flexDirection: 'row',
-    gap: scale(16),
+    gap: scale(20),
     alignItems: 'center',
   },
   controlButton: {
-    width: scale(24),
-    height: scale(24),
-    borderRadius: scale(12),
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  playButton: {
     width: scale(32),
     height: scale(32),
     borderRadius: scale(16),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  activeControlButton: {
+    backgroundColor: 'rgba(255, 148, 41, 0.15)',
+  },
+  playButton: {
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
     backgroundColor: SECONDARY_COLORS.DEFAULT,
     justifyContent: 'center',
     alignItems: 'center',

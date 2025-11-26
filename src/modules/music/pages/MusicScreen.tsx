@@ -38,7 +38,7 @@ function MusicScreen({ route }: Props) {
   const musicLikeCount = useDropLikeCount(droppingId);
   const toggleLike = useToggleLike(droppingId);
   const myLikes = useMyLikes();
-  const isLiked = !!myLikes.data?.some((like) => like.droppingId === droppingId);
+  const isLiked = !!myLikes.data && Array.isArray(myLikes.data) && myLikes.data.some((like) => like.droppingId === droppingId);
   const musicPlayer = useHLSPlayer(songId);
   const playNext = usePlayerStore(state => state.playNext);
   const playPrevious = usePlayerStore(state => state.playPrevious);

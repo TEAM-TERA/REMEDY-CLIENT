@@ -103,7 +103,7 @@ const PlaylistGrid: React.FC<PlaylistGridProps> = ({ playlists, onCreatePlaylist
     });
 
     const addSongMutation = useMutation({
-        mutationFn: ({ id, songId }: { id: string | number; songId: string }) => addSongToPlaylist(id, songId),
+        mutationFn: ({ id, songId }: { id: string | number; songId: string }) => addSongToPlaylist(id, [songId]),
         onSuccess: () => {
             setAddSongVisible(false);
             setMenuVisible(false);

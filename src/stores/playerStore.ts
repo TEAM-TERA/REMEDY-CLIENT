@@ -1,12 +1,18 @@
 import { create } from 'zustand';
-import TrackPlayer, { TrackType } from 'react-native-track-player';
+import TrackPlayer, { TrackType, Event } from 'react-native-track-player';
 import Config from 'react-native-config';
 
 type PlayerState = {
   queue: string[];
   currentId: string | null;
+  autoPlay: boolean;
+  isShuffleEnabled: boolean;
+  isRepeatEnabled: boolean;
   setQueue: (ids: string[]) => void;
   setCurrentId: (id: string | null) => void;
+  setAutoPlay: (enabled: boolean) => void;
+  setShuffleEnabled: (enabled: boolean) => void;
+  setRepeatEnabled: (enabled: boolean) => void;
   playIfDifferent: (songId: string, meta?: { title?: string; artist?: string; artwork?: string }) => Promise<void>;
   playNext: () => Promise<void>;
   playPrevious: () => Promise<void>;
@@ -15,7 +21,13 @@ type PlayerState = {
 export const usePlayerStore = create<PlayerState>((set, get) => ({
   queue: [],
   currentId: null,
+  autoPlay: true,
+  isShuffleEnabled: false,
+  isRepeatEnabled: false,
   setQueue: (ids) => set({ queue: ids }),
+  setAutoPlay: (enabled) => set({ autoPlay: enabled }),
+  setShuffleEnabled: (enabled) => set({ isShuffleEnabled: enabled }),
+  setRepeatEnabled: (enabled) => set({ isRepeatEnabled: enabled }),
   setCurrentId: (id) => {
     console.log('🔄 [STORE] playerStore.setCurrentId 호출됨:', {
       newId: id,

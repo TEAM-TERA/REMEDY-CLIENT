@@ -49,6 +49,15 @@ export type RootStackParamList = {
   MusicDetail: {
     songId: string;
   };
+
+  MusicPlayer: {
+    songId: string;
+    songInfo?: {
+      title: string;
+      artist: string;
+      albumImagePath: string;
+    };
+  };
 };
 
 export type AuthStackParamList = {

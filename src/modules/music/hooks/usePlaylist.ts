@@ -17,7 +17,7 @@ export const useAddSongToPlaylist = () => {
 
   return useMutation({
     mutationFn: ({ playlistId, songId }: { playlistId: string; songId: string }) =>
-      addSongToPlaylist(playlistId, songId),
+      addSongToPlaylist(playlistId, [songId]), // songId를 배열로 감쌈
     onSuccess: (_, variables) => {
       // Invalidate and refetch playlist data
       queryClient.invalidateQueries({

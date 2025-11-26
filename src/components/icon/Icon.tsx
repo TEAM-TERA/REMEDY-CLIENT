@@ -35,6 +35,9 @@ import PlaylistSvg from './icons/PlaylistSvg';
 import DebateSvg from './icons/DebateSvg';
 import PlusSvg from './icons/PlusSvg';
 import TrashSvg from './icons/TrashSvg';
+import ShuffleSvg from './icons/ShuffleSvg';
+import DeleteSvg from './icons/DeleteSvg';
+import RepeatSvg from './icons/RepeatSvg';
 
 const icons = {
     edit: EditSvg,
@@ -72,6 +75,9 @@ const icons = {
     debate: DebateSvg,
     plus: PlusSvg,
     trash: TrashSvg,
+    shuffle: ShuffleSvg,
+    delete: DeleteSvg,
+    repeat: RepeatSvg,
 };
 
 export type IconName = keyof typeof icons;
