@@ -29,6 +29,7 @@ export type RootStackParamList = {
     artist: string;
     location: string;
     message?: string;
+    isMyDropping?: boolean;
   };
 
   Playlist: {

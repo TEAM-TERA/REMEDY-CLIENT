@@ -80,17 +80,13 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
       return;
     }
 
-    // Check if we're currently in playlist mode and the song is in the current queue
     if (isPlaylistMode) {
       console.log('🎵 In playlist mode, trying to skip to song:', songId);
-      // Try to skip to the song within the existing playlist
       try {
         await skipToSongInPlaylist(songId);
-        // Check if the skip was successful by verifying current track
         const activeTrack = await TrackPlayer.getActiveTrack();
         if (activeTrack?.id === songId) {
           console.log('✅ Successfully skipped to song in playlist');
-          // Navigate to MusicPlayer screen for successful skip
           navigation.navigate('MusicPlayer', {
             songId,
             songInfo: {
@@ -106,17 +102,11 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
         }
       } catch (error) {
         console.log('🔄 Skip failed, restarting playlist from clicked song');
-        // Fall through to restart playlist logic
       }
     }
-
-    // If we reach here: either not in playlist mode or skip failed
     console.log('🎵 Starting new playlist from clicked song');
-    // Find the index of the clicked song
     const songIndex = playlistDetail.songs.findIndex((song: PlaylistDetailSong) => song.songId === songId);
     if (songIndex === -1) return;
-
-    // Prepare song IDs and metadata for the entire playlist
     const songIds = playlistDetail.songs.map((song: PlaylistDetailSong) => song.songId);
     const songMetas = playlistDetail.songs.map((song: PlaylistDetailSong) => {
       const artwork = getImageUrl(song.albumImagePath);

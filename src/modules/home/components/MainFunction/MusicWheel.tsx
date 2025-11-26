@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { runOnJS, useSharedValue, withSpring, useDerivedValue } from 'react-native-reanimated';
 import { styles } from '../../styles/MainFunction/MusicWheel';
 import MusicNode from './MusicNode';
 import { VisibleNode } from '../../types/musicList';
@@ -161,6 +161,12 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
   }, [showDropOptions, dropOptions, musicDroppings]);
 
   const displayTotalSongs = displayData.length;
+
+  // 메인 노드 인덱스 계산
+  const mainNodeIndex = useDerivedValue(() => {
+    'worklet';
+    return 0; // 첫 번째 노드(슬롯 인덱스 0)가 항상 메인 노드
+  }, []);
 
   const visibleEntries = React.useMemo(() => {
     if (displayTotalSongs === 0) return [];
@@ -347,6 +353,7 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
                 baseAngle={node.position.angle}
                 rotation={gestureOffset}
                 baseRotation={rotationShared}
+                mainNodeIndex={mainNodeIndex}
                 nodeIndex={node.slotIndex}
                 currentLocation={currentLocation}
                 currentAddress={currentAddress}
