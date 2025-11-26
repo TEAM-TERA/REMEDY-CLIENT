@@ -28,7 +28,7 @@ export const styles = StyleSheet.create({
   },
   dropButtonWrapper: {
     position: 'absolute',
-    bottom: verticalScale(120),
+    bottom: verticalScale(90),
     alignSelf: 'center',
   },
   selectorOverlay: {

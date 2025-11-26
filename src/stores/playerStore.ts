@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import TrackPlayer, { TrackType, Event, Capability } from 'react-native-track-player';
+import TrackPlayer, { TrackType, Event, Capability, State } from 'react-native-track-player';
 import Config from 'react-native-config';
 
 type PlayerState = {
@@ -8,15 +8,15 @@ type PlayerState = {
   autoPlay: boolean;
   isShuffleEnabled: boolean;
   isRepeatEnabled: boolean;
-  isPlaylistMode: boolean; // Track if we're in playlist mode
-  playlistMetas: Array<{title?: string; artist?: string; artwork?: string}>; // Store playlist metadata
+  isPlaylistMode: boolean;
+  playlistMetas: Array<{title?: string; artist?: string; artwork?: string}>;
   setQueue: (ids: string[]) => void;
   setCurrentId: (id: string | null) => void;
+  playIfDifferent: (songId: string, meta?: { title?: string; artist?: string; artwork?: string }, forcePlay?: boolean) => Promise<void>;
   setAutoPlay: (enabled: boolean) => void;
   setShuffleEnabled: (enabled: boolean) => void;
   setRepeatEnabled: (enabled: boolean) => void;
-  skipToSongInPlaylist: (songId: string) => Promise<void>; // New function for skipping within playlist
-  playIfDifferent: (songId: string, meta?: { title?: string; artist?: string; artwork?: string }) => Promise<void>;
+  skipToSongInPlaylist: (songId: string) => Promise<void>;
   playPlaylist: (songIds: string[], startIndex?: number, songMetas?: Array<{title?: string; artist?: string; artwork?: string}>) => Promise<void>;
   playNext: () => Promise<void>;
   playPrevious: () => Promise<void>;
@@ -35,11 +35,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
   setShuffleEnabled: (enabled) => set({ isShuffleEnabled: enabled }),
   setRepeatEnabled: (enabled) => set({ isRepeatEnabled: enabled }),
   setCurrentId: (id) => {
-    console.log('🔄 [STORE] playerStore.setCurrentId 호출됨:', {
-      newId: id,
-      type: typeof id,
-      timestamp: new Date().toISOString()
-    });
     set({ currentId: id });
   },
   skipToSongInPlaylist: async (songId) => {
@@ -67,21 +62,20 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       console.error('Error skipping to song in playlist:', error);
     }
   },
-  playIfDifferent: async (songId, meta) => {
+  playIfDifferent: async (songId, meta, forcePlay = false) => {
     const { currentId } = get();
-    if (currentId === songId) {
-      console.log('⏭️ Same song already playing, skipping:', songId);
+
+    if (currentId === songId && !forcePlay) {
       return;
     }
+
     const streamBase = Config.MUSIC_STREAM_BASE_URL || Config.MUSIC_API_BASE_URL;
     const streamUrl = `${streamBase}/hls/${songId}/playlist.m3u8`;
-    console.log('🎵 Attempting to play:', songId);
-    console.log('🔗 Stream URL:', streamUrl);
-    console.log('📝 Meta:', meta);
+
     try {
       await TrackPlayer.reset();
-      console.log('✅ TrackPlayer reset');
 
+      const trackData = {
       // Set up TrackPlayer options for single track playback
       await TrackPlayer.updateOptions({
         capabilities: [
@@ -101,15 +95,30 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
         artist: meta?.artist || '알 수 없음',
         artwork: meta?.artwork,
         type: TrackType.HLS,
+      };
+
+      await TrackPlayer.add(trackData);
+
+      await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        subscription.remove();
+        reject(new Error('재생 시작 타임아웃'));
+      }, 5000); // 5초 타임아웃
+
+      const subscription = TrackPlayer.addEventListener(Event.PlaybackState, (event: any) => {
+        if (event.state === State.Playing) {
+          clearTimeout(timeout);
+          subscription.remove();
+          resolve();
+        } else if (event.state === State.Error) {
+          clearTimeout(timeout);
+          subscription.remove();
+          reject(new Error('재생 실패'));
+        }
       });
-      console.log('✅ Track added to player');
 
-      await TrackPlayer.play();
-      console.log('✅ Play command sent');
-
-      const state = await TrackPlayer.getPlaybackState();
-      console.log('🎮 Playback state after play:', state);
-
+      TrackPlayer.play();
+    });
       set({
         currentId: songId,
         queue: [songId], // Single track queue
@@ -118,7 +127,7 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       });
       console.log('✅ Current ID set to:', songId);
     } catch (e) {
-      console.error('❌ Failed to play song:', e);
+      console.error('음악 재생 실패:', e);
     }
   },
   playPlaylist: async (songIds, startIndex = 0, songMetas = []) => {
@@ -130,8 +139,6 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
     try {
       await TrackPlayer.reset();
       console.log('✅ TrackPlayer reset');
-
-      // Add all tracks to TrackPlayer
       const tracks = songIds.map((songId, index) => {
         const meta = songMetas[index] || {};
         return {
