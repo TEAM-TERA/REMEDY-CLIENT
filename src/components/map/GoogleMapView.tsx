@@ -135,7 +135,8 @@ const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentL
             title: data.payload.title || '드랍핑 음악',
             artist: data.payload.artist || '알 수 없는 아티스트',
             message: data.payload.content || '',
-            location: data.payload.address || data.payload.location || '위치 정보 없음'
+            location: data.payload.address || data.payload.location || '위치 정보 없음',
+            isMyDropping: data.payload.isMyDropping || false
           });
         } else if (data.action === 'navigateToDebate') {
           // DebateScreen으로 이동 (VOTE 드랍핑)
@@ -638,7 +639,7 @@ const GoogleMapView = forwardRef<any, GoogleMapViewProps>(({ droppings, currentL
             // 곡 정보
             const title = songData.title || '재생 중인 곡';
             const artist = songData.artist || '알 수 없는 아티스트';
-            const likeCount = songData.likeCount || 12;
+            const likeCount = songData.likeCount || 0;
 
             // CD 모양 앨범 이미지 SVG
             const clipId = 'albumClip' + Date.now();

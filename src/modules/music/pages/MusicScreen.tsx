@@ -14,8 +14,10 @@ import { useHLSPlayer } from '../../../hooks/music/useHLSPlayer';
 import { useBackgroundAudioPermission } from '../../../hooks/useBackgroundAudioPermission';
 import { useQuery } from '@tanstack/react-query';
 import { getSongInfo, getDroppingById } from '../../drop/api/dropApi';
+import { useDeleteDropping } from '../../drop/hooks/useDeleteDropping';
 import { BACKGROUND_COLORS } from '../../../constants/colors';
 import { usePlayerStore } from '../../../stores/playerStore';
+import { Alert } from 'react-native';
 
 type Props = {
   route: {
@@ -27,13 +29,14 @@ type Props = {
       message?: string;
       location?: string;
       likeCount?: number;
+      isMyDropping?: boolean;
     };
   };
 };
 
 function MusicScreen({ route }: Props) {
   const navigation = useNavigation();
-  const { droppingId, songId, title, artist, message, location } = route.params;
+  const { droppingId, songId, title, artist, message, location, isMyDropping } = route.params;
 
   const musicLikeCount = useDropLikeCount(droppingId);
   const toggleLike = useToggleLike(droppingId);
@@ -42,6 +45,7 @@ function MusicScreen({ route }: Props) {
   const musicPlayer = useHLSPlayer(songId);
   const playNext = usePlayerStore(state => state.playNext);
   const playPrevious = usePlayerStore(state => state.playPrevious);
+  const deleteDropping = useDeleteDropping();
 
   const { requestBackgroundAudioPermission } = useBackgroundAudioPermission();
   const [hasRequestedPermission, setHasRequestedPermission] = React.useState(false);
@@ -57,6 +61,16 @@ function MusicScreen({ route }: Props) {
     queryFn: () => getDroppingById(droppingId || ''),
     enabled: !!droppingId,
   });
+
+  // 디버깅용 로그
+  React.useEffect(() => {
+    console.log('MusicScreen 파라미터들:', {
+      droppingId,
+      isMyDropping: isMyDropping,
+      droppingInfoIsMyDropping: droppingInfo?.isMyDropping,
+      shouldShowDeleteButton: droppingInfo?.isMyDropping || isMyDropping
+    });
+  }, [droppingInfo, isMyDropping, droppingId]);
 
   useEffect(() => {
     if (songId && !hasRequestedPermission) {
@@ -87,6 +101,30 @@ function MusicScreen({ route }: Props) {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleDeleteDropping = () => {
+    Alert.alert(
+      "드랍핑 삭제",
+      "정말로 이 드랍핑을 삭제하시겠습니까?",
+      [
+        {
+          text: "취소",
+          style: "cancel",
+        },
+        {
+          text: "삭제",
+          style: "destructive",
+          onPress: () => {
+            deleteDropping.mutate(droppingId, {
+              onSuccess: () => {
+                navigation.goBack();
+              },
+            });
+          },
+        },
+      ]
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.contentContainer}>
@@ -94,6 +132,16 @@ function MusicScreen({ route }: Props) {
           <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
             <Icon name="left" width={10} height={18} color={TEXT_COLORS.CAPTION_1} />
           </TouchableOpacity>
+
+          {(droppingInfo?.isMyDropping || isMyDropping) && (
+            <TouchableOpacity
+              style={styles.deleteButton}
+              onPress={handleDeleteDropping}
+              disabled={deleteDropping.isPending}
+            >
+              <Icon name="delete" width={18} height={18} color="#FF3B30" />
+            </TouchableOpacity>
+          )}
         </View>
         <View style={styles.cdPlayerSection}>
           <CdPlayer imageUrl={songInfo?.albumImagePath} isPlaying={musicPlayer.isPlaying} />

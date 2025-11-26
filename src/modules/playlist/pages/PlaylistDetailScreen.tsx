@@ -7,9 +7,6 @@ import {
   Image,
   TouchableOpacity,
   SafeAreaView,
-  Modal,
-  TextInput,
-  Alert,
 } from 'react-native';
 import TrackPlayer, { usePlaybackState, useActiveTrack } from 'react-native-track-player';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -24,9 +21,9 @@ import {
 } from '../../../constants/colors';
 import { TYPOGRAPHY } from '../../../constants/typography';
 import { scale } from '../../../utils/scalers';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { getDroppingById } from '../../drop/api/dropApi';
-import { renamePlaylist, deletePlaylist } from '../../profile/api/playlistApi';
+import { useDropLikeCount, useToggleLike } from '../../music/hooks/useLike';
 import type { PlaylistDropDetail, PlaylistDetailSong } from '../types/PlaylistDetail';
 import Config from 'react-native-config';
 import { usePlayerStore } from '../../../stores/playerStore';
@@ -38,10 +35,6 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
   const { playIfDifferent, setCurrentId, currentId, playPlaylist, skipToSongInPlaylist, isPlaylistMode } = usePlayerStore();
   const playbackState = usePlaybackState();
   const activeTrack = useActiveTrack();
-  const queryClient = useQueryClient();
-
-  const [showRenameModal, setShowRenameModal] = useState(false);
-  const [newPlaylistName, setNewPlaylistName] = useState('');
 
   const isPlaying = playbackState.state === 'playing';
   const currentTrackId = activeTrack?.id;
@@ -52,22 +45,9 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
     staleTime: 5 * 60 * 1000,
   });
 
-  const renameMutation = useMutation({
-    mutationFn: (name: string) => renamePlaylist(droppingId, name),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['playlistDropDetail', droppingId] });
-      queryClient.invalidateQueries({ queryKey: ['playlists', 'my'] });
-      setShowRenameModal(false);
-    },
-  });
-
-  const deleteMutation = useMutation({
-    mutationFn: () => deletePlaylist(droppingId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['playlists', 'my'] });
-      navigation.goBack();
-    },
-  });
+  // 좋아요 관련 훅들
+  const likeCount = useDropLikeCount(droppingId);
+  const toggleLike = useToggleLike(droppingId);
 
   const getImageUrl = (albumImagePath?: string) => {
     if (!albumImagePath) {
@@ -76,7 +56,7 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
     if (albumImagePath.startsWith('http')) {
       return { uri: albumImagePath };
     }
-    const baseUrl = Config.MUSIC_API_BASE_URL || 'http://localhost:3000';
+    const baseUrl = Config.MUSIC_API_BASE_URL;
     return { uri: `${baseUrl}${albumImagePath}` };
   };
 
@@ -133,12 +113,12 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
     // If we reach here: either not in playlist mode or skip failed
     console.log('🎵 Starting new playlist from clicked song');
     // Find the index of the clicked song
-    const songIndex = playlistDetail.songs.findIndex(song => song.songId === songId);
+    const songIndex = playlistDetail.songs.findIndex((song: PlaylistDetailSong) => song.songId === songId);
     if (songIndex === -1) return;
 
     // Prepare song IDs and metadata for the entire playlist
-    const songIds = playlistDetail.songs.map(song => song.songId);
-    const songMetas = playlistDetail.songs.map(song => {
+    const songIds = playlistDetail.songs.map((song: PlaylistDetailSong) => song.songId);
+    const songMetas = playlistDetail.songs.map((song: PlaylistDetailSong) => {
       const artwork = getImageUrl(song.albumImagePath);
       return {
         title: song.title,
@@ -164,9 +144,8 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
   const handlePlayButtonPress = async () => {
     if (!playlistDetail?.songs || playlistDetail.songs.length === 0) return;
 
-    // Prepare song IDs and metadata for the entire playlist
-    const songIds = playlistDetail.songs.map(song => song.songId);
-    const songMetas = playlistDetail.songs.map(song => {
+    const songIds = playlistDetail.songs.map((song: PlaylistDetailSong) => song.songId);
+    const songMetas = playlistDetail.songs.map((song: PlaylistDetailSong) => {
       const artwork = getImageUrl(song.albumImagePath);
       return {
         title: song.title,
@@ -179,41 +158,7 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
     await playPlaylist(songIds, 0, songMetas);
   };
 
-  const handleAddSongPress = () => {
-    navigation.navigate('PlaylistMusicSearch', {
-      playlistId: droppingId,
-      playlistName: playlistDetail?.playlistName || '플레이리스트',
-    } as any);
-  };
-
-  const handleRenamePress = () => {
-    setNewPlaylistName(playlistDetail?.playlistName || '');
-    setShowRenameModal(true);
-  };
-
-  const handleRenameSubmit = () => {
-    if (newPlaylistName.trim()) {
-      renameMutation.mutate(newPlaylistName.trim());
-    }
-  };
-
-  const handleDeletePress = () => {
-    Alert.alert(
-      '플레이리스트 삭제',
-      '정말로 이 플레이리스트를 삭제하시겠습니까?',
-      [
-        {
-          text: '취소',
-          style: 'cancel',
-        },
-        {
-          text: '삭제',
-          style: 'destructive',
-          onPress: () => deleteMutation.mutate(),
-        },
-      ]
-    );
-  };
+  // 편집 관련 함수들 제거됨
 
   const togglePlayPause = async () => {
     if (isPlaying) {
@@ -223,10 +168,7 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
-  };
+  // formatDate 함수 제거됨
 
   if (isLoading) {
     return (
@@ -267,15 +209,7 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
           <Text style={styles.headerLocationText}>플레이리스트</Text>
         </View>
         <View style={styles.headerActions}>
-          <TouchableOpacity style={styles.headerButton} onPress={handleRenamePress}>
-            <Icon name="edit" width={16} height={16} fill={TEXT_COLORS.CAPTION} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={handleAddSongPress}>
-            <Icon name="plus" width={16} height={16} fill={TEXT_COLORS.CAPTION} />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.headerButton} onPress={handleDeletePress}>
-            <Icon name="trash" width={16} height={16} fill={TEXT_COLORS.CAPTION} />
-          </TouchableOpacity>
+          {/* 헤더 액션 버튼들 제거 */}
         </View>
       </View>
 
@@ -300,13 +234,27 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
           </View>
           <View style={styles.playlistCreatorRow}>
             <View style={styles.creatorDot} />
-            <Text style={styles.creatorName}>User_1</Text>
+            <Text style={styles.creatorName}>
+              {playlistDetail.username || 'User_1'}
+            </Text>
           </View>
         </View>
 
         {/* Action Buttons */}
         <View style={styles.actionButtonsRow}>
-          <View style={styles.leftActions} />
+          <View style={styles.leftActions}>
+            {/* 좋아요 버튼 */}
+            <TouchableOpacity
+              style={styles.likeButton}
+              onPress={() => toggleLike.mutate()}
+              disabled={toggleLike.isPending}
+            >
+              <Icon name="heart" width={16} height={16} color={SECONDARY_COLORS.DEFAULT} />
+              <Text style={styles.likeText}>
+                {likeCount.data?.likeCount ?? 0}
+              </Text>
+            </TouchableOpacity>
+          </View>
           <View style={styles.rightActions}>
             <TouchableOpacity style={styles.shuffleButton}>
               <Icon name="shuffle" width={16} height={16} fill={TEXT_COLORS.TEXT2} />
@@ -319,7 +267,7 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
 
         {/* Songs List with Special Design */}
         <View style={styles.songsSection}>
-          {playlistDetail.songs?.map((song: PlaylistDetailSong, index: number) => {
+          {playlistDetail.songs?.map((song: PlaylistDetailSong, _index: number) => {
             const isCurrentlyPlaying = currentTrackId === song.songId;
 
             return (
@@ -382,47 +330,7 @@ function PlaylistDetailScreen({ navigation, route }: Props) {
         </View>
       </ScrollView>
 
-      {/* Rename Modal */}
-      <Modal
-        visible={showRenameModal}
-        transparent={true}
-        animationType="fade"
-        onRequestClose={() => setShowRenameModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <TouchableOpacity
-            style={styles.modalBackground}
-            activeOpacity={1}
-            onPress={() => setShowRenameModal(false)}
-          />
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>플레이리스트 이름 수정</Text>
-            <TextInput
-              value={newPlaylistName}
-              onChangeText={setNewPlaylistName}
-              placeholder="플레이리스트 이름"
-              placeholderTextColor={TEXT_COLORS.CAPTION}
-              style={styles.modalInput}
-              autoFocus={true}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => setShowRenameModal(false)}
-              >
-                <Text style={styles.cancelButtonText}>취소</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.confirmButton]}
-                onPress={handleRenameSubmit}
-                disabled={renameMutation.isPending}
-              >
-                <Text style={styles.confirmButtonText}>저장</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      {/* Rename Modal 제거됨 */}
     </SafeAreaView>
   );
 }
@@ -606,6 +514,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  likeButton: {
+    width: scale(80),
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: scale(6),
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(6),
+    borderRadius: scale(16),
+  },
+  likeText: {
+    ...TYPOGRAPHY.BODY_2,
+    color: SECONDARY_COLORS.DEFAULT,
+    fontSize: scale(12),
+    fontWeight: 'bold',
+  },
   // Songs section with special design
   songsSection: {
     paddingHorizontal: scale(12),
@@ -706,72 +629,7 @@ const styles = StyleSheet.create({
     borderRadius: scale(1.5),
     marginBottom: scale(2),
   },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: scale(20),
-  },
-  modalBackground: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  modalContent: {
-    backgroundColor: FORM_COLORS.BACKGROUND_3,
-    borderRadius: scale(16),
-    padding: scale(20),
-    width: '100%',
-    maxWidth: scale(300),
-  },
-  modalTitle: {
-    ...TYPOGRAPHY.BODY_2,
-    color: TEXT_COLORS.TEXT2,
-    fontSize: scale(18),
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: scale(20),
-  },
-  modalInput: {
-    backgroundColor: BACKGROUND_COLORS.BACKGROUND,
-    borderRadius: scale(8),
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(10),
-    color: TEXT_COLORS.TEXT2,
-    fontSize: scale(16),
-    borderWidth: 1,
-    borderColor: FORM_COLORS.STROKE,
-    marginBottom: scale(20),
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: scale(12),
-  },
-  modalButton: {
-    flex: 1,
-    paddingVertical: scale(12),
-    borderRadius: scale(8),
-    alignItems: 'center',
-  },
-  cancelButton: {
-    backgroundColor: FORM_COLORS.BACKGROUND_2,
-  },
-  confirmButton: {
-    backgroundColor: SECONDARY_COLORS.DEFAULT,
-  },
-  cancelButtonText: {
-    ...TYPOGRAPHY.BODY_2,
-    color: TEXT_COLORS.CAPTION,
-    fontSize: scale(14),
-    fontWeight: '500',
-  },
-  confirmButtonText: {
-    ...TYPOGRAPHY.BODY_2,
-    color: TEXT_COLORS.TEXT2,
-    fontSize: scale(14),
-    fontWeight: 'bold',
-  },
+  // Modal styles 제거됨
 });
 
 export default PlaylistDetailScreen;

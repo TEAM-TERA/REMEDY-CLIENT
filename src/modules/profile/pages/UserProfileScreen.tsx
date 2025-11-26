@@ -362,6 +362,7 @@ function UserProfileScreen() {
               albumImageUrl: like.imageUrl,
               // PLAYLIST type fields
               playlistName: like.playlistName,
+              firstAlbumImageUrl: like.imageUrl, // PLAYLIST 타입을 위해 imageUrl을 firstAlbumImageUrl에도 설정
               // VOTE type fields
               topic: like.topic,
             };

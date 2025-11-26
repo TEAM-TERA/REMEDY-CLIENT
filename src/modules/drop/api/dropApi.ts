@@ -193,3 +193,15 @@ export async function addComment(droppingId: string, content: string) {
     handleApiError(error);
   }
 }
+
+export async function deleteDropping(droppingId: string) {
+  try {
+    console.log(`deleteDropping 호출: droppingId=${droppingId}`);
+    const res = await axiosInstance.delete(`/droppings/${droppingId}`);
+    console.log(`deleteDropping 응답:`, res.data);
+    return res.data;
+  } catch (error) {
+    console.error(`deleteDropping 에러:`, error);
+    handleApiError(error);
+  }
+}

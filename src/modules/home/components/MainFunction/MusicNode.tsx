@@ -158,14 +158,34 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
             return;
         }
 
-        navigation.navigate('Music', {
-          droppingId: data.dropping.droppingId,
-          songId: data.dropping.songId,
-          title: data.songInfo?.title || '드랍핑 음악',
-          artist: data.songInfo?.artist || '알 수 없는 아티스트',
-          location: data.dropping.address,
-          message: data.dropping.content,
-        });
+        // 드랍핑 타입에 따라 다른 화면으로 네비게이트
+        if (data.dropping.type === 'PLAYLIST') {
+          navigation.navigate('PlaylistDetail', {
+            droppingId: data.dropping.droppingId,
+          });
+        } else if (data.dropping.type === 'VOTE') {
+          // TODO: 투표 화면으로 네비게이션 (아직 구현되지 않음)
+          navigation.navigate('Music', {
+            droppingId: data.dropping.droppingId,
+            songId: data.dropping.songId,
+            title: data.songInfo?.title || '드랍핑 음악',
+            artist: data.songInfo?.artist || '알 수 없는 아티스트',
+            location: data.dropping.address,
+            message: data.dropping.content,
+            isMyDropping: data.dropping.isMyDropping,
+          });
+        } else {
+          // MUSIC 타입 또는 기본값
+          navigation.navigate('Music', {
+            droppingId: data.dropping.droppingId,
+            songId: data.dropping.songId,
+            title: data.songInfo?.title || '드랍핑 음악',
+            artist: data.songInfo?.artist || '알 수 없는 아티스트',
+            location: data.dropping.address,
+            message: data.dropping.content,
+            isMyDropping: data.dropping.isMyDropping,
+          });
+        }
     }, [navigation, data.dropping, data.songInfo, data.isDropOption, currentLocation, currentAddress]);
 
 

@@ -22,8 +22,9 @@ export const styles = StyleSheet.create({
     },
     // Header
     header: {
-        flexDirection: 'column',
-        gap: 0,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
         width: '100%',
     },
     backButton: {
@@ -31,6 +32,15 @@ export const styles = StyleSheet.create({
         height: scale(24),
         alignItems: 'center',
         justifyContent: 'center',
+        marginBottom: verticalScale(4),
+    },
+    deleteButton: {
+        width: scale(36),
+        height: scale(36),
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255, 59, 48, 0.1)',
+        borderRadius: scale(18),
         marginBottom: verticalScale(4),
     },
     cdPlayerSection: {
