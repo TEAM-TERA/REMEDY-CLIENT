@@ -112,7 +112,7 @@ function HomeScreen() {
     if (currentId && currentDroppingId) {
       const fetchCurrentSongData = async () => {
         try {
-          const localDropping = droppings.find((d: Dropping) => String(d.droppingId) === String(currentDroppingId));
+          const localDropping = droppings?.find((d: Dropping) => String(d.droppingId) === String(currentDroppingId));
 
           let droppingData = localDropping;
           if (!droppingData) {
