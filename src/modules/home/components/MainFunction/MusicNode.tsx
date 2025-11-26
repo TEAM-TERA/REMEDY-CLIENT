@@ -24,15 +24,25 @@ interface MusicNodeProps {
 const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: _index, baseAngle, rotation, baseRotation, mainNodeIndex, nodeIndex }: MusicNodeProps) {
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-    // 모든 노드가 같은 반지름의 원 위에 배치
-    const radius = scale(120);
+    // 컨테이너 크기(scale(300))의 반지름에서 노드 크기와 여유 공간을 뺀 값
+    const containerSize = scale(300);
+    const nodeSize = scale(64); // 메인 노드 크기
+    const padding = scale(10); // 여유 공간
+    const radius = (containerSize / 2) - (nodeSize / 2) - padding;
 
     const imageSource = React.useMemo(() => {
+        console.log('MusicNode imageSource 계산:', {
+            songId: data.dropping?.songId,
+            hasSongInfo: !!data.songInfo,
+            albumImagePath: data.songInfo?.albumImagePath,
+            songInfoKeys: data.songInfo ? Object.keys(data.songInfo) : []
+        });
+        
         if (data.songInfo?.albumImagePath && data.songInfo.albumImagePath.trim() !== "") {
             return { uri: data.songInfo.albumImagePath };
         }
         return require('../../../../assets/images/profileImage.png');
-    }, [data.songInfo?.albumImagePath]);
+    }, [data.songInfo?.albumImagePath, data.dropping?.songId]);
 
     const animatedStyle = useAnimatedStyle(() => {
         'worklet';
@@ -49,6 +59,20 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
         const mainNodeIndexValue = mainNodeIndex?.value ?? 0;
         const isCurrentlyMain = mainNodeIndexValue === nodeIndex;
 
+        // 각도에 따라 반지름 조정 (하단 노드는 더 바깥으로)
+        // -180도(왼쪽) ~ 0도(오른쪽) 범위에서 -90도(아래)가 최대
+        const normalizedAngle = ((currentAngle + 180) % 360) - 180;
+        const distanceFromBottom = Math.abs(normalizedAngle - (-90)); // -90도(아래)와의 거리
+        
+        // 메인 노드는 반지름 조정 안 함
+        let radiusMultiplier = 1.0;
+        if (!isCurrentlyMain && distanceFromBottom < 45) {
+          // -90도 근처(±45도)는 반지름 증가 (최대 +30%)
+          radiusMultiplier = 1.0 + (0.3 * (1 - distanceFromBottom / 45));
+        }
+        
+        const dynamicRadius = radius * radiusMultiplier;
+
         // 투명도: 메인 노드는 완전히 선명, 서브 노드는 40%
         const opacity = isCurrentlyMain ? 1.0 : 0.4;
 
@@ -58,10 +82,10 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
         return {
             transform: [
                 {
-                    translateX: Math.cos(angleInRadians) * radius,
+                    translateX: Math.cos(angleInRadians) * dynamicRadius,
                 },
                 {
-                    translateY: Math.sin(angleInRadians) * radius,
+                    translateY: Math.sin(angleInRadians) * dynamicRadius,
                 },
                 {
                     scale: nodeScale,
