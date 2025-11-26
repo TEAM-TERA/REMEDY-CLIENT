@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useSharedValue, withSpring, useDerivedValue } from 'react-native-reanimated';
+import Animated, { runOnJS, useSharedValue, withSpring, useDerivedValue, useAnimatedReaction } from 'react-native-reanimated';
 import { styles } from '../../styles/MainFunction/MusicWheel';
 import MusicNode from './MusicNode';
 import { VisibleNode } from '../../types/musicList';
@@ -9,8 +9,6 @@ import { navigate } from '../../../../navigation';
 import DropButton from './DropButton';
 import { useQueries } from '@tanstack/react-query';
 import { getSongInfo } from '../../../drop/api/dropApi';
-import { useHLSPlayer } from '../../../../hooks/music/useHLSPlayer';
-import { usePlayerStore } from '../../../../stores/playerStore';
 
 const SWIPE_THRESHOLD = 60;
 const INVERT_DIRECTION = false;
@@ -20,78 +18,51 @@ const TOTAL_NODES = 8;
 
 interface MusicWheelProps {
   droppings: any[];
+  onDroppingChange?: (droppingId: string | undefined, songId: string | undefined) => void;
 }
 
-const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps) {
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const safeDroppings = Array.isArray(droppings) ? droppings : [];
+const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange }: MusicWheelProps) {
+  const safeDroppings = React.useMemo(() => {
+    return Array.isArray(droppings) ? droppings : [];
+  }, [droppings]);
+
+  const extendedDroppings = React.useMemo(() => {
+    if (safeDroppings.length === 0) return [];
+
+    const extended = [];
+    for (let i = 0; i < TOTAL_NODES; i++) {
+      const sourceIndex = i % safeDroppings.length;
+      extended.push({
+        ...safeDroppings[sourceIndex],
+        _originalIndex: sourceIndex,
+        _extendedIndex: i
+      });
+    }
+
+    return extended;
+  }, [safeDroppings]);
+
   const totalSongs = safeDroppings.length;
   const rotation = useSharedValue(0);
   const baseRotation = useSharedValue(0);
   const startRotation = useSharedValue(0);
 
-  const [isSwiping, setIsSwiping] = useState<boolean>(false);
-  const [currentSongId, setCurrentSongId] = useState<string | undefined>(undefined);
-  const musicPlayer = useHLSPlayer(currentSongId);
-  const { setCurrentId } = usePlayerStore();
-  const didInitRef = useRef(false);
-
-  const updateIndexAndSong = React.useCallback((newIndex: number) => {
-    if (totalSongs === 0) return;
-    const normalized = ((newIndex % totalSongs) + totalSongs) % totalSongs;
-    setCurrentIndex(normalized);
-    const nextSongId = safeDroppings[normalized]?.songId;
-    setCurrentSongId(nextSongId);
-    if (nextSongId) {
-      setCurrentId(nextSongId);
-    }
-  }, [safeDroppings, totalSongs, setCurrentId]);
-
-  // 초기 마운트 시 이전 회전/인덱스 복원
-  useEffect(() => {
-    if (!didInitRef.current) {
-      didInitRef.current = true;
-      baseRotation.value = 0;
-      rotation.value = 0;
-    }
-    if (__DEV__) {
-      console.log('🎡 MusicWheel mounted, droppings count:', safeDroppings.length);
-    }
-  }, [rotation, baseRotation, safeDroppings.length]);
+  const [_isSwiping, setIsSwiping] = useState<boolean>(false);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if (__DEV__) {
-      console.log('Droppings changed, count:', safeDroppings.length);
-      console.log('Current index:', currentIndex);
-      console.log('Is swiping:', isSwiping);
-      console.log('Current song ID:', currentSongId);
-    }
-  }, [safeDroppings, currentIndex, isSwiping, currentSongId]);
+    if (safeDroppings.length > 0 && !hasInitialized.current) {
+      hasInitialized.current = true;
 
-  const visibleSongIds = React.useMemo(() => {
-    if (totalSongs === 0) return [];
-    const ids = [];
-    for (let i = 0; i < Math.min(TOTAL_NODES, totalSongs); i++) {
-      const dataIndex = (currentIndex + i) % totalSongs;
-      if (safeDroppings[dataIndex]?.songId) {
-        ids.push(safeDroppings[dataIndex].songId);
+      if (extendedDroppings && extendedDroppings.length > 0 && extendedDroppings[0]) {
+        const firstDropping = extendedDroppings[0];
+
+        if (onDroppingChange && firstDropping.songId) {
+          onDroppingChange(firstDropping.droppingId, firstDropping.songId);
+        }
       }
     }
-    return ids;
-  }, [safeDroppings, currentIndex, totalSongs]);
-
-  const songQueries = useQueries({
-    queries: visibleSongIds.map((songId, idx) => ({
-      queryKey: ['songInfo', songId, safeDroppings[(currentIndex + idx) % totalSongs]?.droppingId || idx],
-      queryFn: () => getSongInfo(songId),
-      enabled: !!songId,
-      staleTime: 5 * 60 * 1000,
-    })),
-  });
-
-  const handlerPressDrop = React.useCallback(() => {
-    navigate('Drop');
-  }, []);
+  }, [safeDroppings.length, safeDroppings, extendedDroppings, onDroppingChange]);
 
   const mainNodeIndex = useDerivedValue(() => {
     'worklet';
@@ -114,31 +85,83 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
     return closestIndex;
   });
 
-  const actualMainDataIndex = useMemo(() => {
-    if (totalSongs === 0) return 0;
-    return currentIndex % totalSongs;
-  }, [currentIndex, totalSongs]);
-
-  useEffect(() => {
-    if (safeDroppings && safeDroppings[actualMainDataIndex]) {
-      const nextId = safeDroppings[actualMainDataIndex].songId;
-      setCurrentSongId(nextId);
-    } else {
-      setCurrentSongId(undefined);
+  const handleMainNodeChange = React.useCallback((newIndex: number) => {
+    if (
+      extendedDroppings &&
+      Array.isArray(extendedDroppings) &&
+      extendedDroppings.length > 0 &&
+      newIndex >= 0 &&
+      newIndex < extendedDroppings.length
+    ) {
+      const currentDropping = extendedDroppings[newIndex];
+      if (currentDropping && currentDropping.droppingId && currentDropping.songId) {
+        if (onDroppingChange) {
+          onDroppingChange(currentDropping.droppingId, currentDropping.songId);
+        }
+      }
     }
-  }, [actualMainDataIndex, safeDroppings]);
+  }, [extendedDroppings, onDroppingChange]);
+
+  useAnimatedReaction(
+    () => mainNodeIndex.value,
+    (currentIndex, previousIndex) => {
+      'worklet';
+      if (currentIndex !== previousIndex && currentIndex >= 0) {
+        runOnJS(handleMainNodeChange)(currentIndex);
+      }
+    },
+    [handleMainNodeChange]
+  );
+
+  const visibleSongIds = React.useMemo(() => {
+    if (!extendedDroppings || !Array.isArray(extendedDroppings) || extendedDroppings.length === 0) {
+      return [];
+    }
+
+    const ids = [];
+    for (let i = 0; i < TOTAL_NODES; i++) {
+      const dataIndex = i % TOTAL_NODES;
+
+      if (dataIndex < extendedDroppings.length) {
+        const dropping = extendedDroppings[dataIndex];
+        if (dropping?.songId && typeof dropping.songId === 'string') {
+          ids.push(dropping.songId);
+        }
+      }
+    }
+
+    return ids;
+  }, [extendedDroppings]);
+
+  const songQueries = useQueries({
+    queries: visibleSongIds.filter(songId => songId && typeof songId === 'string').map((songId) => ({
+      queryKey: ['songInfo', songId],
+      queryFn: () => getSongInfo(songId),
+      enabled: !!songId && typeof songId === 'string',
+      staleTime: 5 * 60 * 1000,
+      retry: 1,
+    })),
+  });
+
+  const handlerPressDrop = React.useCallback(() => {
+    navigate('Drop');
+  }, []);
 
   const visibleNodes = React.useMemo(() => {
     const nodes: VisibleNode[] = [];
-    if (totalSongs === 0) {
+
+    if (!extendedDroppings || !Array.isArray(extendedDroppings) || extendedDroppings.length === 0) {
       return nodes;
     }
 
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
-      const dataIndex = (currentIndex + nodeIndex) % totalSongs;
+      const dataIndex = nodeIndex % TOTAL_NODES;
 
-      if (safeDroppings[dataIndex]) {
-        const dropping = safeDroppings[dataIndex];
+      if (dataIndex >= extendedDroppings.length) continue;
+
+      const dropping = extendedDroppings[dataIndex];
+
+      if (dropping && dropping.droppingId && dropping.songId) {
         const isMainNode = nodeIndex === 0;
 
         let songInfo = null;
@@ -164,8 +187,9 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
         });
       }
     }
+
     return nodes;
-  }, [safeDroppings, currentIndex, totalSongs, visibleSongIds, songQueries]);
+  }, [extendedDroppings, visibleSongIds, songQueries]);
 
   const pan = Gesture.Pan()
     .onBegin(() => {
@@ -201,7 +225,6 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
                 if (finished) {
                     baseRotation.value = targetRotation;
                     rotation.value = 0;
-                    runOnJS(updateIndexAndSong)(targetStep % totalSongs);
                     runOnJS(setIsSwiping)(false);
                 }
             });
@@ -219,7 +242,6 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
                 if (finished) {
                     baseRotation.value = targetRotation;
                     rotation.value = 0;
-                    runOnJS(updateIndexAndSong)(nearestStep % totalSongs);
                     runOnJS(setIsSwiping)(false);
                 }
             });
@@ -261,14 +283,15 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
     </GestureDetector>
   );
 }, (prevProps, nextProps) => {
-  if (prevProps.droppings.length !== nextProps.droppings.length) {
-    return false;
-  }
+  const droppingsEqual = prevProps.droppings.length === nextProps.droppings.length &&
+    prevProps.droppings.every((prev, index) => {
+      const next = nextProps.droppings[index];
+      return next && prev.droppingId === next.droppingId && prev.songId === next.songId;
+    });
 
-  return prevProps.droppings.every((prev, index) => {
-    const next = nextProps.droppings[index];
-    return next && prev.droppingId === next.droppingId && prev.songId === next.songId;
-  });
+  const callbackEqual = prevProps.onDroppingChange === nextProps.onDroppingChange;
+
+  return droppingsEqual && callbackEqual;
 });
 
 export default MusicWheel;
