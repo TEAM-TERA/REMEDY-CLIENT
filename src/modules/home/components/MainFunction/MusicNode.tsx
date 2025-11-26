@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, TouchableOpacity, Text } from 'react-native';
-import Animated, { useAnimatedStyle, SharedValue, interpolate, DerivedValue } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, SharedValue, DerivedValue } from 'react-native-reanimated';
 import { styles } from '../../styles/MainFunction/MusicNode';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
@@ -45,28 +45,15 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
         const currentAngle = baseAngle + totalRotation;
         const angleInRadians = (currentAngle * Math.PI) / 180;
 
-        // 현재 각도를 -180 ~ 180 범위로 정규화
-        const normalizedAngle = ((currentAngle + 180) % 360) - 180;
-
-        // 메인 위치(-90°) 기준으로 투명도와 스케일 계산 (더 정확한 범위)
-        const distanceFromMain = Math.abs(normalizedAngle - (-90));
-
         // 현재 이 노드가 메인 노드인지 동적으로 확인
         const mainNodeIndexValue = mainNodeIndex?.value ?? 0;
         const isCurrentlyMain = mainNodeIndexValue === nodeIndex;
 
-        // 전체 노드들의 기본 가시성 (60도 범위)
-        const isVisible = distanceFromMain < 60;
-
-        // 투명도: 메인 노드는 완전히 선명, 나머지는 거리에 따라
-        const opacity = isCurrentlyMain
-            ? 1.0
-            : isVisible
-            ? interpolate(distanceFromMain, [0, 60], [0.8, 0.2], 'clamp')
-            : 0.1;
+        // 투명도: 메인 노드는 완전히 선명, 서브 노드는 40%
+        const opacity = isCurrentlyMain ? 1.0 : 0.4;
 
         // 스케일: 메인 노드는 64px(1.0), 서브 노드는 48px(0.75)로 통일
-        const scale = isCurrentlyMain ? 1.0 : 0.75;
+        const nodeScale = isCurrentlyMain ? 1.0 : 0.75;
 
         return {
             transform: [
@@ -77,7 +64,7 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
                     translateY: Math.sin(angleInRadians) * radius,
                 },
                 {
-                    scale: scale,
+                    scale: nodeScale,
                 },
             ],
             opacity: opacity,
