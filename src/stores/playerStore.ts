@@ -41,14 +41,14 @@ export const usePlayerStore = create<PlayerState>((set, get) => ({
       };
 
       await TrackPlayer.add(trackData);
-      
+
       await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
         subscription.remove();
         reject(new Error('재생 시작 타임아웃'));
       }, 5000); // 5초 타임아웃
 
-      const subscription = TrackPlayer.addEventListener(Event.PlaybackState, (event) => {
+      const subscription = TrackPlayer.addEventListener(Event.PlaybackState, (event: any) => {
         if (event.state === State.Playing) {
           clearTimeout(timeout);
           subscription.remove();
