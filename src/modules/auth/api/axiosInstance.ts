@@ -14,10 +14,21 @@ const axiosInstance = axios.create({
   },
 });
 axiosInstance.interceptors.request.use(async (config) => {
-  console.log("API Request:", config.method?.toUpperCase(), config.url);
-  console.log("Full URL:", (config.baseURL || "") + (config.url || ""));
+  const isLikeApi = config.url?.includes('/my-like');
+
+  if (isLikeApi) {
+    console.log("🔥 [DEBUG] 좋아요 API Request:", config.method?.toUpperCase(), config.url);
+    console.log("🔥 [DEBUG] Full URL:", (config.baseURL || "") + (config.url || ""));
+  } else {
+    console.log("API Request:", config.method?.toUpperCase(), config.url);
+    console.log("Full URL:", (config.baseURL || "") + (config.url || ""));
+  }
 
   const token = await AsyncStorage.getItem("userToken");
+  if (isLikeApi) {
+    console.log("🔥 [DEBUG] Token:", token ? 'exists' : 'missing');
+  }
+
   if (token && config.headers) {
     (config.headers as any)["Authorization"] = `Bearer ${token}`;
   }
@@ -25,8 +36,18 @@ axiosInstance.interceptors.request.use(async (config) => {
 });
 
 axiosInstance.interceptors.response.use(
-  (res) => res,
+  (res) => {
+    const isLikeApi = res.config.url?.includes('/my-like');
+    if (isLikeApi) {
+      console.log("🔥 [DEBUG] 좋아요 API Response 성공:", res.status, res.data);
+    }
+    return res;
+  },
   async (error) => {
+    const isLikeApi = error.config?.url?.includes('/my-like');
+    if (isLikeApi) {
+      console.log("🔥 [DEBUG] 좋아요 API Response 에러:", error.response?.status, error.response?.data);
+    }
     const originalRequest = error.config;
     
     if (error?.response?.status === 401 && !originalRequest._retry) {

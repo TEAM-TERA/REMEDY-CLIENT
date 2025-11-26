@@ -9,7 +9,9 @@ import {
   Image,
   ActivityIndicator,
   Alert,
+  Platform,
 } from 'react-native';
+import { launchImageLibrary, ImagePickerResponse, MediaType } from 'react-native-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NavigationProp } from '@react-navigation/native';
@@ -24,6 +26,7 @@ import {
   BACKGROUND_COLORS,
   TEXT_COLORS,
   PRIMARY_COLORS,
+  SECONDARY_COLORS,
   TERTIARY_COLORS,
   UI_COLORS,
   FORM_COLORS,
@@ -36,6 +39,7 @@ import { useMyLikes } from '../hooks/useMyLike';
 import { useMyPlaylists } from '../hooks/useMyPlaylists';
 import { useCreatePlaylist } from '../../music/hooks/useCreatePlaylist';
 import { getSongInfo } from '../../drop/api/dropApi';
+import { updateProfileImageApi, getMyLikesApi } from '../../auth/api/authApi';
 import { getErrorMessage } from '../../../utils/errorHandler';
 import Config from 'react-native-config';
 
@@ -78,9 +82,21 @@ type DroppingData = {
 function UserProfileScreen() {
   const navigation = useNavigation<NavigationProp<ProfileStackParamList & RootStackParamList>>();
   const [activeTab, setActiveTab] = useState<'drop' | 'like' | 'playlist'>('drop');
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const { data: myDrops = [], isLoading: dropLoading } = useMyDrop();
-  const { data: myLikes = [], isLoading: likeLoading, error: likeError } = useMyLikes();
+  const { data: myLikesResponse, isLoading: likeLoading, error: likeError } = useMyLikes();
+  const myLikes = myLikesResponse?.droppings || [];
+
+  // 좋아요 데이터 디버깅
+  console.log('🔥 [DEBUG] UserProfileScreen - 좋아요 데이터 상태:', {
+    myLikesResponse,
+    myLikes,
+    myLikesLength: myLikes?.length,
+    likeLoading,
+    likeError: likeError?.message,
+    activeTab,
+  });
   const { data: me, isLoading, isError, refetch } = useMyProfile();
   const { data: myPlaylistsData, isLoading: playlistLoading } = useMyPlaylists();
 
@@ -141,6 +157,60 @@ function UserProfileScreen() {
 
   const handleEditProfile = () => {
     navigation.navigate('NameEdit');
+  };
+
+  const handleProfileImagePress = () => {
+    const options = {
+      mediaType: 'photo' as MediaType,
+      includeBase64: false,
+      maxHeight: 1000,
+      maxWidth: 1000,
+      quality: 0.8 as any,
+    };
+
+    launchImageLibrary(options, (response: ImagePickerResponse) => {
+      if (response.didCancel) {
+        return;
+      }
+
+      if (response.errorMessage) {
+        Alert.alert('오류', response.errorMessage);
+        return;
+      }
+
+      if (response.assets && response.assets[0]) {
+        const asset = response.assets[0];
+        uploadProfileImage(asset);
+      }
+    });
+  };
+
+  const uploadProfileImage = async (imageAsset: any) => {
+    try {
+      setIsUploadingImage(true);
+
+      const imageFile = {
+        uri: imageAsset.uri,
+        type: imageAsset.type,
+        name: imageAsset.fileName || 'profile.jpg',
+      };
+
+      const result = await updateProfileImageApi(imageFile);
+
+      if (result?.profileImageUrl) {
+        // 프로필 데이터 새로고침
+        refetch();
+
+        Alert.alert('성공', '프로필 이미지가 업데이트되었습니다.');
+      } else {
+        Alert.alert('오류', '이미지 업로드에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Profile image upload error:', error);
+      Alert.alert('오류', '이미지 업로드 중 오류가 발생했습니다.');
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   const handleCreatePlaylist = () => {
@@ -299,8 +369,13 @@ function UserProfileScreen() {
     </View>
   );
 
-  const renderDropItem = (item: DroppingData) => {
-    switch (item.type) {
+  const renderDropItem = (item: any) => {
+    // droppingType을 type으로 변환하여 호환성 유지
+    const itemType = item.type || item.droppingType;
+
+    console.log('🔥 [DEBUG] renderDropItem - itemType:', itemType, 'original item:', item);
+
+    switch (itemType) {
       case 'MUSIC':
         return renderMusicItem(item);
       case 'PLAYLIST':
@@ -308,6 +383,7 @@ function UserProfileScreen() {
       case 'VOTE':
         return renderVoteItem(item);
       default:
+        console.log('🔥 [DEBUG] renderDropItem - Unknown type:', itemType);
         return null;
     }
   };
@@ -316,8 +392,20 @@ function UserProfileScreen() {
   const dropsArray = Array.isArray(myDrops) ? myDrops : [];
   const likesArray = Array.isArray(myLikes) ? myLikes : [];
 
+  console.log('🔥 [DEBUG] 배열 처리:', {
+    dropsArrayLength: dropsArray.length,
+    likesArrayLength: likesArray.length,
+    likesArraySample: likesArray.slice(0, 2),
+  });
+
   const filteredDrops = dropsArray.filter((d: any) => d && d.droppingId);
   const filteredLikes = likesArray.filter((like: any) => like && like.droppingId);
+
+  console.log('🔥 [DEBUG] 필터링 후:', {
+    filteredDropsLength: filteredDrops.length,
+    filteredLikesLength: filteredLikes.length,
+    filteredLikesSample: filteredLikes.slice(0, 2),
+  });
 
   const playlists = myPlaylistsData?.playlists || [];
 
@@ -333,19 +421,69 @@ function UserProfileScreen() {
           hasHeart: false,
         }))
       : activeTab === "like"
-        ? filteredLikes.map((like: any) => ({
-            droppingId: like.droppingId,
-            memo: like.title || "알 수 없는 곡",
-            artist: like.artist || "알 수 없는 가수",
-            location: like.address || "위치 정보 없음",
-            imageSource: like.imageUrl ? { uri: like.imageUrl } : undefined,
-            hasHeart: true,
-          }))
+        ? filteredLikes.map((like: any) => {
+            // 새로운 API 응답 형식에 맞춰서 처리
+            let memo = "";
+            let artist = "";
+            let imageSource = undefined;
+
+            if (like.droppingType === "MUSIC") {
+              memo = like.title || "알 수 없는 곡";
+              artist = like.artist || "알 수 없는 가수";
+              imageSource = like.imageUrl ? { uri: like.imageUrl } : undefined;
+            } else if (like.droppingType === "PLAYLIST") {
+              memo = like.playlistName || "알 수 없는 플레이리스트";
+              artist = "플레이리스트";
+            } else if (like.droppingType === "VOTE") {
+              memo = like.topic || "알 수 없는 투표";
+              artist = "투표";
+            }
+
+            return {
+              droppingId: like.droppingId,
+              memo,
+              artist,
+              location: like.address || "위치 정보 없음",
+              imageSource,
+              hasHeart: true,
+            };
+          })
         : [];
 
   // 새로운 타입별 UI용 데이터 (드랍/좋아요 탭용)
   const droppingsData: any[] =
-    activeTab === "drop" ? filteredDrops : activeTab === "like" ? filteredLikes : [];
+    activeTab === "drop"
+      ? filteredDrops
+      : activeTab === "like"
+        ? filteredLikes.map((like: any) => {
+            // 좋아요 데이터를 DroppingData 형식으로 변환
+            const converted = {
+              type: like.droppingType, // droppingType을 type으로 변환
+              droppingId: like.droppingId,
+              userId: 0, // 좋아요에서는 userId 정보가 없음
+              address: like.address,
+              content: '', // 좋아요에서는 content 정보가 없음
+              latitude: 0, // 좋아요에서는 좌표 정보가 없음
+              longitude: 0,
+              // MUSIC type fields
+              title: like.title,
+              artist: like.artist,
+              albumImageUrl: like.imageUrl,
+              // PLAYLIST type fields
+              playlistName: like.playlistName,
+              // VOTE type fields
+              topic: like.topic,
+            };
+            console.log('🔥 [DEBUG] 좋아요 데이터 변환:', like, '→', converted);
+            return converted;
+          })
+        : [];
+
+  console.log('🔥 [DEBUG] droppingsData:', {
+    activeTab,
+    droppingsDataLength: droppingsData.length,
+    droppingsDataSample: droppingsData.slice(0, 2),
+  });
 
   if(isLoading || (dropLoading && !myDrops) || (likeLoading && !myLikes) || (playlistLoading && !myPlaylistsData)){
     return (
@@ -375,7 +513,6 @@ function UserProfileScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={BACKGROUND_COLORS.BACKGROUND} />
 
-      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={handleGoBack} style={styles.headerButton}>
           <Icon name="left" width={10} height={18} color={TEXT_COLORS.CAPTION} />
@@ -392,15 +529,23 @@ function UserProfileScreen() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Profile Info */}
         <View style={styles.profileContainer}>
-          <View style={styles.profileImageContainer}>
+          <TouchableOpacity
+            style={styles.profileImageContainer}
+            onPress={handleProfileImagePress}
+            activeOpacity={0.7}
+          >
             <Image
               source={{ uri: me?.profileImageUrl || 'https://via.placeholder.com/72x72/E61F54/FFFFFF?text=U' }}
               style={styles.profileImage}
               resizeMode="cover"
             />
-          </View>
+            {isUploadingImage && (
+              <View style={styles.uploadingOverlay}>
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              </View>
+            )}
+          </TouchableOpacity>
 
           <View style={styles.profileInfo}>
             <View style={styles.nameContainer}>
@@ -411,7 +556,7 @@ function UserProfileScreen() {
             </View>
 
             <Text style={styles.userBio}>
-              나이 18세, 음악 좋아함{'\n'}
+              {me?.username}입니다{'\n'}
               ~~~~~~~~~{'\n'}
               ~~~~~~~~
             </Text>
@@ -450,7 +595,12 @@ function UserProfileScreen() {
                 ) : (
                   droppingsData
                     .filter((item) => item && item.droppingId)
-                    .map((item) => renderDropItem(item))
+                    .map((item) => {
+                      console.log('🔥 [DEBUG] renderDropItem 호출:', item);
+                      console.log('🔥 [DEBUG] item.type:', item.type);
+                      console.log('🔥 [DEBUG] item.droppingType:', item.droppingType);
+                      return renderDropItem(item);
+                    })
                 )}
               </View>
             )}
@@ -560,6 +710,18 @@ const styles = StyleSheet.create({
   profileImage: {
     width: scale(72),
     height: scale(72),
+    borderRadius: scale(36), // 반지름을 절반으로 설정하여 완전한 원 만들기
+  },
+  uploadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: scale(50),
   },
   profileInfo: {
     flex: 1,
@@ -755,11 +917,11 @@ const styles = StyleSheet.create({
     lineHeight: scale(16),
   },
   playlistTitle: {
-    color: TERTIARY_COLORS.DEFAULT,
+    color: SECONDARY_COLORS.DEFAULT,
     maxHeight: scale(52),
   },
   voteTitle: {
-    color: '#6210EF', // tertiary color
+    color: TERTIARY_COLORS.DEFAULT,
     maxHeight: scale(68),
   },
   menuButton: {
@@ -784,21 +946,22 @@ const styles = StyleSheet.create({
   },
   locationTagText: {
     ...TYPOGRAPHY.CAPTION_1,
-    color: '#FB6A90', // primary+20
+    color: PRIMARY_COLORS.DEFAULT,
     fontSize: scale(14),
     lineHeight: scale(16),
   },
   playlistLocationTag: {
-    // 플레이리스트용 태그 스타일
+    marginTop: scale(-4),
   },
   playlistLocationTagText: {
-    color: '#F5BE70', // secondary+20
+
+    color: SECONDARY_COLORS.DEFAULT,
   },
   voteLocationTag: {
     // 투표용 태그 스타일
   },
   voteLocationTagText: {
-    color: '#A170F5', // tertiary+20
+    color: TERTIARY_COLORS.DEFAULT,
   },
 });
 

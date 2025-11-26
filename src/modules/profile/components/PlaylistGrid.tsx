@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { View, TouchableOpacity, Text, Image, StyleSheet, Modal, TextInput, FlatList } from 'react-native';
+import Config from 'react-native-config';
 import { scale, verticalScale } from '../../../utils/scalers';
 import { TEXT_COLORS, FORM_COLORS, PRIMARY_COLORS } from '../../../constants/colors';
 import Icon from '../../../components/icon/Icon';
@@ -16,14 +17,26 @@ interface PlaylistGridProps {
     onCreatePlaylist?: () => void;
 }
 
+const getImageUrl = (imagePath?: string) => {
+    if (!imagePath) {
+        return require('../../../assets/images/profileImage.png');
+    }
+    if (imagePath.startsWith('http')) {
+        return { uri: imagePath };
+    }
+    const baseUrl = Config.MUSIC_API_BASE_URL || 'http://localhost:3000';
+    return { uri: `${baseUrl}${imagePath}` };
+};
+
 const PlaylistCard: React.FC<{ playlist: Playlist; onPressMore: (p: Playlist) => void; onPressOpen: (p: Playlist) => void }> = ({ playlist, onPressMore, onPressOpen }) => (
     <TouchableOpacity style={styles.playlistItem} activeOpacity={0.85} onPress={() => onPressOpen(playlist)}>
         <View style={styles.playlistContainer}>
             <View style={styles.playlistHeaderBar} />
             <View style={styles.playlistImageContainer}>
                 <Image
-                    source={require('../../../assets/images/profileImage.png')}
+                    source={getImageUrl(playlist.albumImageUrl)}
                     style={styles.playlistThumbnail}
+                    resizeMode="cover"
                 />
             </View>
         </View>

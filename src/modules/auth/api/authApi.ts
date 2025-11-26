@@ -35,3 +35,31 @@ export async function signUpApi(payload: SignUpRequest) {
   const res = await axiosInstance.post('/auth/register', payload);
   return res.data;
 }
+
+// Profile image upload API
+export async function updateProfileImageApi(imageFile: any) {
+  try {
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    const res = await axiosInstance.put('/users/profile-image', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return res.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
+
+// Get my likes API
+export async function getMyLikesApi() {
+  try {
+    const res = await axiosInstance.get('/users/my-like');
+    return res.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+}
