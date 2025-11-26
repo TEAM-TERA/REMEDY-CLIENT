@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Platform, PermissionsAndroid } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import { Linking } from 'react-native';
+import Config from 'react-native-config';
 
 const useLocation = () => {
     const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
@@ -11,79 +12,60 @@ const useLocation = () => {
 
     const getAddressFromCoords = async (latitude: number, longitude: number) => {
         try {
-            console.log('Reverse geocoding 시작:', { latitude, longitude });
+            console.log('Google Reverse geocoding 시작:', { latitude, longitude });
+
+            const googleApiKey = Config.GOOGLE_MAPS_API_KEY;
+            if (!googleApiKey) {
+                console.warn('Google API Key가 없습니다.');
+                setAddress("위치 정보를 가져올 수 없습니다");
+                return;
+            }
 
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&accept-language=ko&zoom=18&extratags=1`
+                `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${googleApiKey}&language=ko&region=kr`
             );
             const data = await response.json();
-            console.log('Reverse geocoding 상세 응답:', data);
+            console.log('Google Geocoding 응답:', data);
 
-            if (data && data.address) {
-                const { address: addr } = data;
-                console.log('주소 파싱 상세:', addr);
+            if (data.status === 'OK' && data.results && data.results.length > 0) {
+                // 첫 번째 결과에서 formatted_address 사용
+                const result = data.results[0];
+                const formattedAddress = result.formatted_address;
 
-                const addressParts = [];
-                let dongInfo = '';
+                // 한국 주소에서 불필요한 부분 제거 (우편번호, 대한민국 등)
+                const cleanAddress = formattedAddress
+                    .replace(/대한민국\s*/g, '')
+                    .replace(/\d{5}\s*/g, '') // 우편번호 제거
+                    .trim();
 
-                // 1. 도/시/도 (시/도)
-                if (addr.state || addr.province) {
-                    addressParts.push(addr.state || addr.province);
-                }
-
-                // 2. 시/군/구
-                if (addr.city || addr.county) {
-                    addressParts.push(addr.city || addr.county);
-                }
-
-                // 3. 구/군 (더 세부적인)
-                if (addr.city_district || addr.borough || addr.suburb) {
-                    addressParts.push(addr.city_district || addr.borough || addr.suburb);
-                }
-
-                // 4. 동/면/읍 정보 저장 (나중에 괄호로 추가)
-                if (addr.quarter || addr.neighbourhood || addr.village || addr.town || addr.hamlet) {
-                    dongInfo = addr.quarter || addr.neighbourhood || addr.village || addr.town || addr.hamlet;
-                }
-
-                // 5. 도로명/길
-                if (addr.road || addr.pedestrian || addr.street || addr.path) {
-                    addressParts.push(addr.road || addr.pedestrian || addr.street || addr.path);
-                }
-
-                // 6. 건물번호/번지
-                if (addr.house_number) {
-                    addressParts.push(addr.house_number);
-                }
-
-                // 7. 동 정보를 괄호로 추가
-                if (dongInfo) {
-                    addressParts.push(`(${dongInfo})`);
-                }
-
-                // 8. 건물명이나 상호명 (있다면, 동 정보와 다를 경우에만)
-                if (addr.amenity || addr.shop || addr.building) {
-                    const buildingInfo = addr.amenity || addr.shop || addr.building;
-                    if (typeof buildingInfo === 'string' && buildingInfo.length > 0 && buildingInfo !== dongInfo) {
-                        addressParts.push(`[${buildingInfo}]`);
-                    }
-                }
-
-                const formattedAddress = addressParts.filter(Boolean).join(' ');
-
-                console.log('주소 조합 결과:', {
-                    original: data.display_name,
-                    formatted: formattedAddress,
-                    parts: addressParts,
-                    allAddressData: addr
+                console.log('Google 주소 결과:', {
+                    original: formattedAddress,
+                    cleaned: cleanAddress,
+                    allResults: data.results
                 });
 
-                // 더 상세한 주소가 있으면 사용, 없으면 원본 display_name 사용
-                const finalAddress = formattedAddress || data.display_name || "위치 정보를 가져올 수 없습니다";
-                setAddress(finalAddress);
+                setAddress(cleanAddress || "위치 정보를 가져올 수 없습니다");
             } else {
-                console.warn('주소 데이터 없음');
-                setAddress("위치 정보를 가져올 수 없습니다");
+                console.warn('Google Geocoding 실패:', data.status, data.error_message);
+
+                // Google API 실패 시 fallback으로 OpenStreetMap 사용
+                console.log('Fallback to OpenStreetMap...');
+                const osmResponse = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1&accept-language=ko&zoom=18`
+                );
+                const osmData = await osmResponse.json();
+
+                if (osmData && osmData.display_name) {
+                    const osmAddress = osmData.display_name
+                        .split(',')
+                        .slice(0, 4) // 상위 4개 요소만 사용
+                        .reverse()
+                        .join(' ')
+                        .trim();
+                    setAddress(osmAddress || "위치 정보를 가져올 수 없습니다");
+                } else {
+                    setAddress("위치 정보를 가져올 수 없습니다");
+                }
             }
         } catch (error) {
             console.warn('Reverse geocoding failed:', error);
