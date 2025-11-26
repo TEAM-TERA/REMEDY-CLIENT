@@ -13,8 +13,9 @@ import { getSongInfo } from '../../../drop/api/dropApi';
 const SWIPE_THRESHOLD = 60;
 const INVERT_DIRECTION = false;
 const sign = INVERT_DIRECTION ? -1 : 1;
-const ANGLE_PER_ITEM = 45;
+const ANGLE_PER_ITEM = 45;  // 45도 → 25도 (더 촉촉하게)
 const TOTAL_NODES = 8;
+const MAIN_NODE_ANGLE = -100;  // 메인 노드는 왼쪽
 
 interface MusicWheelProps {
   droppings: any[];
@@ -23,7 +24,18 @@ interface MusicWheelProps {
 
 const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange }: MusicWheelProps) {
   const safeDroppings = React.useMemo(() => {
-    return Array.isArray(droppings) ? droppings : [];
+    if (!Array.isArray(droppings)) return [];
+    
+    // MUSIC 타입만 필터링 (VOTE 타입 제외)
+    const musicDroppings = droppings.filter(d => 
+      d && 
+      d.type === 'MUSIC' && 
+      d.songId && 
+      d.droppingId
+    );
+    
+    console.log(`safeDroppings 필터링: 전체 ${droppings.length}개 → MUSIC ${musicDroppings.length}개`);
+    return musicDroppings;
   }, [droppings]);
 
   const extendedDroppings = React.useMemo(() => {
@@ -39,6 +51,8 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
       });
     }
 
+    console.log(`extendedDroppings: ${extended.length}개 생성`);
+    extended.forEach((d, i) => console.log(`  [${i}] type:${d.type} songId:${d.songId?.substring(0,8)}`));
     return extended;
   }, [safeDroppings]);
 
@@ -49,6 +63,29 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
 
   const [_isSwiping, setIsSwiping] = useState<boolean>(false);
   const hasInitialized = useRef(false);
+  const lastReportedSongId = useRef<string | undefined>(undefined);
+  const previousDroppingsRef = useRef<any[]>([]);
+
+  // droppings 배열이 변경되면 회전 상태 초기화
+  useEffect(() => {
+    if (safeDroppings.length > 0) {
+      // droppings의 실제 내용이 바뀌었는지 확인
+      const droppingsChanged = 
+        previousDroppingsRef.current.length !== safeDroppings.length ||
+        previousDroppingsRef.current.some((prev, idx) => 
+          prev?.droppingId !== safeDroppings[idx]?.droppingId
+        );
+
+      if (droppingsChanged) {
+        console.log('droppings 변경 감지 - 회전 상태 초기화');
+        baseRotation.value = 0;
+        rotation.value = 0;
+        hasInitialized.current = false;
+        lastReportedSongId.current = undefined;
+        previousDroppingsRef.current = [...safeDroppings];
+      }
+    }
+  }, [safeDroppings, baseRotation, rotation]);
 
   useEffect(() => {
     if (safeDroppings.length > 0 && !hasInitialized.current) {
@@ -58,6 +95,7 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
         const firstDropping = extendedDroppings[0];
 
         if (onDroppingChange && firstDropping.songId) {
+          lastReportedSongId.current = firstDropping.songId;
           onDroppingChange(firstDropping.droppingId, firstDropping.songId);
         }
       }
@@ -70,11 +108,11 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
     let minDistance = Infinity;
 
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
-      const baseAngle = nodeIndex * ANGLE_PER_ITEM - 90;
+      const baseAngle = nodeIndex * ANGLE_PER_ITEM + MAIN_NODE_ANGLE;
       const totalRotation = baseRotation.value + rotation.value;
       const currentAngle = baseAngle + totalRotation;
       const normalizedAngle = ((currentAngle + 180) % 360) - 180;
-      const distanceFromMain = Math.abs(normalizedAngle - (-90));
+      const distanceFromMain = Math.abs(normalizedAngle - MAIN_NODE_ANGLE);
 
       if (distanceFromMain < minDistance) {
         minDistance = distanceFromMain;
@@ -95,7 +133,14 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
     ) {
       const currentDropping = extendedDroppings[newIndex];
       if (currentDropping && currentDropping.droppingId && currentDropping.songId) {
+        // 이미 보고된 곡이면 중복 호출 방지
+        if (lastReportedSongId.current === currentDropping.songId) {
+          return;
+        }
+        
+        lastReportedSongId.current = currentDropping.songId;
         if (onDroppingChange) {
+          console.log('메인 노드 변경:', currentDropping.songId);
           onDroppingChange(currentDropping.droppingId, currentDropping.songId);
         }
       }
@@ -118,26 +163,27 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
       return [];
     }
 
-    const ids = [];
+    // 중복 제거: Set 사용
+    const uniqueIds = new Set<string>();
     for (let i = 0; i < TOTAL_NODES; i++) {
       const dataIndex = i % TOTAL_NODES;
 
       if (dataIndex < extendedDroppings.length) {
         const dropping = extendedDroppings[dataIndex];
         if (dropping?.songId && typeof dropping.songId === 'string') {
-          ids.push(dropping.songId);
+          uniqueIds.add(dropping.songId);
         }
       }
     }
 
-    return ids;
+    return Array.from(uniqueIds);
   }, [extendedDroppings]);
 
   const songQueries = useQueries({
-    queries: visibleSongIds.filter(songId => songId && typeof songId === 'string').map((songId) => ({
+    queries: visibleSongIds.map((songId) => ({
       queryKey: ['songInfo', songId],
       queryFn: () => getSongInfo(songId),
-      enabled: !!songId && typeof songId === 'string',
+      enabled: true,
       staleTime: 5 * 60 * 1000,
       retry: 1,
     })),
@@ -147,6 +193,19 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
     navigate('Drop');
   }, []);
 
+  // songQueries의 data를 songId를 키로 하는 Map으로 변환
+  const songInfoMap = React.useMemo(() => {
+    const map = new Map<string, any>();
+    visibleSongIds.forEach((songId, index) => {
+      if (songQueries[index]?.data) {
+        map.set(songId, songQueries[index].data);
+        console.log(`songInfoMap 설정: ${songId}`, songQueries[index].data);
+      }
+    });
+    console.log('songInfoMap 전체:', Array.from(map.keys()));
+    return map;
+  }, [visibleSongIds, songQueries]);
+
   const visibleNodes = React.useMemo(() => {
     const nodes: VisibleNode[] = [];
 
@@ -154,23 +213,23 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
       return nodes;
     }
 
+    console.log('=== visibleNodes 생성 시작 ===');
     for (let nodeIndex = 0; nodeIndex < TOTAL_NODES; nodeIndex++) {
-      const dataIndex = nodeIndex % TOTAL_NODES;
+      if (nodeIndex >= extendedDroppings.length) {
+        console.log(`[${nodeIndex}] ❌ 범위 초과 (extendedDroppings.length: ${extendedDroppings.length})`);
+        continue;
+      }
 
-      if (dataIndex >= extendedDroppings.length) continue;
-
-      const dropping = extendedDroppings[dataIndex];
+      const dropping = extendedDroppings[nodeIndex];
+      const hasSongId = !!dropping?.songId;
+      const hasDroppingId = !!dropping?.droppingId;
+      
+      console.log(`[${nodeIndex}] type:${dropping?.type} songId:${hasSongId} droppingId:${hasDroppingId}`);
 
       if (dropping && dropping.droppingId && dropping.songId) {
         const isMainNode = nodeIndex === 0;
-
-        let songInfo = null;
-        const queryIndex = visibleSongIds.indexOf(dropping.songId);
-        if (queryIndex !== -1 && songQueries[queryIndex]?.data) {
-          songInfo = songQueries[queryIndex].data;
-        }
-
-        const baseAngle = nodeIndex * ANGLE_PER_ITEM - 90;
+        const songInfo = songInfoMap.get(dropping.songId) || null;
+        const baseAngle = nodeIndex * ANGLE_PER_ITEM + MAIN_NODE_ANGLE;
 
         nodes.push({
           position: {
@@ -185,11 +244,15 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
           } as any,
           slotIndex: nodeIndex,
         });
+        console.log(`[${nodeIndex}] ✅ 노드 추가됨`);
+      } else {
+        console.log(`[${nodeIndex}] ❌ 조건 미충족`);
       }
     }
 
+    console.log(`=== visibleNodes 완료: ${nodes.length}개 ===`);
     return nodes;
-  }, [extendedDroppings, visibleSongIds, songQueries]);
+  }, [extendedDroppings, songInfoMap]);
 
   const pan = Gesture.Pan()
     .onBegin(() => {
