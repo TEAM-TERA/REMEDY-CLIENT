@@ -136,7 +136,8 @@ function LoginScreen() {
             </TouchableOpacity>
           </View>
         </View>
-        <View style={styles.socialLoginContainer}>
+{/* 임시로 OAuth 버튼들 숨김 */}
+        {/* <View style={styles.socialLoginContainer}>
           <TouchableOpacity style={styles.socialButton}>
             <GoogleOAuthSvg />
           </TouchableOpacity>
@@ -146,7 +147,7 @@ function LoginScreen() {
           <TouchableOpacity style={styles.socialButton}>
             <NaverOAuthSvg />
           </TouchableOpacity>
-        </View>
+        </View> */}
       </View>
     </SafeAreaView>
   );
