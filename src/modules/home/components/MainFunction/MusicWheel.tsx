@@ -283,9 +283,12 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
     </GestureDetector>
   );
 }, (prevProps, nextProps) => {
-  const droppingsEqual = prevProps.droppings.length === nextProps.droppings.length &&
-    prevProps.droppings.every((prev, index) => {
-      const next = nextProps.droppings[index];
+  const prevDroppings = Array.isArray(prevProps.droppings) ? prevProps.droppings : [];
+  const nextDroppings = Array.isArray(nextProps.droppings) ? nextProps.droppings : [];
+
+  const droppingsEqual = prevDroppings.length === nextDroppings.length &&
+    prevDroppings.every((prev, index) => {
+      const next = nextDroppings[index];
       return next && prev.droppingId === next.droppingId && prev.songId === next.songId;
     });
 
