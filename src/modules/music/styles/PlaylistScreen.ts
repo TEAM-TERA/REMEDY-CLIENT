@@ -1,0 +1,322 @@
+import { StyleSheet } from 'react-native';
+import {
+    PRIMARY_COLORS,
+    BACKGROUND_COLORS,
+    UI_COLORS,
+    TEXT_COLORS,
+    FORM_COLORS,
+} from '../../../constants/colors';
+import { TYPOGRAPHY } from '../../../constants/typography';
+import { scale, verticalScale } from '../../../utils/scalers';
+
+export const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: BACKGROUND_COLORS.BACKGROUND,
+    },
+    contentContainer: {
+        flex: 1,
+        paddingHorizontal: scale(16),
+        paddingVertical: verticalScale(16),
+        gap: scale(24),
+    },
+
+    // Header
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 0,
+        paddingVertical: 0,
+    },
+    locationIndicator: {
+        backgroundColor: FORM_COLORS.BACKGROUND_3,
+        flexDirection: 'row',
+        gap: scale(8),
+        alignItems: 'center',
+        paddingHorizontal: scale(16),
+        paddingVertical: scale(4),
+        borderRadius: scale(16),
+    },
+    locationText: {
+        color: TEXT_COLORS.CAPTION_1,
+        ...TYPOGRAPHY.BODY_2,
+        textAlign: 'center',
+    },
+
+    // Playlist Cover
+    playlistCoverContainer: {
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        height: verticalScale(180),
+        width: '100%',
+        overflow: 'hidden',
+        position: 'relative',
+    },
+    playlistCover: {
+        width: scale(300),
+        height: scale(300),
+        borderRadius: scale(150),
+        shadowColor: PRIMARY_COLORS.DEFAULT,
+        shadowOffset: { width: 0, height: 3 },
+        shadowOpacity: 0.15,
+        shadowRadius: 4,
+        elevation: 8,
+        position: 'relative',
+    },
+    playlistCoverImage: {
+        width: '100%',
+        height: '100%',
+        borderRadius: scale(150),
+    },
+    playlistCoverOverlay: {
+        position: 'absolute',
+        bottom: scale(45),
+        left: '50%',
+        transform: [{ translateX: -scale(45) }],
+        width: scale(90),
+        height: scale(90),
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        borderRadius: scale(45),
+    },
+    playlistCoverBackground: {
+        backgroundColor: FORM_COLORS.BACKGROUND_3,
+        borderRadius: scale(24),
+        overflow: 'hidden',
+        height: verticalScale(181),
+    },
+    playlistCoverGradient: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+    },
+
+    // Playlist Info
+    playlistInfo: {
+        gap: scale(24),
+        paddingHorizontal: scale(12),
+        paddingVertical: scale(12),
+    },
+    playlistHeader: {
+        gap: scale(4),
+    },
+    playlistHeaderRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    playlistTitle: {
+        color: TEXT_COLORS.DEFAULT,
+        fontWeight: 'bold',
+        ...TYPOGRAPHY.SUBTITLE,
+    },
+    playlistActions: {
+        flexDirection: 'row',
+        gap: scale(16),
+        alignItems: 'center',
+    },
+    actionButton: {
+        width: scale(24),
+        height: scale(24),
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: scale(12),
+        paddingHorizontal: scale(9),
+        paddingVertical: 0,
+        overflow: 'hidden',
+        minWidth: scale(24),
+    },
+    deleteButton: {
+        width: scale(24),
+        height: scale(24),
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderRadius: scale(12),
+        paddingHorizontal: scale(9),
+        paddingVertical: 0,
+        overflow: 'hidden',
+        minWidth: scale(24),
+    },
+    userInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: scale(8),
+        paddingHorizontal: 0,
+        paddingVertical: scale(4),
+        borderRadius: scale(24),
+    },
+    userDot: {
+        width: scale(20),
+        height: scale(20),
+        borderRadius: scale(10),
+        backgroundColor: PRIMARY_COLORS.DEFAULT,
+    },
+    userName: {
+        color: TEXT_COLORS.DEFAULT,
+        ...TYPOGRAPHY.CAPTION_3,
+    },
+
+    // Play Controls
+    playControlsContainer: {
+        flexDirection: 'row',
+        gap: scale(16),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    playButtonContainer: {
+        width: scale(32),
+        height: scale(32),
+        backgroundColor: PRIMARY_COLORS.DEFAULT,
+        borderRadius: scale(16),
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: scale(10),
+        paddingHorizontal: scale(12),
+        paddingVertical: 0,
+        overflow: 'hidden',
+        minWidth: scale(32),
+    },
+    mainPlayButton: {
+        flex: 1,
+        backgroundColor: PRIMARY_COLORS.DEFAULT,
+        borderRadius: scale(16),
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: scale(10),
+        paddingHorizontal: scale(12),
+        paddingVertical: scale(4),
+        overflow: 'hidden',
+        minWidth: scale(32),
+        minHeight: scale(32),
+    },
+    playButtonText: {
+        color: TEXT_COLORS.DEFAULT,
+        fontWeight: 'bold',
+        ...TYPOGRAPHY.BUTTON_TEXT,
+    },
+
+    // Songs List
+    songsContainer: {
+        flex: 1,
+        gap: scale(12),
+        paddingHorizontal: scale(12),
+        paddingVertical: scale(12),
+        borderRadius: scale(12),
+        overflow: 'hidden',
+        minHeight: 0,
+    },
+    songItem: {
+        flexDirection: 'row',
+        gap: scale(16),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    songLeftSection: {
+        flexDirection: 'row',
+        gap: scale(8),
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    songIndicatorLine: {
+        width: 0,
+        height: scale(20),
+        borderLeftWidth: scale(1.5),
+        borderColor: PRIMARY_COLORS.MINUS_TEN,
+    },
+    songCoverContainer: {
+        position: 'relative',
+        width: scale(80),
+        height: scale(80),
+    },
+    songCover: {
+        width: scale(80),
+        height: scale(80),
+        borderRadius: scale(8),
+        shadowColor: '#000',
+        shadowOffset: { width: 3, height: 0 },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 8,
+    },
+    songCoverOverlay: {
+        position: 'absolute',
+        bottom: scale(10),
+        left: scale(50),
+        width: scale(60),
+        height: scale(60),
+    },
+    songInfo: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignSelf: 'stretch',
+    },
+    songTextContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 0,
+        minWidth: 0,
+    },
+    songTitle: {
+        color: PRIMARY_COLORS.DEFAULT,
+        fontWeight: 'medium',
+        fontSize: scale(16),
+        lineHeight: scale(22),
+        width: '100%',
+        overflow: 'hidden',
+    },
+    songArtist: {
+        color: TEXT_COLORS.DEFAULT,
+        fontWeight: 'medium',
+        fontSize: scale(12),
+        lineHeight: scale(16),
+        width: '100%',
+        overflow: 'hidden',
+    },
+    songMenu: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: scale(24),
+        width: scale(18),
+        height: scale(18),
+    },
+
+    // Loading and Error States
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: scale(16),
+    },
+    loadingText: {
+        color: TEXT_COLORS.CAPTION_1,
+        ...TYPOGRAPHY.BODY_2,
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: scale(16),
+        paddingHorizontal: scale(32),
+    },
+    errorText: {
+        color: TEXT_COLORS.DEFAULT,
+        ...TYPOGRAPHY.BODY_2,
+        textAlign: 'center',
+    },
+    retryButton: {
+        backgroundColor: PRIMARY_COLORS.DEFAULT,
+        paddingHorizontal: scale(24),
+        paddingVertical: scale(12),
+        borderRadius: scale(8),
+    },
+    retryButtonText: {
+        color: TEXT_COLORS.DEFAULT,
+        fontWeight: 'bold',
+        ...TYPOGRAPHY.BUTTON_TEXT,
+    },
+});

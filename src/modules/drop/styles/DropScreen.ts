@@ -18,6 +18,7 @@ export const styles = StyleSheet.create({
     playerContainer : {
         display : "flex",
         padding : scale(12),
+        marginTop : scale(24),
         flexDirection : "column",
         alignItems : "flex-start",
         gap : scale(12),

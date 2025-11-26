@@ -28,6 +28,19 @@ import DangerSvg from './icons/DangerSvg';
 import EyeOnSvg from './icons/EyeOnSvg';
 import EyeOffSvg from './icons/EyeOffSvg';
 import ListSvg from './icons/ListSvg';
+import PrevTrackSvg from './icons/PrevTrackSvg';
+import NextTrackSvg from './icons/NextTrackSvg';
+import DownloadSvg from './icons/DownloadSvg';
+import PlaylistSvg from './icons/PlaylistSvg';
+import DebateSvg from './icons/DebateSvg';
+import PlusSvg from './icons/PlusSvg';
+import TrashSvg from './icons/TrashSvg';
+import ShuffleSvg from './icons/ShuffleSvg';
+import DeleteSvg from './icons/DeleteSvg';
+import RepeatSvg from './icons/RepeatSvg';
+import PlaylistDropSvg from './icons/PlaylistDropSvg';
+import CloseSvg from './icons/CloseSvg';
+import PlaylistMarkerSvg from './icons/PlaylistMarkerSvg';
 
 const icons = {
     edit: EditSvg,
@@ -58,6 +71,19 @@ const icons = {
     eyeOn: EyeOnSvg,
     eyeOff: EyeOffSvg,
     list: ListSvg,
+    prevTrack: PrevTrackSvg,
+    nextTrack: NextTrackSvg,
+    download: DownloadSvg,
+    playlist: PlaylistSvg,
+    debate: DebateSvg,
+    plus: PlusSvg,
+    trash: TrashSvg,
+    shuffle: ShuffleSvg,
+    delete: DeleteSvg,
+    repeat: RepeatSvg,
+    playlistDrop: PlaylistDropSvg,
+    close: CloseSvg,
+    playlistMarker: PlaylistMarkerSvg,
 };
 
 export type IconName = keyof typeof icons;

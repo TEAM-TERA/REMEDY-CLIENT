@@ -6,6 +6,21 @@ export type RootStackParamList = {
   Challenge: undefined;
   Customize: undefined;
   Tutorial: undefined;
+  DebateDrop:
+    | {
+        selectedSong?: {
+          id: string;
+          title: string;
+          artist: string;
+          imageUrl?: string;
+        };
+        slotIndex?: number;
+      }
+    | undefined;
+  DebateMusicSearch: {
+    slotIndex: number;
+    parentKey?: string;
+  };
 
   Music: {
     droppingId: string;
@@ -14,6 +29,55 @@ export type RootStackParamList = {
     artist: string;
     location: string;
     message?: string;
+  };
+
+  Playlist: {
+    playlistId: string;
+  };
+
+  PlaylistMusicSearch: {
+    playlistId: string;
+    playlistName?: string;
+  };
+
+  DebateScreen: {
+    droppingId: string;
+    content?: string;
+    location?: string;
+  };
+
+  MusicDetail: {
+    songId: string;
+  };
+
+  MusicPlayer: {
+    songId: string;
+    songInfo?: {
+      title: string;
+      artist: string;
+      albumImagePath: string;
+    };
+  };
+
+  PlaylistSelection: {
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+
+  PlaylistDropModal: {
+    playlist: {
+      id: string;
+      name: string;
+      albumImageUrl?: string;
+    };
+    latitude: number;
+    longitude: number;
+    address: string;
+  };
+
+  PlaylistDetail: {
+    droppingId: string;
   };
 };
 

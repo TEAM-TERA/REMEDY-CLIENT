@@ -23,7 +23,7 @@ export async function updateMyProfile(payload: UpdateProfilePayload) {
 export async function updateProfileImage(imageFile: FormData) {
   console.log('updateProfileImage API 호출');
 
-  const { data } = await axiosInstance.put('/api/v1/users/profile-image', imageFile, {
+  const { data } = await axiosInstance.put('/users/profile-image', imageFile, {
     headers: {
       'Content-Type': 'multipart/form-data',
     },

@@ -6,7 +6,7 @@ import { TEXT_COLORS } from "../../constants/colors";
 import Icon from "../icon/Icon";
 import { scale } from "../../utils/scalers";
 
-function Input({placeholder, value, onChangeText, width, containerWidth, keyboardType, error, secureTextEntry, helperText, onFocus, onBlur} : InputProps){
+function Input({placeholder, value, onChangeText, width, containerWidth, keyboardType, error, secureTextEntry, helperText, onFocus, onBlur, style} : InputProps){
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const togglePasswordVisibility = () => {
@@ -18,6 +18,7 @@ function Input({placeholder, value, onChangeText, width, containerWidth, keyboar
         containerWidth !== undefined && styles.containerCentered,
         containerWidth !== undefined && { width: containerWidth },
         error && styles.containerError,
+        style,
     ];
 
     const textInputStyle = [
