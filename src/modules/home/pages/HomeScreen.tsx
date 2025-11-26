@@ -62,7 +62,6 @@ function HomeScreen() {
         }
 
         await playIfDifferent(songId, songMeta, true);
-        setCurrentId(songId);
       } catch (error) {
         console.error('음악 재생 실패:', songId, error);
       }
