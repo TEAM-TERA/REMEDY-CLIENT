@@ -28,35 +28,9 @@ export async function PlaybackService() {
   TrackPlayer.addEventListener(Event.PlaybackState, async (event) => {
     console.log('PlaybackService - 재생 상태 변경:', event.state);
 
-    // When a track ends, automatically play next track if available
+    // 트랙 종료 시 무한 반복으로 자동 재시작 (RepeatMode.Track이 처리)
     if (event.state === State.Ended) {
-      console.log('🎵 Track ended, checking for next track...');
-
-      try {
-        const queue = await TrackPlayer.getQueue();
-        const currentTrackIndex = await TrackPlayer.getActiveTrackIndex();
-
-        console.log('Current track ended. Queue length:', queue.length, 'Current index:', currentTrackIndex);
-
-        if (queue.length > 1 && currentTrackIndex !== undefined && currentTrackIndex < queue.length - 1) {
-          console.log('🎵 Auto-advancing to next track...');
-
-          // Add a small delay for HLS streams
-          setTimeout(async () => {
-            try {
-              await TrackPlayer.skipToNext();
-              await TrackPlayer.play();
-              console.log('✅ Successfully advanced to next track');
-            } catch (skipError) {
-              console.error('❌ Error during skip:', skipError);
-            }
-          }, 500);
-        } else {
-          console.log('🏁 End of playlist reached');
-        }
-      } catch (error) {
-        console.error('❌ Error in auto-advance logic:', error);
-      }
+      console.log('🔁 Track ended - Infinite repeat mode will handle restart');
     }
   });
 

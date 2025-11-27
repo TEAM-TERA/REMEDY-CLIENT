@@ -179,27 +179,56 @@ function SignUpScreen() {
         ]
       );
     } catch (error: any) {
-      const serverMessage =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        error?.response?.data?.detail ||
-        error?.message;
-      
-      let userFriendlyMessage = "회원가입에 실패했습니다.";
-      
-      if (typeof serverMessage === "string") {
-        if (serverMessage.includes("email")) {
-          userFriendlyMessage = "이미 사용 중인 이메일입니다.";
-        } else if (serverMessage.includes("username")) {
-          userFriendlyMessage = "이미 사용 중인 이름입니다.";
-        } else {
-          userFriendlyMessage = serverMessage;
+      console.log('🔥 회원가입 에러 상세:', {
+        fullError: error,
+        response: error?.response,
+        responseData: error?.response?.data,
+        status: error?.response?.status,
+        message: error?.message
+      });
+
+      // 백엔드에서 올 수 있는 모든 가능한 에러 메시지 경로 확인
+      const possibleMessages = [
+        error?.response?.data?.message,
+        error?.response?.data?.error,
+        error?.response?.data?.detail,
+        error?.response?.data?.msg,
+        error?.message,
+        error?.response?.statusText
+      ].filter(msg => msg && typeof msg === "string" && msg.trim());
+
+      console.log('🔍 추출된 가능한 메시지들:', possibleMessages);
+
+      let displayMessage = "회원가입에 실패했습니다.";
+
+      // 첫 번째로 발견된 유효한 메시지를 사용
+      if (possibleMessages.length > 0) {
+        displayMessage = possibleMessages[0];
+      } else {
+        // 상태 코드별 기본 메시지
+        switch (error?.response?.status) {
+          case 400:
+            displayMessage = "입력 정보를 확인해주세요.";
+            break;
+          case 409:
+            displayMessage = "이미 존재하는 사용자 정보입니다.";
+            break;
+          case 422:
+            displayMessage = "입력한 정보가 유효하지 않습니다.";
+            break;
+          case 500:
+            displayMessage = "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+            break;
+          default:
+            displayMessage = `회원가입에 실패했습니다. (오류 코드: ${error?.response?.status || 'Unknown'})`;
         }
       }
-      
+
+      console.log('📢 사용자에게 표시될 메시지:', displayMessage);
+
       Alert.alert(
         "회원가입 실패",
-        userFriendlyMessage + "\n다시 시도해주세요.",
+        displayMessage,
         [{ text: "확인" }]
       );
     } finally {

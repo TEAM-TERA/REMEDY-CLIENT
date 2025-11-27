@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Image } from 'react-native';
-import TrackPlayer, { Event, State, useTrackPlayerEvents, TrackType} from 'react-native-track-player';
+import TrackPlayer, { Event, State, useTrackPlayerEvents, TrackType, RepeatMode} from 'react-native-track-player';
 import axiosInstance from '../../modules/auth/api/axiosInstance';
 import Config from 'react-native-config';
 import { usePlayerStore } from '../../stores/playerStore';
@@ -164,12 +164,16 @@ export function useHLSPlayer(songId?: string) {
         console.log('Adding track:', track);
       }
       await TrackPlayer.add(track);
-  
+
+      // 무한 반복 모드 설정
+      await TrackPlayer.setRepeatMode(RepeatMode.Track);
+      console.log('🔁 트랙 무한 반복 모드 설정 완료');
+
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
       }
       progressIntervalRef.current = setInterval(updateProgress, 1000);
-  
+
       setState(prev => ({ ...prev, isLoading: false }));
       
       try {

@@ -180,39 +180,49 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
 
     // 어떤 슬롯이 메인 위치(-90도)에 가장 가까운지 계산
     const steps = Math.round(totalRotation / ANGLE_PER_ITEM);
-    const mainSlot = ((-steps % totalSongs) + totalSongs) % totalSongs;
+    const mainSlot = ((-steps % TOTAL_NODES) + TOTAL_NODES) % TOTAL_NODES;
 
     return mainSlot;
   }, [totalSongs]);
 
   const visibleEntries = React.useMemo(() => {
-    if (displayTotalSongs === 0) return [];
     const entries: { songId: string; droppingId: string; dataIndex: number; slotIndex: number }[] = [];
-    const maxNodes = Math.min(TOTAL_NODES, displayTotalSongs);
 
-    for (let slotIndex = 0; slotIndex < maxNodes; slotIndex++) {
-      let dataIndex: number;
-
-      if (showDropOptions) {
-        dataIndex = slotIndex;
-      } else {
-        // 배열을 안정적으로 유지하고 시각적 회전만 적용
-        dataIndex = slotIndex % displayTotalSongs;
+    if (showDropOptions) {
+      // 드랍 옵션 모드
+      const maxNodes = Math.min(TOTAL_NODES, displayTotalSongs);
+      for (let slotIndex = 0; slotIndex < maxNodes; slotIndex++) {
+        const drop = displayData[slotIndex];
+        if (drop) {
+          entries.push({
+            songId: drop.songId || drop.type || String(slotIndex),
+            droppingId: String(drop.droppingId ?? slotIndex),
+            dataIndex: slotIndex,
+            slotIndex,
+          });
+        }
       }
+    } else {
+      // 일반 음악 모드 - 모든 8개 슬롯에 대해 순차 반복으로 엔트리 생성
+      for (let slotIndex = 0; slotIndex < TOTAL_NODES; slotIndex++) {
+        if (totalSongs > 0) {
+          const dataIndex = slotIndex % totalSongs; // 순차 반복
+          const drop = musicDroppings[dataIndex];
 
-      const drop = displayData[dataIndex];
-
-      if (drop) {
-        entries.push({
-          songId: drop.songId || drop.type || String(dataIndex),
-          droppingId: String(drop.droppingId ?? dataIndex),
-          dataIndex,
-          slotIndex,
-        });
+          if (drop) {
+            entries.push({
+              songId: drop.songId || String(dataIndex),
+              droppingId: String(drop.droppingId ?? dataIndex),
+              dataIndex,
+              slotIndex,
+            });
+          }
+        }
       }
     }
+
     return entries;
-  }, [displayData, displayTotalSongs, showDropOptions]);
+  }, [displayData, displayTotalSongs, showDropOptions, totalSongs, musicDroppings]);
 
   const songQueries = useQueries({
     queries: visibleEntries.map(entry => ({
@@ -292,11 +302,18 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
         });
       }
     } else {
-      // 일반 음악 모드일 때 - 모든 TOTAL_NODES 슬롯을 표시
+      // 일반 음악 모드일 때 - 모든 TOTAL_NODES 슬롯을 음악으로 채움
       for (let slotIndex = 0; slotIndex < TOTAL_NODES; slotIndex++) {
         const baseAngle = slotIndex * ANGLE_PER_ITEM - 90;
-        const dataIndex = slotIndex % totalSongs;
-        const dropping = totalSongs > 0 ? musicDroppings[dataIndex] : null;
+
+        // 음악이 있으면 순차적으로 반복해서 슬롯 채우기
+        let dropping = null;
+        let actualMusicIndex = 0;
+
+        if (totalSongs > 0) {
+          actualMusicIndex = slotIndex % totalSongs; // 1~4가 있으면 1,2,3,4,1,2,3,4로 반복
+          dropping = musicDroppings[actualMusicIndex];
+        }
 
         let songInfo = null;
         if (dropping) {
@@ -306,25 +323,45 @@ const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange 
           }
         }
 
-        // 메인 노드는 현재 선택된 음악이 있는 위치
-        const isMainNode = dropping && dataIndex === currentMusicIndex;
+        // 메인 노드는 메인 슬롯 위치에 있는 노드 (회전과 무관하게 슬롯 기준)
+        const isMainNode = slotIndex === 0; // 첫 번째 슬롯이 항상 메인 (회전으로 위치가 변경됨)
 
-        nodes.push({
-          position: {
-            angle: baseAngle,
-            isMain: !!isMainNode,
-            scale: 1,
-            opacity: dropping ? 1 : 0.3, // 빈 노드는 투명하게
-          },
-          song: {
-            dropping: dropping,
-            songInfo: songInfo,
-            isDropOption: false,
-            isEmpty: !dropping, // 빈 노드 표시
-            onEmptyClick: handleEmptyNodeClick
-          } as any,
-          slotIndex: slotIndex,
-        });
+        // 음악이 없는 경우에만 빈 슬롯 처리
+        if (totalSongs === 0) {
+          nodes.push({
+            position: {
+              angle: baseAngle,
+              isMain: false,
+              scale: 1,
+              opacity: 0.3,
+            },
+            song: {
+              dropping: null,
+              songInfo: null,
+              isDropOption: false,
+              isEmpty: true,
+              onEmptyClick: handleEmptyNodeClick
+            } as any,
+            slotIndex: slotIndex,
+          });
+        } else {
+          // 음악이 있으면 순차 반복으로 채움
+          nodes.push({
+            position: {
+              angle: baseAngle,
+              isMain: !!isMainNode,
+              scale: 1,
+              opacity: 1,
+            },
+            song: {
+              dropping: dropping,
+              songInfo: songInfo,
+              isDropOption: false,
+              isEmpty: false
+            } as any,
+            slotIndex: slotIndex,
+          });
+        }
       }
     }
 

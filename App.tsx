@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AuthProvider } from './src/modules/auth/auth-context';
 import RootNavigation from './src/navigation';
-import TrackPlayer, { Capability } from 'react-native-track-player';
+import TrackPlayer, { Capability, RepeatMode } from 'react-native-track-player';
 import { FPSCounter } from './src/components/FPSCounter';
 
 export const queryClient = new QueryClient({
@@ -41,6 +41,10 @@ export default function App() {
               Capability.Pause,
             ],
         });
+
+        // 무한 반복 모드를 기본값으로 설정
+        await TrackPlayer.setRepeatMode(RepeatMode.Track);
+        console.log('🔁 기본 무한 반복 모드 설정 완료');
       } catch (e) {
         console.warn('TrackPlayer setup failed:', e);
       }

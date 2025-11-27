@@ -32,8 +32,14 @@ type SignUpRequest = {
 };
 
 export async function signUpApi(payload: SignUpRequest) {
-  const res = await axiosInstance.post('/auth/register', payload);
-  return res.data;
+  try {
+    const res = await axiosInstance.post('/auth/register', payload);
+    return res.data;
+  } catch (error) {
+    console.log('🔥 signUpApi 에러:', error);
+    // 에러를 그대로 throw하여 SignUpScreen에서 처리할 수 있도록 함
+    throw error;
+  }
 }
 
 // Profile image upload API
