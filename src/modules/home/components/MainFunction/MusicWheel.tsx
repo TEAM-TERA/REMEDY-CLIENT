@@ -22,15 +22,20 @@ const TOTAL_NODES = 8;
 
 interface MusicWheelProps {
   droppings: any[];
+  onDroppingChange?: (droppingId: string | undefined) => void;
 }
 
-const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps) {
+const MusicWheel = React.memo(function MusicWheel({ droppings, onDroppingChange }: MusicWheelProps) {
   const safeDroppings = Array.isArray(droppings) ? droppings : [];
 
   // MUSIC 타입만 필터링 (VOTE 타입 제외)
   const musicDroppings = React.useMemo(() => {
     return safeDroppings.filter(dropping => {
-      const dropType = String(dropping.type || 'MUSIC').toUpperCase();
+      if (!dropping.type) {
+        console.warn('⚠️ MusicWheel: Missing type field for dropping:', dropping.droppingId);
+        return false;
+      }
+      const dropType = String(dropping.type).toUpperCase();
       return dropType === 'MUSIC';
     });
   }, [safeDroppings]);
@@ -39,8 +44,6 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
   const gestureOffset = useSharedValue(0);
   const [rotationDeg, setRotationDeg] = useState(persistedRotation);
   const rotationShared = useSharedValue(persistedRotation);
-  const [currentIndex, setCurrentIndex] = useState<number>(persistedIndex);
-  const [selectedDroppingId, setSelectedDroppingId] = useState<string | undefined>(musicDroppings[0]?.droppingId);
   const [isSwiping, setIsSwiping] = useState<boolean>(false);
   const [showDropOptions, setShowDropOptions] = useState<boolean>(false);
   const { playIfDifferent, setCurrentId } = usePlayerStore();
@@ -49,82 +52,87 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
   const currentLocation = location ?? { latitude: 37.5665, longitude: 126.9780 };
   const currentAddress = address || "부산광역시 강서구 가락대로 73";
 
-  // 디버깅을 위한 로그
-  console.log('MusicWheel location data:', { location, address, currentLocation, currentAddress });
+  // 현재 선택된 인덱스를 rotation 기반으로 계산
+  const currentMusicIndex = useMemo(() => {
+    if (totalSongs === 0) return 0;
+    const rotationSteps = Math.round(rotationDeg / ANGLE_PER_ITEM);
+    // 음수 회전값도 올바르게 처리하도록 수정
+    return (((-rotationSteps) % totalSongs) + totalSongs) % totalSongs;
+  }, [rotationDeg, totalSongs]);
 
-  useEffect(() => {
-    setCurrentIndex(prev => {
-      if (totalSongs === 0) return 0;
-      const normalized = ((prev % totalSongs) + totalSongs) % totalSongs;
-      persistedIndex = normalized;
-      return normalized;
-    });
-  }, [totalSongs]);
+  // 현재 선택된 드랍핑 정보
+  const currentDropping = musicDroppings[currentMusicIndex];
+  const currentDroppingId = currentDropping?.droppingId;
 
-  useEffect(() => {
-    if (totalSongs === 0) {
-      setSelectedDroppingId(undefined);
-      setCurrentIndex(0);
-      persistedIndex = 0;
-      return;
-    }
-
-    // Only update if we don't have a valid selectedDroppingId or it doesn't exist in current data
-    if (!selectedDroppingId || !musicDroppings.find(d => String(d.droppingId) === String(selectedDroppingId))) {
-      setSelectedDroppingId(musicDroppings[0]?.droppingId);
-      setCurrentIndex(0);
-      persistedIndex = 0;
-    }
-  }, [musicDroppings, totalSongs, selectedDroppingId]);
-
+  // rotation 값 동기화
   useEffect(() => {
     rotationShared.value = rotationDeg;
     persistedRotation = rotationDeg;
   }, [rotationDeg, rotationShared]);
 
-  const playByIndex = React.useCallback((index: number) => {
-    const currentMusicDroppings = safeDroppings.filter(dropping => {
-      const dropType = String(dropping.type || 'MUSIC').toUpperCase();
-      return dropType === 'MUSIC';
-    });
+  // 전역 인덱스 업데이트
+  useEffect(() => {
+    persistedIndex = currentMusicIndex;
+  }, [currentMusicIndex]);
 
-    if (!currentMusicDroppings[index]) return;
-    const dropping = currentMusicDroppings[index];
-    const newSongId = dropping.songId;
-    if (!newSongId) return;
+  // 선택된 드랍핑 변경 시 부모 컴포넌트에 알림
+  useEffect(() => {
+    onDroppingChange?.(currentDroppingId);
+  }, [currentDroppingId, onDroppingChange]);
 
-    playIfDifferent(newSongId, {
-      title: dropping.title || '음악',
-      artist: dropping.singer || '알 수 없음',
-      artwork: undefined,
-    });
-    setCurrentId(newSongId);
-  }, [safeDroppings, playIfDifferent, setCurrentId]);
+  // 앱 진입 시 첫 번째 음악 자동 재생
+  useEffect(() => {
+    if (totalSongs > 0 && musicDroppings.length > 0) {
+      const firstDropping = musicDroppings[0];
+      // 현재 재생중이 아니고 rotation이 0일 때 (초기 상태)
+      if (firstDropping?.songId && rotationDeg === 0) {
+        console.log('🎵 앱 진입: 첫 번째 음악 자동 재생', firstDropping.title);
+        playIfDifferent(firstDropping.songId, {
+          title: firstDropping.title || '음악',
+          artist: firstDropping.singer || '알 수 없음',
+          artwork: undefined,
+        });
+        setCurrentId(firstDropping.songId);
+      }
+    }
+  }, [totalSongs, musicDroppings, rotationDeg, playIfDifferent, setCurrentId]);
 
-  const commitRotationStep = React.useCallback((targetIndex: number) => {
+  const commitRotationStep = React.useCallback((targetStep: number) => {
     if (totalSongs === 0) return;
 
-    const newIndex = ((targetIndex % totalSongs) + totalSongs) % totalSongs;
-    setCurrentIndex(newIndex);
-    persistedIndex = newIndex;
+    const targetRotation = targetStep * ANGLE_PER_ITEM;
+    setRotationDeg(targetRotation);
 
-    const currentMusicDroppings = safeDroppings.filter(dropping => {
-      const dropType = String(dropping.type || 'MUSIC').toUpperCase();
-      return dropType === 'MUSIC';
-    });
+    // 새로운 로테이션 값으로 선택된 음악이 바뀌면 재생
+    const newMusicIndex = (((-targetStep) % totalSongs) + totalSongs) % totalSongs;
+    const targetDropping = musicDroppings[newMusicIndex];
 
-    setSelectedDroppingId(currentMusicDroppings[newIndex]?.droppingId);
-    playByIndex(newIndex);
-  }, [totalSongs, playByIndex, safeDroppings]);
+    if (targetDropping?.songId) {
+      playIfDifferent(targetDropping.songId, {
+        title: targetDropping.title || '음악',
+        artist: targetDropping.singer || '알 수 없음',
+        artwork: undefined,
+      });
+      setCurrentId(targetDropping.songId);
+    }
+  }, [totalSongs, musicDroppings, playIfDifferent, setCurrentId]);
 
   useEffect(() => {
     if (__DEV__) {
-      console.log('Music Droppings changed, count:', musicDroppings.length);
-      console.log('Total droppings (including VOTE):', safeDroppings.length);
-      console.log('Current index:', currentIndex);
-      console.log('Is swiping:', isSwiping);
+      console.log('🎵 MusicWheel State:', {
+        musicCount: musicDroppings.length,
+        totalDroppings: safeDroppings.length,
+        currentMusicIndex,
+        currentDroppingId,
+        rotationDeg,
+        isSwiping,
+        currentMusic: currentDropping ? {
+          title: currentDropping.title,
+          artist: currentDropping.singer
+        } : null
+      });
     }
-  }, [musicDroppings, safeDroppings, currentIndex, isSwiping]);
+  }, [musicDroppings, safeDroppings, currentMusicIndex, currentDroppingId, rotationDeg, isSwiping, currentDropping]);
 
   // 드랍 옵션 데이터
   const dropOptions = React.useMemo(() => [
@@ -160,11 +168,22 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
 
   const displayTotalSongs = displayData.length;
 
-  // 메인 노드 인덱스 계산
+  // 메인 노드 인덱스 계산 - 실제 회전 기반으로 계산
   const mainNodeIndex = useDerivedValue(() => {
     'worklet';
-    return 0; // 첫 번째 노드(슬롯 인덱스 0)가 항상 메인 노드
-  }, []);
+    if (totalSongs === 0) return 0;
+
+    // 현재 rotation에서 메인 위치(-90도, 위쪽 중앙)에 있는 노드를 찾기
+    const baseRotationValue = rotationShared.value || 0;
+    const rotationValue = gestureOffset.value || 0;
+    const totalRotation = baseRotationValue + rotationValue;
+
+    // 어떤 슬롯이 메인 위치(-90도)에 가장 가까운지 계산
+    const steps = Math.round(totalRotation / ANGLE_PER_ITEM);
+    const mainSlot = ((-steps % totalSongs) + totalSongs) % totalSongs;
+
+    return mainSlot;
+  }, [totalSongs]);
 
   const visibleEntries = React.useMemo(() => {
     if (displayTotalSongs === 0) return [];
@@ -172,7 +191,15 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
     const maxNodes = Math.min(TOTAL_NODES, displayTotalSongs);
 
     for (let slotIndex = 0; slotIndex < maxNodes; slotIndex++) {
-      const dataIndex = (showDropOptions ? slotIndex : (currentIndex + slotIndex)) % displayTotalSongs;
+      let dataIndex: number;
+
+      if (showDropOptions) {
+        dataIndex = slotIndex;
+      } else {
+        // 배열을 안정적으로 유지하고 시각적 회전만 적용
+        dataIndex = slotIndex % displayTotalSongs;
+      }
+
       const drop = displayData[dataIndex];
 
       if (drop) {
@@ -185,7 +212,7 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
       }
     }
     return entries;
-  }, [displayData, displayTotalSongs, currentIndex, showDropOptions]);
+  }, [displayData, displayTotalSongs, showDropOptions]);
 
   const songQueries = useQueries({
     queries: visibleEntries.map(entry => ({
@@ -206,51 +233,103 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
     }
   }, [showDropOptions]);
 
+  // 빈 노드 클릭 시 첫 번째로 돌아가는 함수
+  const handleEmptyNodeClick = React.useCallback(() => {
+    if (totalSongs === 0) return;
+
+    console.log('🎵 빈 노드 클릭: 첫 번째 음악으로 이동');
+    const targetRotation = 0; // 첫 번째 위치
+    setRotationDeg(targetRotation);
+    rotationShared.value = withSpring(targetRotation, {
+      damping: 20,
+      stiffness: 150,
+      mass: 1.2,
+    });
+
+    // 첫 번째 음악 재생
+    const firstDropping = musicDroppings[0];
+    if (firstDropping?.songId) {
+      playIfDifferent(firstDropping.songId, {
+        title: firstDropping.title || '음악',
+        artist: firstDropping.singer || '알 수 없음',
+        artwork: undefined,
+      });
+      setCurrentId(firstDropping.songId);
+    }
+  }, [totalSongs, musicDroppings, playIfDifferent, setCurrentId, rotationShared]);
+
   const visibleNodes = React.useMemo(() => {
     const nodes: VisibleNode[] = [];
-    if (displayTotalSongs === 0) {
-      return nodes;
-    }
 
-    for (let idx = 0; idx < visibleEntries.length; idx++) {
-      const entry = visibleEntries[idx];
-      const dropping = displayData[entry.dataIndex];
-      if (!dropping) continue;
+    // 드랍 옵션 모드일 때
+    if (showDropOptions) {
+      for (let idx = 0; idx < visibleEntries.length; idx++) {
+        const entry = visibleEntries[idx];
+        const dropping = displayData[entry.dataIndex];
+        if (!dropping) continue;
 
-      let songInfo = null;
-      if (!showDropOptions && songQueries[idx]?.data) {
-        songInfo = songQueries[idx].data;
-      }
-
-      let baseAngle;
-      if (showDropOptions) {
+        let baseAngle;
         switch (entry.slotIndex) {
           case 0: baseAngle = -98; break;
           case 1: baseAngle = -142; break;
           case 2: baseAngle = -194; break;
           default: baseAngle = -90; break;
         }
-      } else {
-        baseAngle = entry.slotIndex * ANGLE_PER_ITEM - 90;
-      }
 
-      nodes.push({
-        position: {
-          angle: baseAngle,
-          isMain: entry.slotIndex === 0,
-          scale: 1,
-          opacity: 1,
-        },
-        song: {
-          dropping: dropping,
-          songInfo: songInfo,
-          isDropOption: showDropOptions
-        } as any,
-        slotIndex: entry.slotIndex,
-      });
+        nodes.push({
+          position: {
+            angle: baseAngle,
+            isMain: entry.slotIndex === 0,
+            scale: 1,
+            opacity: 1,
+          },
+          song: {
+            dropping: dropping,
+            songInfo: null,
+            isDropOption: true
+          } as any,
+          slotIndex: entry.slotIndex,
+        });
+      }
+    } else {
+      // 일반 음악 모드일 때 - 모든 TOTAL_NODES 슬롯을 표시
+      for (let slotIndex = 0; slotIndex < TOTAL_NODES; slotIndex++) {
+        const baseAngle = slotIndex * ANGLE_PER_ITEM - 90;
+        const dataIndex = slotIndex % totalSongs;
+        const dropping = totalSongs > 0 ? musicDroppings[dataIndex] : null;
+
+        let songInfo = null;
+        if (dropping) {
+          const entryIdx = visibleEntries.findIndex(e => e.slotIndex === slotIndex);
+          if (entryIdx >= 0 && songQueries[entryIdx]?.data) {
+            songInfo = songQueries[entryIdx].data;
+          }
+        }
+
+        // 메인 노드는 현재 선택된 음악이 있는 위치
+        const isMainNode = dropping && dataIndex === currentMusicIndex;
+
+        nodes.push({
+          position: {
+            angle: baseAngle,
+            isMain: !!isMainNode,
+            scale: 1,
+            opacity: dropping ? 1 : 0.3, // 빈 노드는 투명하게
+          },
+          song: {
+            dropping: dropping,
+            songInfo: songInfo,
+            isDropOption: false,
+            isEmpty: !dropping, // 빈 노드 표시
+            onEmptyClick: handleEmptyNodeClick
+          } as any,
+          slotIndex: slotIndex,
+        });
+      }
     }
+
     return nodes;
-  }, [displayData, displayTotalSongs, visibleEntries, songQueries, showDropOptions]);
+  }, [displayData, visibleEntries, songQueries, showDropOptions, currentMusicIndex, totalSongs, musicDroppings, handleEmptyNodeClick]);
 
   const handleSwipeBegin = React.useCallback(() => {
     setIsSwiping(true);
@@ -344,7 +423,7 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
             }
             return visibleNodes.map((node: VisibleNode, index) => (
               <MusicNode
-                key={`${(node.song as any).dropping.droppingId}-${node.slotIndex}-${showDropOptions ? 'drop' : currentIndex}`}
+                key={`${(node.song as any).dropping.droppingId}-${node.slotIndex}-${showDropOptions ? 'drop' : currentMusicIndex}`}
                 data={node.song as any}
                 isMain={node.position.isMain}
                 index={index}
@@ -375,7 +454,9 @@ const MusicWheel = React.memo(function MusicWheel({ droppings }: MusicWheelProps
       return next && prev.droppingId === next.droppingId && prev.songId === next.songId;
     });
 
-  return droppingsEqual;
+  const callbackEqual = prevProps.onDroppingChange === nextProps.onDroppingChange;
+
+  return droppingsEqual && callbackEqual;
 });
 
 export default MusicWheel;

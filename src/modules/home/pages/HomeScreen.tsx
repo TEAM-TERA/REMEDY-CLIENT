@@ -1,6 +1,7 @@
 import { View } from "react-native";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useEffect, useState, useRef, useCallback } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
 import { BACKGROUND_COLORS } from "../../../constants/colors";
 import HeaderBar from "../components/HeaderBar";
 import GoogleMapView from "../../../components/map/GoogleMapView";
@@ -13,9 +14,11 @@ import type { Dropping } from "../types/musicList";
 import { getSongInfo, getDroppingById } from "../../drop/api/dropApi";
 import { getDropLikeCount } from "../../music/api/likeApi";
 import { getCommentsByDroppingId } from "../../music/api/commentApi";
+import { useQueryClient } from "@tanstack/react-query";
 
 function HomeScreen() {
   const { location } = useLocation();
+  const queryClient = useQueryClient();
 
   const defaultLocation = useMemo(() => ({ latitude: 37.5665, longitude: 126.9780 }), []);
   
@@ -184,6 +187,18 @@ function HomeScreen() {
       setCurrentSongData(null);
     }
   }, [currentId, currentDroppingId, droppings]);
+
+  // 홈 화면에 포커스가 올 때 droppings 데이터를 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      console.log('🏠 HomeScreen focused: Refetching droppings data');
+      // 위치 기반 droppings 쿼리를 새로고침
+      queryClient.refetchQueries({
+        queryKey: ["droppings", currentLocation.longitude, currentLocation.latitude],
+        exact: false
+      });
+    }, [queryClient, currentLocation.longitude, currentLocation.latitude])
+  );
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: BACKGROUND_COLORS.BACKGROUND }} edges={['bottom']}>

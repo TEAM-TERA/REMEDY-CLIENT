@@ -158,6 +158,12 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
             return;
         }
 
+        // 빈 노드 클릭 처리
+        if ((data as any).isEmpty && (data as any).onEmptyClick) {
+            (data as any).onEmptyClick();
+            return;
+        }
+
         // 드랍핑 타입에 따라 다른 화면으로 네비게이트
         if (data.dropping.type === 'PLAYLIST') {
           navigation.navigate('PlaylistDetail', {
@@ -213,6 +219,18 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
                              data.dropping.type === 'playlist' ? '' : ''}
                         </Text>
                     </>
+                ) : (data as any).isEmpty ? (
+                    <>
+                        <View style={[styles.musicImg, { backgroundColor: '#2A2A3A', justifyContent: 'center', alignItems: 'center', opacity: 0.5 }]}>
+                            <Text style={{ color: '#666', fontSize: 12 }}>Empty</Text>
+                        </View>
+                        <Text style={[styles.musicTitle, { opacity: 0.5 }]}>
+                            빈 슬롯
+                        </Text>
+                        <Text style={[styles.singerText, { opacity: 0.5 }]}>
+                            터치하여 첫 곡으로
+                        </Text>
+                    </>
                 ) : (
                     <>
                         <Image
@@ -220,10 +238,10 @@ const MusicNode = React.memo(function MusicNode({ data, isMain: _isMain, index: 
                             style={styles.musicImg}
                         />
                         <Text style={styles.musicTitle}>
-                            {data.songInfo?.title || data.dropping.title || '드랍핑 음악'}
+                            {data.songInfo?.title || data.dropping?.title || '드랍핑 음악'}
                         </Text>
                         <Text style={styles.singerText}>
-                            {data.songInfo?.artist || data.dropping.singer || '알 수 없는 아티스트'}
+                            {data.songInfo?.artist || data.dropping?.singer || '알 수 없는 아티스트'}
                         </Text>
                     </>
                 )}
